@@ -76,17 +76,6 @@
 
 }).call(this);
 (function() {
-  Emu.CollectionField = Emu.Field.extend();
-
-  Emu.collection = function(modelType) {
-    return Emu.CollectionField.create({
-      modelType: modelType,
-      type: "array"
-    });
-  };
-
-}).call(this);
-(function() {
   Emu.field = function(type, options) {
     var getAttr, meta, setAttr;
 
