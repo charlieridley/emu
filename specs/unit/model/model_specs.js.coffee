@@ -78,3 +78,21 @@ describe "Emu.Model", ->
 		it "should get the models from the store only once", ->
 			expect(@store.findAll.calls.length).toEqual(1)
 			@result = @model.get("orders")
+	describe "When getting the value of a lazy collection which is not set, but setting doNotLoad=true", ->
+		beforeEach ->
+			@store = Ember.Object.create
+				findAll: ->		
+			Person = Emu.Model.extend
+				_store: @store
+				_fields:
+					orders: Emu.collection(Order).lazy()		
+			spyOn(@store, "findAll")
+			spyOn(Emu.ModelCollection, "create")							
+			@model = Person.create()
+			@result = @model.get("orders", {doNotLoad: true})
+		it "should not create a new collection", ->
+			expect(Emu.ModelCollection.create).not.toHaveBeenCalled()
+		it "should not query the store", ->
+			expect(@store.findAll).not.toHaveBeenCalled()
+		it "should return undefined", ->
+			expect(@result).toBeUndefined()

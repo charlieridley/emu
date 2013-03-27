@@ -33,7 +33,7 @@ Emu.Serializer = Ember.Object.extend
 	_serializeProperty: (model, jsonData, attributeInfo, property) ->
 		type = attributeInfo.get("type")
 		if type == "array" 			
-			collection = model.get(property)
+			collection = model.get(property, {doNotLoad: true})
 			jsonData[property] = collection.map (item) => @serializeModel(item)
 		else
 			attributeSerializer = Emu.AttributeSerializers[type]

@@ -112,13 +112,14 @@ describe "Emu.Serializer", ->
 				name: Emu.field(Order)
 				orders: Emu.collection(Order)		
 		beforeEach ->
-			customer = Customer.create
+			@customer = Customer.create
 				name: "Terry the customer"
 				orders: Emu.ModelCollection.create(type: Order)
-			customer.get("orders").pushObject(Order.create(orderCode: "123"))
-			customer.get("orders").pushObject(Order.create(orderCode: "456"))
+			@customer.get("orders").pushObject(Order.create(orderCode: "123"))
+			@customer.get("orders").pushObject(Order.create(orderCode: "456"))
+			spyOn(@customer, "get").andCallThrough()
 			@serializer = Emu.Serializer.create()
-			@jsonResult = @serializer.serializeModel(customer)
+			@jsonResult = @serializer.serializeModel(@customer)
 		it "should deserialize the object to json", ->
 			expect(@jsonResult).toEqual
 				name: "Terry the customer"
@@ -126,3 +127,5 @@ describe "Emu.Serializer", ->
 					{orderCode: "123"}
 					{orderCode: "456"}
 				]	
+		it "should have called the get for the property with the doNotLoad argument, to stop it lazy loading", ->
+			expect(@customer.get).toHaveBeenCalledWith("orders", {doNotLoad: true})
