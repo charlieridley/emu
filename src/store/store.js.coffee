@@ -5,12 +5,18 @@ Emu.Store = Ember.Object.extend
 	createRecord: (type) ->
 		collection = @_getCollectionForType(type)
 		collection.createRecord(isDirty: true)
-	findAll: (type, options) ->
-		collection = options?.collection or @_getCollectionForType(type)
+	findAll: (type) ->
+		collection = @_getCollectionForType(type)
 		if collection.get("isLoading") or collection.get("isLoaded")
 			return collection
 		collection.set("isLoading", true)
-		@_adapter.findAll(type, this, collection, options)
+		@_adapter.findAll(type, this, collection)
+		collection	
+	loadAll: (collection) ->
+		if collection.get("isLoading") or collection.get("isLoaded")
+			return collection
+		collection.set("isLoading", true)
+		@_adapter.findAll(collection.get("type"), this, collection)
 		collection	
 	save: (model) ->
 		if model.get("id") then @_adapter.update(this, model) else @_adapter.insert(this, model)
