@@ -38,4 +38,4 @@ How to use it
 	.
 	//Save the model
 	App.store.save(club)
-		//Put request to:	http://www.megaclubs.crazy/club/5
+		//PUT request to:	http://www.megaclubs.crazy/club/5
