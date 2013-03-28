@@ -20,4 +20,4 @@ describe "Partial loading property tests", ->
 				name: "Harry"
 			@model.get("town")
 		it "should not make an ajax request to load the parent model", ->
-			expect($.ajax.mostRecentCall.args[0].url).not.toEqual("api/customer/43")
+			expect($.ajax.calls.length).toEqual(1)
