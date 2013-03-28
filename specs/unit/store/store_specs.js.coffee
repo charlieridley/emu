@@ -15,7 +15,7 @@ describe "Emu.Store", ->
 			expect(Emu.RestAdapter.create).toHaveBeenCalled()
 	describe "When finding all records", ->
 		beforeEach ->			
-			@models = Emu.ModelCollection.create()
+			@models = Emu.ModelCollection.create(type: Person)
 			spyOn(Emu.ModelCollection, "create").andReturn(@models)
 			spyOn(adapter, "findAll")
 			@store = Emu.Store.create
@@ -161,6 +161,15 @@ describe "Emu.Store", ->
 			expect(adapter.findAll).toHaveBeenCalledWith(Person, @store, @collection)
 		it "should not create a new collection", ->
 			expect(Emu.ModelCollection.create).not.toHaveBeenCalled()
+	describe "When loading an existing model", ->
+		beforeEach ->
+			@model = Person.create(id: 4)
+			spyOn(adapter, "findById")
+			@store = Emu.Store.create		
+				adapter: Adapter
+			@store.loadModel(@model)
+		it "should call the findById method on the adapter", ->
+			expect(adapter.findById).toHaveBeenCalledWith(Person, @store, @model, 4)
 
 
 

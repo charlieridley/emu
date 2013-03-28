@@ -7,10 +7,7 @@ Emu.Store = Ember.Object.extend
 		collection.createRecord(isDirty: true)
 	findAll: (type) ->
 		collection = @_getCollectionForType(type)
-		if collection.get("isLoading") or collection.get("isLoaded")
-			return collection
-		collection.set("isLoading", true)
-		@_adapter.findAll(type, this, collection)
+		@loadAll(collection)
 		collection	
 	loadAll: (collection) ->
 		if collection.get("isLoading") or collection.get("isLoaded")
@@ -29,8 +26,10 @@ Emu.Store = Ember.Object.extend
 		model = collection.find (item) -> item.get("id") == id
 		if not model
 			model = collection.createRecord(id: id, isLoading: true, isLoaded: false)			
-			@_adapter.findById(type, this, model, 5)
+			@_adapter.findById(type, this, model, id)
 		model
+	loadModel: (model) ->
+		@_adapter.findById(model.constructor, this, model, model.get("id"))
 	didFindById: (model) ->
 		model.set("isLoading", false)
 		model.set("isLoaded", true)
