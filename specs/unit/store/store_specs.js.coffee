@@ -24,7 +24,7 @@ describe "Emu.Store", ->
 		it "should have created an internal collection for the records, with a reference to the store and the model type", ->			
 			expect(Emu.ModelCollection.create).toHaveBeenCalledWith(type: Person, store: @store)
 		it "should call the findAll method on the adapter", ->
-			expect(adapter.findAll).toHaveBeenCalledWith(Person, @store, @models, undefined)
+			expect(adapter.findAll).toHaveBeenCalledWith(Person, @store, @models)
 		it "should set isLoading on the models to true"	, ->
 			expect(@result.get("isLoading")).toBeTruthy()
 		it "should return the model collection", ->
@@ -64,30 +64,6 @@ describe "Emu.Store", ->
 			expect(adapter.findAll).not.toHaveBeenCalled()
 		it "should return the model collection", ->
 			expect(@result).toEqual(@models)
-	describe "When finding all and fully loading", ->
-		beforeEach ->			
-			@models = Emu.ModelCollection.create()
-			spyOn(Emu.ModelCollection, "create").andReturn(@models)
-			spyOn(adapter, "findAll")
-			@store = Emu.Store.create
-				adapter: Adapter
-			@result = @store.findAll(Person, fullyLoad: true)
-		it "should call the findAll method on the adapter", ->
-			expect(adapter.findAll).toHaveBeenCalledWith(Person, @store, @models, fullyLoad: true)
-		it "should set isLoading on the models to true"	, ->
-			expect(@result.get("isLoading")).toBeTruthy()
-		it "should return the model collection", ->
-			expect(@result).toEqual(@models)	
-	describe "When finding all and fully loading, and the adapter finishes loading all records", ->
-		beforeEach ->
-			@models = Emu.ModelCollection.create(isLoading: true)		
-			@models.pushObject(Person.create())	
-			@models.pushObject(Person.create())	
-			@store = Emu.Store.create
-				adapter: Adapter
-			@store.didFindAll(@models, fullyLoad: true)	
-		it "should mark all models in the collection as loaded", ->
-			expect(@models.get("content").every((item) -> item.get("isLoaded"))).toBeTruthy()
 	describe "When finding by id", ->
 		beforeEach ->
 			@modelCollection = Emu.ModelCollection.create()
@@ -173,16 +149,16 @@ describe "Emu.Store", ->
 			@store.save(@model)
 		it "should call update on the adapter", ->
 			expect(adapter.update).toHaveBeenCalledWith(@store, @model)
-	describe "When finding all and providing a collection to populate", ->
+	describe "When loading all on an existing collection", ->
 		beforeEach ->
-			@collection = Emu.ModelCollection.create()
+			@collection = Emu.ModelCollection.create(type:Person)
 			spyOn(Emu.ModelCollection, "create")
 			spyOn(adapter, "findAll")
 			@store = Emu.Store.create		
 				adapter: Adapter
-			@store.findAll(Person, {collection: @collection})
+			@store.loadAll(@collection)
 		it "should call the findAll method on the adapter with the collection which was passed", ->
-			expect(adapter.findAll).toHaveBeenCalledWith(Person, @store, @collection, {collection: @collection})
+			expect(adapter.findAll).toHaveBeenCalledWith(Person, @store, @collection)
 		it "should not create a new collection", ->
 			expect(Emu.ModelCollection.create).not.toHaveBeenCalled()
 

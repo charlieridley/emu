@@ -14,3 +14,8 @@ describe "Emu.Field", ->
 			@field = Emu.field().lazy()
 		it "should mark the field as lazy", ->
 			expect(@field.get("isLazy")).toBeTruthy()
+	describe "When creating and marking partial", ->
+		beforeEach ->
+			@field = Emu.field().partial()
+		it "should mark the field as partial", ->
+			expect(@field.get("isPartial")).toBeTruthy()
