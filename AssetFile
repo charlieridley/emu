@@ -1,20 +1,11 @@
-require "coffee-script"
-class CoffeeScriptFilter < Rake::Pipeline::Filter
-	def initialize(&block)
-		&block ||= proc { |input| input.path.gsub(/\.coffee/, ".js")
-		super(&block)
-	end
-
-	def generate_output(inputs, output)
-		inputs.each do |input|
-			output.write CoffeeScript.compile(input.read)
-		end
-	end
-end
-
-output "output"
+require "rake-pipeline-web-filters"
+EMU_VERSION = File.read("VERSION").strip
+output "dist"
 input "src" do
-	match "**/*.js.coffee" do
-		filter CoffeeScript
-	end
+	match "**/*.coffee" do
+		coffee_script
+		concat [
+			"core.js.js"	
+		], "ember-emu-#{EMU_VERSION}.js"
+	end	
 end
