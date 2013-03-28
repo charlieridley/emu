@@ -1,21 +1,119 @@
-describe "Emu.Field", ->
-	describe "When creating", ->
+describe "Emu.field", ->	
+	Person = Emu.Model.extend()	
+	Order = Emu.Model.extend()
+	describe "When creating as string", ->
 		beforeEach ->
-			@field = Emu.field()
-		it "should have a default type of 'string'", ->
-			expect(@field.get("type")).toEqual("string")
-	describe "When creating with custom type 'number'", ->
+			@Person = Emu.Model.extend
+				name: Emu.field("string")			
+		it "should have a type of 'string'", ->
+			expect(@Person.metaForProperty("name").type).toEqual("string")
+	describe "When creating as 'number'", ->
 		beforeEach ->
-			@field = Emu.field("number")
+			@Person = Emu.Model.extend
+				age: Emu.field("number")
 		it "should have a type of 'number'", ->
-			expect(@field.get("type")).toEqual("number")
-	describe "When creating and marking lazy", ->
+			expect(@Person.metaForProperty("age").type).toEqual("number")
+	describe "When creating and marking with options", ->
 		beforeEach ->
-			@field = Emu.field().lazy()
+			@Person = Emu.Model.extend
+				name: Emu.field("string", {lazy: true, partial: false})	
 		it "should mark the field as lazy", ->
-			expect(@field.get("isLazy")).toBeTruthy()
-	describe "When creating and marking partial", ->
+			expect(@Person.metaForProperty("name").options).toEqual({lazy: true, partial: false})	
+	describe "When getting a normal field", ->
 		beforeEach ->
-			@field = Emu.field().partial()
-		it "should mark the field as partial", ->
-			expect(@field.get("isPartial")).toBeTruthy()
+			Person = Emu.Model.extend
+				name: Emu.field("string")
+			@model = Person.create(name: "henry")
+			@result = @model.get("name")
+		it "should get the value", ->
+			expect(@result).toEqual("henry")
+	describe "When getting the value for a collection", ->
+		beforeEach ->
+			@orders = Emu.ModelCollection.create(type: Order)			
+			Person = Emu.Model.extend
+				name: Emu.field(Order, {collection: true})			
+			@model = Person.create(orders: @orders)
+			@result = @model.get("orders")
+		it "should return the collection", ->
+			expect(@result).toBe(@orders)
+	describe "When getting the value of a collection which is not set", ->
+		beforeEach ->
+			@store = Ember.Object.create
+				loadAll: ->
+			spyOn(@store, "loadAll")
+			@orders = Emu.ModelCollection.create(type: Order)
+			spyOn(Emu.ModelCollection, "create").andReturn(@orders)
+			Person = Emu.Model.extend
+				_store: @store
+				orders: Emu.field(Order, {collection: true})
+			@model = Person.create()
+			@result = @model.get("orders")
+		it "should get all the models for the collection from the store", ->
+			expect(@result).toBeUndefined()
+		it "should not query the store", ->
+			expect(@store.loadAll).not.toHaveBeenCalled()
+	describe "When getting the value of a lazy collection which is not set", ->
+		beforeEach ->
+			@store = Ember.Object.create
+				loadAll: ->
+			@orders = Emu.ModelCollection.create(type: Order)
+			spyOn(@store, "loadAll")
+			spyOn(Emu.ModelCollection, "create").andReturn(@orders)
+			Person = Emu.Model.extend
+				_store: @store
+				orders: Emu.field(Order, {collection: true, lazy: true})
+			@model = Person.create()
+			@result = @model.get("orders")
+		it "should create a new collection", ->
+			expect(Emu.ModelCollection.create).toHaveBeenCalledWith(type: Order, store: @store, parent: @model)
+		it "should get all the models for the collection from the store", ->
+			expect(@store.loadAll).toHaveBeenCalledWith(@orders)
+		it "should return the collection", ->
+			expect(@result).toBe(@orders)
+	describe "When getting the value of a lazy collection again after it has been loaded", ->
+		beforeEach ->
+			@store = Ember.Object.create
+				loadAll: ->
+			@orders = Emu.ModelCollection.create(type: Order)
+			spyOn(@store, "loadAll")
+			spyOn(Emu.ModelCollection, "create").andReturn(@orders)
+			Person = Emu.Model.extend
+				_store: @store
+				orders: Emu.field(Order, {collection: true, lazy: true})
+			@model = Person.create()
+			@model.get("orders")
+			@model.get("orders")
+		it "should get the models from the store only once", ->
+			expect(@store.loadAll.calls.length).toEqual(1)
+			@result = @model.get("orders")
+	describe "When getting the value of a lazy collection which is not set, but setting doNotLoad=true", ->
+		beforeEach ->
+			@store = Ember.Object.create
+				loadAll: ->		
+			Person = Emu.Model.extend
+				_store: @store
+				orders: Emu.field(Order, {collection: true, lazy: true})
+			spyOn(@store, "loadAll")
+			spyOn(Emu.ModelCollection, "create")							
+			@model = Person.create()
+			@result = @model.getValueOf("orders")
+		it "should not create a new collection", ->
+			expect(Emu.ModelCollection.create).not.toHaveBeenCalled()
+		it "should not query the store", ->
+			expect(@store.loadAll).not.toHaveBeenCalled()
+		it "should return undefined", ->
+			expect(@result).toBeUndefined()
+	describe "When getting the value of a partial property", ->
+		beforeEach ->
+			@store = Ember.Object.create
+				loadModel: ->		
+			Person = Emu.Model.extend
+				name: Emu.field("string", {partial: true})
+			@person = Person.create(id: 5)
+			@person._store = @store
+			spyOn(@store, "loadModel")
+			@person.get("name")
+		it "should load the parent object", ->
+			expect(@store.loadModel).toHaveBeenCalledWith(@person)
+
+

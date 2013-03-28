@@ -21,11 +21,10 @@ files = [
   'src/core.js.coffee',
   'src/model/field.js.coffee',
   'src/**/*.js.coffee',
-  'specs/specs_setup.js.coffee',
-  'specs/unit/**/*.js.coffee',
+  'specs/application.js.coffee',
+  'specs/models.js.coffee',
+  'specs/unit/**/*.js.coffee',  
   'specs/integration/test_helpers.js.coffee',
-  'specs/integration/application.js.coffee',
-  'specs/integration/models.js.coffee',
   'specs/integration/*.js.coffee'
 ];
 

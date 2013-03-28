@@ -11,17 +11,13 @@ How to use it
 
 	// lets define some models
 	App.Person = Emu.Model.extend({
-		_fields: {
-			name: Emu.field(),
-		}	
+		name: Emu.field("string")		
 	});
 
 	App.Club = Emu.Model.extend({
-		_fields: {
-			name: Emu.field(),
-			boardMembers: Emu.collection(App.Person),
-			members: Emu.collection(App.Person).lazy(),			
-		}	
+		name: Emu.field("string"),
+		boardMembers: Emu.field(App.Person, {collection: true}),
+		members: Emu.field(App.Person, {collection: true, lazy: true})
 	});
 	.
 	.
@@ -40,6 +36,6 @@ How to use it
 	.
 	.
 	.
-	//Save the club
+	//Save the model
 	App.store.save(club)
 		//Put request to:	http://www.megaclubs.crazy/club/5

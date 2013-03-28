@@ -4,38 +4,35 @@ Emu.Serializer = Ember.Object.extend
 		parts[parts.length - 1].toLowerCase()
 	serializeModel: (model) ->
 		jsonData = {id: model.get("id")}
-		for property, attributeInfo of model._fields			
-			@_serializeProperty(model, jsonData, attributeInfo, property)			
+		model.constructor.eachComputedProperty (property, meta) =>		
+			@_serializeProperty(model, jsonData, property, meta)			
 		jsonData
 	deserializeModel: (model, jsonData) ->
 		model.set("id", jsonData.id) if jsonData.id
-		for property, attributeInfo of model._fields
-			attributeInfo = model._fields[property]
-			@_deserializeProperty(model, jsonData, attributeInfo, property)
+		model.constructor.eachComputedProperty (property, meta) =>
+			@_deserializeProperty(model, property, jsonData[property], meta)	
 		model
 	deserializeCollection: (collection, jsonData) ->
 		jsonData.forEach (item) =>
 			model = collection.createRecord()
 			@deserializeModel(model, item)			
-	_deserializeProperty: (model, jsonData, attributeInfo, property) ->
-		type = attributeInfo.get("type")
-		if type == "array" 
-			if jsonData[property]
+	_deserializeProperty: (model, property, value, meta) ->		
+		if meta.options.collection
+			if value
 				collection = Emu.ModelCollection.create
-					type: attributeInfo.get("modelType")
+					type: meta.type
 					store: model._store			
 					parent: model
-				@deserializeCollection(collection, jsonData[property])
+				@deserializeCollection(collection, value)
 				model.set(property, collection)
 		else
-			attributeSerializer = Emu.AttributeSerializers[type]
-			value = attributeSerializer.deserialize(jsonData[property])
-			model.set(property, value)
-	_serializeProperty: (model, jsonData, attributeInfo, property) ->
-		type = attributeInfo.get("type")
-		if type == "array" 			
-			collection = model.get(property, {doNotLoad: true})
+			attributeSerializer = Emu.AttributeSerializers[meta.type]
+			value = attributeSerializer.deserialize(value)
+			model.set(property, value) if value
+	_serializeProperty: (model, jsonData, property, meta) ->		
+		if meta.options.collection
+			collection = model.get(property)
 			jsonData[property] = collection.map (item) => @serializeModel(item)
 		else
-			attributeSerializer = Emu.AttributeSerializers[type]
-			jsonData[property] = attributeSerializer.serialize(model.get(property))
+			attributeSerializer = Emu.AttributeSerializers[meta.type]
+			jsonData[property] = attributeSerializer.serialize(model.getValueOf(property))

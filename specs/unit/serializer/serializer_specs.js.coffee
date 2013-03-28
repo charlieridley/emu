@@ -1,14 +1,12 @@
 describe "Emu.Serializer", ->	
 	Person = Emu.Model.extend
-		_fields:
-			name: Emu.field()
+		name: Emu.field("string")
 	describe "When serializing a type name", ->
-		beforeEach ->
-			App.PersonOrder = Emu.Model.extend()		
+		beforeEach ->			
 			@serializer = Emu.Serializer.create()
-			@result = @serializer.serializeTypeName(App.PersonOrder)
+			@result = @serializer.serializeTypeName(App.Person)
 		it "should serialize the name to lower case", ->
-			expect(@result).toEqual("personorder")
+			expect(@result).toEqual("person")
 	describe "When deserializing a json object to a model", ->
 		beforeEach ->	
 			spyOn(Emu.AttributeSerializers.string, "deserialize").andReturn("WINSTON CHURCHILL")			
@@ -47,9 +45,8 @@ describe "Emu.Serializer", ->
 	describe "When deserializing a json object with a nested collection", ->
 		Order = Emu.Model.extend()
 		Customer = Emu.Model.extend
-			_fields:
-				name: Emu.field()
-				orders: Emu.collection(Order)
+			name: Emu.field("string")
+			orders: Emu.field(Order, {collection: true})				
 		beforeEach ->			
 			@jsonData = 
 				name: "Donald Duck"
@@ -68,15 +65,14 @@ describe "Emu.Serializer", ->
 		it "should create a new model collection for that type", ->
 			expect(Emu.ModelCollection.create).toHaveBeenCalledWith(type: Order, store: @store, parent: @model)
 		it "should call deserializeCollection", ->
-			expect(@serializer.deserializeCollection).toHaveBeenCalledWith(@modelCollection,@jsonData.orders)
+			expect(@serializer.deserializeCollection).toHaveBeenCalledWith(@modelCollection, @jsonData.orders)
 		it "should set the result on the model", ->
 			expect(@model.get("orders")).toBe(@modelCollection)
 	describe "When deserializing a json object with a nested collection, when the value of the nested collection is null", ->
 		Order = Emu.Model.extend()
 		Customer = Emu.Model.extend
-			_fields:
-				name: Emu.field()
-				orders: Emu.collection(Order)
+			name: Emu.field("string")
+			orders: Emu.field(Order, {collection: true})				
 		beforeEach ->			
 			@jsonData = 
 				name: "Donald Duck"			
@@ -93,9 +89,8 @@ describe "Emu.Serializer", ->
 			expect(@serializer.deserializeCollection).not.toHaveBeenCalled()
 	describe "When serializing a simple model", ->
 		Customer = Emu.Model.extend
-			_fields:
-				name: Emu.field()
-				age: Emu.field()
+			name: Emu.field("string")
+			age: Emu.field("string")			
 		beforeEach ->
 			customer = Customer.create
 				id: "55"
@@ -110,12 +105,10 @@ describe "Emu.Serializer", ->
 				age: "47"
 	describe "When serializing a model with a nested collection", ->
 		Order = Emu.Model.extend
-			_fields:
-				orderCode: Emu.field()
+			orderCode: Emu.field("string")
 		Customer = Emu.Model.extend
-			_fields:
-				name: Emu.field()
-				orders: Emu.collection(Order)		
+			name: Emu.field("string")
+			orders: Emu.field(Order, {collection: true})						
 		beforeEach ->
 			@customer = Customer.create
 				name: "Terry the customer"
@@ -133,4 +126,4 @@ describe "Emu.Serializer", ->
 					{orderCode: "456"}
 				]	
 		it "should have called the get for the property with the doNotLoad argument, to stop it lazy loading", ->
-			expect(@customer.get).toHaveBeenCalledWith("orders", {doNotLoad: true})
+			expect(@customer.get).toHaveBeenCalledWith("orders")
