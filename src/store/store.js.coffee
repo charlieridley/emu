@@ -25,14 +25,15 @@ Emu.Store = Ember.Object.extend
 		collection = @_getCollectionForType(type)
 		model = collection.find (item) -> item.get("id") == id
 		if not model
-			model = collection.createRecord(id: id, isLoading: true, isLoaded: false)			
-			@_adapter.findById(type, this, model, id)
-		model
+			model = collection.createRecord(id: id)			
+		@loadModel(model)
 	loadModel: (model) ->
-		@_adapter.findById(model.constructor, this, model, model.get("id"))
+		if not model.get("isLoading") and not model.get("isLoaded")
+			model.set("isLoading", true)
+			@_adapter.findById(model.constructor, this, model, model.get("id"))
+		model
 	didFindById: (model) ->
 		model.set("isLoading", false)
 		model.set("isLoaded", true)
-		model.set("isFullyLoaded", true)
 	_getCollectionForType: (type) ->
 		@get("modelCollections")[type] || @get("modelCollections")[type] = Emu.ModelCollection.create(type: type, store: this)

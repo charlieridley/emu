@@ -66,15 +66,18 @@ describe "Emu.Store", ->
 			expect(@result).toEqual(@models)
 	describe "When finding by id", ->
 		beforeEach ->
-			@modelCollection = Emu.ModelCollection.create()
+			@model = Person.create(id: 5)
+			@modelCollection = Emu.ModelCollection.create(Person)
 			spyOn(Emu.ModelCollection, "create").andReturn(@modelCollection)
 			spyOn(@modelCollection, "createRecord").andReturn(@model)
 			spyOn(adapter, "findById")
 			@store = Emu.Store.create
 				adapter: Adapter
 			@result = @store.findById(Person, 5)
-		it "should set the id on the model with the ID and loading and loaded state", ->
-			expect(@modelCollection.createRecord).toHaveBeenCalledWith(id: 5, isLoading: true, isLoaded: false)
+		it "should set the id on the model with the ID", ->
+			expect(@modelCollection.createRecord).toHaveBeenCalledWith(id: 5)
+		it "should set the model in a loading state", ->
+			expect(@model.get("isLoading")).toBeTruthy()
 		it "should call the findById method on the adapter", ->
 			expect(adapter.findById).toHaveBeenCalledWith(Person, @store, @model, 5)
 		it "should return the model", ->
@@ -168,8 +171,18 @@ describe "Emu.Store", ->
 			@store = Emu.Store.create		
 				adapter: Adapter
 			@store.loadModel(@model)
+		it "should set isLoading on the model to true", ->
+			expect(@model.get("isLoading")).toBeTruthy()
 		it "should call the findById method on the adapter", ->
 			expect(adapter.findById).toHaveBeenCalledWith(Person, @store, @model, 4)
-
+	describe "When loading an existing model that is already loading", ->
+		beforeEach ->
+			@model = Person.create(id: 4, isLoading: true)
+			spyOn(adapter, "findById")
+			@store = Emu.Store.create		
+				adapter: Adapter
+			@store.loadModel(@model)
+		it "should not call the findById method on the adapter", ->
+			expect(adapter.findById).not.toHaveBeenCalled()
 
 
