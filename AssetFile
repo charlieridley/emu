@@ -1,0 +1,20 @@
+require "coffee-script"
+class CoffeeScriptFilter < Rake::Pipeline::Filter
+	def initialize(&block)
+		&block ||= proc { |input| input.path.gsub(/\.coffee/, ".js")
+		super(&block)
+	end
+
+	def generate_output(inputs, output)
+		inputs.each do |input|
+			output.write CoffeeScript.compile(input.read)
+		end
+	end
+end
+
+output "output"
+input "src" do
+	match "**/*.js.coffee" do
+		filter CoffeeScript
+	end
+end
