@@ -19,6 +19,7 @@ files = [
   'handlebars.js',
   'ember.js',   
   'src/core.js.coffee',
+  'src/model/field.js.coffee',
   'src/**/*.js.coffee',
   'specs/specs_setup.js.coffee',
   'specs/unit/**/*.js.coffee',

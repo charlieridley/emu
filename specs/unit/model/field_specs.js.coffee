@@ -9,3 +9,8 @@ describe "Emu.Field", ->
 			@field = Emu.field("number")
 		it "should have a type of 'number'", ->
 			expect(@field.get("type")).toEqual("number")
+	describe "When creating and marking lazy", ->
+		beforeEach ->
+			@field = Emu.field().lazy()
+		it "should mark the field as lazy", ->
+			expect(@field.get("isLazy")).toBeTruthy()
