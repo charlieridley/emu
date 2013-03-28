@@ -45,7 +45,7 @@ describe "Emu.Serializer", ->
 		Order = Emu.Model.extend()
 		Customer = Emu.Model.extend
 			_fields:
-				name: Emu.field(Order)
+				name: Emu.field()
 				orders: Emu.collection(Order)
 		beforeEach ->			
 			@jsonData = 
@@ -72,7 +72,7 @@ describe "Emu.Serializer", ->
 		Order = Emu.Model.extend()
 		Customer = Emu.Model.extend
 			_fields:
-				name: Emu.field(Order)
+				name: Emu.field()
 				orders: Emu.collection(Order)
 		beforeEach ->			
 			@jsonData = 
@@ -109,7 +109,7 @@ describe "Emu.Serializer", ->
 				orderCode: Emu.field()
 		Customer = Emu.Model.extend
 			_fields:
-				name: Emu.field(Order)
+				name: Emu.field()
 				orders: Emu.collection(Order)		
 		beforeEach ->
 			@customer = Customer.create

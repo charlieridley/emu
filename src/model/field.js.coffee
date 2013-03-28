@@ -1,4 +1,3 @@
-Emu.Field = Ember.Object.extend
-	type: "string"
-Emu.field = ->
-	Emu.Field.create()
+Emu.Field = Ember.Object.extend()
+Emu.field = (type)->
+	Emu.Field.create(type: type or "string")

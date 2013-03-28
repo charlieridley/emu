@@ -4,3 +4,8 @@ describe "Emu.Field", ->
 			@field = Emu.field()
 		it "should have a default type of 'string'", ->
 			expect(@field.get("type")).toEqual("string")
+	describe "When creating with custom type 'number'", ->
+		beforeEach ->
+			@field = Emu.field("number")
+		it "should have a type of 'number'", ->
+			expect(@field.get("type")).toEqual("number")

@@ -96,3 +96,4 @@ describe "Emu.Model", ->
 			expect(@store.findAll).not.toHaveBeenCalled()
 		it "should return undefined", ->
 			expect(@result).toBeUndefined()
+
