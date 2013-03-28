@@ -13,6 +13,7 @@ describe "Emu.Serializer", ->
 		beforeEach ->	
 			spyOn(Emu.AttributeSerializers.string, "deserialize").andReturn("WINSTON CHURCHILL")			
 			@jsonData = 
+				id: "78"
 				name: "Winston Churchill"
 				age: "60"
 			@serializer = Emu.Serializer.create()
@@ -20,6 +21,8 @@ describe "Emu.Serializer", ->
 			@serializer.deserializeModel(@model, @jsonData)
 		it "should get the deserialized value from the attribute serializer for type string", ->
 			expect(Emu.AttributeSerializers.string.deserialize).toHaveBeenCalledWith("Winston Churchill")
+		it "should always deserialize the id", ->
+			expect(@model.get("id")).toEqual("78")
 		it "should set the deserialized value on the name field", ->
 			expect(@model.get("name")).toEqual("WINSTON CHURCHILL")
 		it "should not deserialize the field which isn't defined in the model", ->
@@ -95,12 +98,14 @@ describe "Emu.Serializer", ->
 				age: Emu.field()
 		beforeEach ->
 			customer = Customer.create
+				id: "55"
 				name: "Terry the customer"
 				age: "47"
 			@serializer = Emu.Serializer.create()
 			@jsonResult = @serializer.serializeModel(customer)
 		it "should deserialize the object to json", ->
 			expect(@jsonResult).toEqual
+				id: "55"
 				name: "Terry the customer"
 				age: "47"
 	describe "When serializing a model with a nested collection", ->

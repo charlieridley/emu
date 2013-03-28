@@ -3,11 +3,12 @@ Emu.Serializer = Ember.Object.extend
 		parts = type.toString().split(".")
 		parts[parts.length - 1].toLowerCase()
 	serializeModel: (model) ->
-		jsonData = {}
+		jsonData = {id: model.get("id")}
 		for property, attributeInfo of model._fields			
 			@_serializeProperty(model, jsonData, attributeInfo, property)			
 		jsonData
 	deserializeModel: (model, jsonData) ->
+		model.set("id", jsonData.id) if jsonData.id
 		for property, attributeInfo of model._fields
 			attributeInfo = model._fields[property]
 			@_deserializeProperty(model, jsonData, attributeInfo, property)
