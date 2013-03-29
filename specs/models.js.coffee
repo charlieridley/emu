@@ -5,4 +5,4 @@ App.Order = Emu.Model.extend
 App.Customer = Emu.Model.extend
 	name: Emu.field("string")
 	orders: Emu.field(App.Order, {collection: true, lazy: true})
-	town: Emu.field("string", {partial: true})
+	town: Emu.field("string", {partial: true})	

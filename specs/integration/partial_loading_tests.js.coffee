@@ -1,7 +1,7 @@
 describe "Partial loading property tests", ->
 	describe "When getting a partial property when the parent object isn't fully loaded", ->
 		beforeEach ->
-			store = TestHelpers.createStore()
+			TestSetup.setup()	
 			spyOn($, "ajax")
 			@models = App.Customer.find()
 			$.ajax.mostRecentCall.args[0].success [
@@ -14,7 +14,7 @@ describe "Partial loading property tests", ->
 			expect($.ajax.mostRecentCall.args[0].url).toEqual("api/customer/43")
 	describe "When getting a partial property when the parent object is fully loaded", ->
 		beforeEach ->
-			store = TestHelpers.createStore()
+			TestSetup.setup()	
 			spyOn($, "ajax")
 			@model = App.Customer.find(43)
 			$.ajax.mostRecentCall.args[0].success

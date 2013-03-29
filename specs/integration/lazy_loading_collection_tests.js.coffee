@@ -1,17 +1,19 @@
 describe "Lazy loading collection tests", ->
 	describe "When getting a lazy loaded collection which hasn't been loaded", ->
 		beforeEach ->			
-			store = TestHelpers.createStore()
+			TestSetup.setup()	
 			spyOn($, "ajax")
 			@customer = App.Customer.find(15)
 			$.ajax.mostRecentCall.args[0].success
 				name: "Harry"
 			@customer.get("orders")
+		it "should have made ajax 2 requests", ->
+			expect($.ajax.calls.length).toEqual(2)
 		it "should make an request to the the orders for that customer", ->
 			expect($.ajax.mostRecentCall.args[0].url).toEqual("api/customer/15/order")
 	describe "When getting a lazy loaded collection and the property finishes loading", ->
-		beforeEach ->			
-			store = TestHelpers.createStore()
+		beforeEach ->		
+			TestSetup.setup()		
 			spyOn($, "ajax")
 			customer = App.Customer.find(5)
 			$.ajax.mostRecentCall.args[0].success
@@ -26,8 +28,8 @@ describe "Lazy loading collection tests", ->
 			expect(@orders.get("firstObject.orderCode")).toEqual("123")
 			expect(@orders.get("lastObject.orderCode")).toEqual("456")
 	describe "When loading a lazy collection upfront", ->
-		beforeEach ->			
-			store = TestHelpers.createStore()
+		beforeEach ->	
+			TestSetup.setup()			
 			spyOn($, "ajax")
 			customer = App.Customer.find(53)
 			$.ajax.mostRecentCall.args[0].success

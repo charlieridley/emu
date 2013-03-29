@@ -44,12 +44,12 @@ describe "Emu.field", ->
 			@orders = Emu.ModelCollection.create(type: Order)
 			spyOn(Emu.ModelCollection, "create").andReturn(@orders)
 			Person = Emu.Model.extend
-				_store: @store
+				store: @store
 				orders: Emu.field(Order, {collection: true})
 			@model = Person.create()
 			@result = @model.get("orders")
-		it "should get all the models for the collection from the store", ->
-			expect(@result).toBeUndefined()
+		it "should return an empty collection", ->
+			expect(@result.get("length")).toEqual(0)
 		it "should not query the store", ->
 			expect(@store.loadAll).not.toHaveBeenCalled()
 	describe "When getting the value of a lazy collection which is not set", ->
@@ -60,12 +60,10 @@ describe "Emu.field", ->
 			spyOn(@store, "loadAll")
 			spyOn(Emu.ModelCollection, "create").andReturn(@orders)
 			Person = Emu.Model.extend
-				_store: @store
+				store: @store
 				orders: Emu.field(Order, {collection: true, lazy: true})
 			@model = Person.create()
-			@result = @model.get("orders")
-		it "should create a new collection", ->
-			expect(Emu.ModelCollection.create).toHaveBeenCalledWith(type: Order, store: @store, parent: @model)
+			@result = @model.get("orders")		
 		it "should get all the models for the collection from the store", ->
 			expect(@store.loadAll).toHaveBeenCalledWith(@orders)
 		it "should return the collection", ->
@@ -78,7 +76,7 @@ describe "Emu.field", ->
 			spyOn(@store, "loadAll")
 			spyOn(Emu.ModelCollection, "create").andReturn(@orders)
 			Person = Emu.Model.extend
-				_store: @store
+				store: @store
 				orders: Emu.field(Order, {collection: true, lazy: true})
 			@model = Person.create()
 			@model.get("orders")
@@ -86,31 +84,14 @@ describe "Emu.field", ->
 		it "should get the models from the store only once", ->
 			expect(@store.loadAll.calls.length).toEqual(1)
 			@result = @model.get("orders")
-	describe "When getting the value of a lazy collection which is not set, but setting doNotLoad=true", ->
-		beforeEach ->
-			@store = Ember.Object.create
-				loadAll: ->		
-			Person = Emu.Model.extend
-				_store: @store
-				orders: Emu.field(Order, {collection: true, lazy: true})
-			spyOn(@store, "loadAll")
-			spyOn(Emu.ModelCollection, "create")							
-			@model = Person.create()
-			@result = @model.getValueOf("orders")
-		it "should not create a new collection", ->
-			expect(Emu.ModelCollection.create).not.toHaveBeenCalled()
-		it "should not query the store", ->
-			expect(@store.loadAll).not.toHaveBeenCalled()
-		it "should return undefined", ->
-			expect(@result).toBeUndefined()
+
 	describe "When getting the value of a partial property", ->
 		beforeEach ->
 			@store = Ember.Object.create
 				loadModel: ->		
 			Person = Emu.Model.extend
 				name: Emu.field("string", {partial: true})
-			@person = Person.create(id: 5)
-			@person._store = @store
+			@person = Person.create(id: 5, store: @store)			
 			spyOn(@store, "loadModel")
 			@person.get("name")
 		it "should load the parent object", ->

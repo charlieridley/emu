@@ -63,30 +63,11 @@ describe "Emu.Serializer", ->
 			@model._store = @store
 			@serializer.deserializeModel(@model, @jsonData)
 		it "should create a new model collection for that type", ->
-			expect(Emu.ModelCollection.create).toHaveBeenCalledWith(type: Order, store: @store, parent: @model)
+			expect(Emu.ModelCollection.create).toHaveBeenCalledWith(type: Order, parent: @model)
 		it "should call deserializeCollection", ->
 			expect(@serializer.deserializeCollection).toHaveBeenCalledWith(@modelCollection, @jsonData.orders)
 		it "should set the result on the model", ->
 			expect(@model.get("orders")).toBe(@modelCollection)
-	describe "When deserializing a json object with a nested collection, when the value of the nested collection is null", ->
-		Order = Emu.Model.extend()
-		Customer = Emu.Model.extend
-			name: Emu.field("string")
-			orders: Emu.field(Order, {collection: true})				
-		beforeEach ->			
-			@jsonData = 
-				name: "Donald Duck"			
-			@store = Ember.Object.create()
-			@serializer = Emu.Serializer.create()
-			spyOn(@serializer, "deserializeCollection")				
-			spyOn(Emu.ModelCollection, "create")
-			@model = Customer.create()
-			@model._store = @store
-			@serializer.deserializeModel(@model, @jsonData)
-		it "should not create a new model collection for that type", ->
-			expect(Emu.ModelCollection.create).not.toHaveBeenCalled()
-		it "should not call deserializeCollection", ->
-			expect(@serializer.deserializeCollection).not.toHaveBeenCalled()
 	describe "When serializing a simple model", ->
 		Customer = Emu.Model.extend
 			name: Emu.field("string")
@@ -111,19 +92,36 @@ describe "Emu.Serializer", ->
 			orders: Emu.field(Order, {collection: true})						
 		beforeEach ->
 			@customer = Customer.create
-				name: "Terry the customer"
+				name: "Terry the customer"				
 				orders: Emu.ModelCollection.create(type: Order)
 			@customer.get("orders").pushObject(Order.create(orderCode: "123"))
 			@customer.get("orders").pushObject(Order.create(orderCode: "456"))
-			spyOn(@customer, "get").andCallThrough()
+			spyOn(@customer, "getValueOf").andCallThrough()
 			@serializer = Emu.Serializer.create()
 			@jsonResult = @serializer.serializeModel(@customer)
 		it "should deserialize the object to json", ->
 			expect(@jsonResult).toEqual
-				name: "Terry the customer"
+				name: "Terry the customer"				
 				orders: [
 					{orderCode: "123"}
 					{orderCode: "456"}
 				]	
-		it "should have called the get for the property with the doNotLoad argument, to stop it lazy loading", ->
-			expect(@customer.get).toHaveBeenCalledWith("orders")
+		it "should have called the getValueOf for the property, to stop it lazy loading", ->
+			expect(@customer.getValueOf).toHaveBeenCalledWith("orders")
+	describe "When serializing a model with a computed property", ->
+		Customer = Emu.Model.extend
+			name: Emu.field("string")
+			town: Emu.field("string")
+			description: (->
+				@get("name") + " from " +@get("town")
+			).property("name", "town")
+		beforeEach ->
+			@customer = Customer.create
+				name: "Terry the customer"				
+				town: "Swindon"
+			@serializer = Emu.Serializer.create()
+			@jsonResult = @serializer.serializeModel(@customer)
+		it "should not deserialize the computed property", ->
+			expect(@jsonResult).toEqual
+				name: "Terry the customer"				
+				town: "Swindon"

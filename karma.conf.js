@@ -24,7 +24,7 @@ files = [
   'specs/application.js.coffee',
   'specs/models.js.coffee',
   'specs/unit/**/*.js.coffee',  
-  'specs/integration/test_helpers.js.coffee',
+  'specs/integration/test_setup.js.coffee',
   'specs/integration/*.js.coffee'
 ];
 
