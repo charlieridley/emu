@@ -13,6 +13,12 @@ describe "Emu.field", ->
 				age: Emu.field("number")
 		it "should have a type of 'number'", ->
 			expect(@Person.metaForProperty("age").type).toEqual("number")
+	describe "When creating as a type of model", ->
+		beforeEach ->
+			@Person = Emu.Model.extend
+				order: Emu.field(Order)
+		it "should mark the field as a model lazy", ->
+			expect(@Person.metaForProperty("order").isModel).toBeTruthy()
 	describe "When creating and marking with options", ->
 		beforeEach ->
 			@Person = Emu.Model.extend
@@ -84,7 +90,6 @@ describe "Emu.field", ->
 		it "should get the models from the store only once", ->
 			expect(@store.loadAll.calls.length).toEqual(1)
 			@result = @model.get("orders")
-
 	describe "When getting the value of a partial property", ->
 		beforeEach ->
 			@store = Ember.Object.create
@@ -96,5 +101,11 @@ describe "Emu.field", ->
 			@person.get("name")
 		it "should load the parent object", ->
 			expect(@store.loadModel).toHaveBeenCalledWith(@person)
-
+	describe "When getting the value of a model property, when it has no value", ->
+		beforeEach ->
+			Person = Emu.Model.extend
+				order: Emu.field(Order)
+			@model = Person.create()
+		it "should not return anything", ->
+			expect(@model.get("order")).toBeFalsy()
 

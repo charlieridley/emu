@@ -15,7 +15,7 @@ describe "Find by ID tests", ->
 			@result = App.Person.find(5)
 			$.ajax.mostRecentCall.args[0].success
 				name: "Harry"
-		it "should make a request to the person URL with the correct ID", ->
+		it "should deserialize the simple field", ->
 			expect(@result.get("name")).toEqual("Harry")
 	describe "When finding by ID on a model with a lazy property", ->
 		beforeEach ->

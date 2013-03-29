@@ -3,7 +3,8 @@ Emu.field = (type, options)->
 	meta =
 		type: type
 		options: options
-		isEmuField: true
+		isField: true
+		isModel: type.isEmuModel
 	getAttr = (record, key) ->
 		record._attributes ?= {}
 		record._attributes[key]
@@ -16,7 +17,7 @@ Emu.field = (type, options)->
 			setAttr(this, key, value)
 			@set("isDirty", true)
 		else
-			if not getAttr(this, key) 
+			if not getAttr(this, key) and meta.options.collection				
 				collection = Emu.ModelCollection.create(type: meta.type, parent: this)	
 				collection.addObserver "content.@each", => @set("isDirty", true)
 				setAttr(this, key, collection)
@@ -25,4 +26,4 @@ Emu.field = (type, options)->
 			else if meta.options.partial 
 				@get("store").loadModel(this)
 		getAttr(this, key)
-	).property("data").meta(meta)
+	).property().meta(meta)

@@ -4,6 +4,8 @@ describe "Emu.Model", ->
 	Person = Emu.Model.extend
 		name: Emu.field("string")
 		orders: Emu.field(Order, {collection:true})
+	it "should have a flag to indicate the type is an Emu model", ->
+		expect(Person.isEmuModel).toBeTruthy()
 	describe "When creating a record", ->
 		beforeEach ->
 			Ember.set(Emu, "defaultStore", undefined)

@@ -12,9 +12,10 @@ Emu.proxyToStore = (methodName) ->
 		Ember.assert("Cannot call " + methodName + ". You need define a store first like this: App.Store = Emu.Store.extend()", !!store);
 		store[methodName].apply(store, args)
 Emu.Model.reopenClass
+	isEmuModel: true
 	createRecord: Emu.proxyToStore("createRecord")
 	find: Emu.proxyToStore("find")
 	eachEmuField: (callback) ->
 		@eachComputedProperty (property, meta) ->
-			if meta.isEmuField
+			if meta.isField
 				callback(property, meta)

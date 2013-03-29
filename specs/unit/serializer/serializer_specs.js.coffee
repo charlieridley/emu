@@ -60,7 +60,6 @@ describe "Emu.Serializer", ->
 			@modelCollection = Emu.ModelCollection.create()
 			spyOn(Emu.ModelCollection, "create").andReturn(@modelCollection)
 			@model = Customer.create()
-			@model._store = @store
 			@serializer.deserializeModel(@model, @jsonData)
 		it "should create a new model collection for that type", ->
 			expect(Emu.ModelCollection.create).toHaveBeenCalledWith(type: Order, parent: @model)
@@ -68,6 +67,38 @@ describe "Emu.Serializer", ->
 			expect(@serializer.deserializeCollection).toHaveBeenCalledWith(@modelCollection, @jsonData.orders)
 		it "should set the result on the model", ->
 			expect(@model.get("orders")).toBe(@modelCollection)
+	describe "When deserializing a json object with a nested object", ->
+		Order = Emu.Model.extend()
+		Customer = Emu.Model.extend
+			name: Emu.field("string")
+			order: Emu.field(Order)	
+		beforeEach ->
+			@jsonData = 
+				name: "Donald Duck"
+				order: 
+					id: 1
+			@store = Ember.Object.create()
+			serializer = Emu.Serializer.create()
+			@model = Customer.create()
+			serializer.deserializeModel(@model, @jsonData)
+		it "should deserialize the nested object property", ->
+			expect(@model.get("order.id")).toEqual(1)
+		it "should have deserialized the correct type for that property", ->
+			expect(@model.get("order").constructor).toBe(Order)
+	describe "When deserializing a json object with a nested object which there is no value for", ->
+		Order = Emu.Model.extend()
+		Customer = Emu.Model.extend
+			name: Emu.field("string")
+			order: Emu.field(Order)	
+		beforeEach ->
+			@jsonData = 
+				name: "Donald Duck"
+			@store = Ember.Object.create()
+			serializer = Emu.Serializer.create()
+			@model = Customer.create()
+			serializer.deserializeModel(@model, @jsonData)
+		it "should have a null value for the object", ->
+			expect(@model.get("order")).toBeFalsy()
 	describe "When serializing a simple model", ->
 		Customer = Emu.Model.extend
 			name: Emu.field("string")
@@ -125,3 +156,33 @@ describe "Emu.Serializer", ->
 			expect(@jsonResult).toEqual
 				name: "Terry the customer"				
 				town: "Swindon"
+	describe "When serializing a model with nested model", ->
+		Order = Emu.Model.extend
+			orderCode: Emu.field("string")
+		Customer = Emu.Model.extend
+			name: Emu.field("string")
+			order: Emu.field(Order)	
+		beforeEach ->
+			@customer = Customer.create
+				name: "Gladys the difficult customer"
+			@customer.set("order", Order.create(orderCode: "1234"))
+			@serializer = Emu.Serializer.create()
+			@jsonResult = @serializer.serializeModel(@customer)
+		it "should deserialize the object to json", ->
+			expect(@jsonResult).toEqual
+				name: "Gladys the difficult customer"				
+				order: {orderCode: "1234"}	
+	describe "When serializing a model with nested model which there is no value for", ->
+		Order = Emu.Model.extend
+			orderCode: Emu.field("string")
+		Customer = Emu.Model.extend
+			name: Emu.field("string")
+			order: Emu.field(Order)	
+		beforeEach ->
+			@customer = Customer.create
+				name: "Gladys the difficult customer"
+			@serializer = Emu.Serializer.create()
+			@jsonResult = @serializer.serializeModel(@customer)		
+		it "should deserialize the object to json", ->
+			expect(@jsonResult).toEqual
+				name: "Gladys the difficult customer"	

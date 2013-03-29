@@ -12,7 +12,7 @@ describe "Find all tests", ->
 			spyOn($, "ajax")
 			@result = App.Person.find()
 			$.ajax.mostRecentCall.args[0].success [				
-				{name: "Harry"}
+				{id: 1, name: "Harry"}
 			]
 		it "should have populated the model with the json data", ->
 			expect(@result.get("firstObject.name")).toEqual("Harry")
