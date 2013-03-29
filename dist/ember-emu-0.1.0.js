@@ -134,18 +134,38 @@
     }
   });
 
+  Emu.proxyToStore = function(methodName) {
+    return function() {
+      var args, store;
+
+      store = Ember.get(Emu, "defaultStore");
+      args = [].slice.call(arguments);
+      args.unshift(this);
+      Ember.assert("Cannot call " + methodName + ". You need define a store first like this: App.Store = Emu.Store.extend()", !!store);
+      return store[methodName].apply(store, args);
+    };
+  };
+
+  Emu.Model.reopenClass({
+    createRecord: Emu.proxyToStore("createRecord"),
+    find: Emu.proxyToStore("find")
+  });
+
 }).call(this);
 (function() {
   Emu.ModelCollection = Ember.ArrayProxy.extend({
     init: function() {
-      return this.set("content", Ember.A([]));
-    },
-    createRecord: function(hash) {
-      var model;
+      this.set("content", Ember.A([]));
+      this.createRecord = function(hash) {
+        var model;
 
-      model = this.get("type").create(hash);
-      model._store = this.get("store");
-      return this.pushObject(model);
+        model = this.get("type").create(hash);
+        model._store = this.get("store");
+        return this.pushObject(model);
+      };
+      return this.find = function(predicate) {
+        return this.get("content").find(predicate);
+      };
     }
   });
 
@@ -247,6 +267,9 @@
     init: function() {
       var _ref;
 
+      if (!Ember.get(Emu, "defaultStore")) {
+        Ember.set(Emu, "defaultStore", this);
+      }
       if (this.get("modelCollections") === void 0) {
         this.set("modelCollections", {});
       }
@@ -259,6 +282,13 @@
       return collection.createRecord({
         isDirty: true
       });
+    },
+    find: function(type, id) {
+      if (id) {
+        return this.findById(type, id);
+      } else {
+        return this.findAll(type);
+      }
     },
     findAll: function(type) {
       var collection;
