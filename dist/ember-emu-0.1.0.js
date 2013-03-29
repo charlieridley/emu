@@ -84,7 +84,8 @@
     }
     meta = {
       type: type,
-      options: options
+      options: options,
+      isEmuField: true
     };
     getAttr = function(record, key) {
       var _ref;
@@ -103,30 +104,42 @@
       return record._attributes[key] = value;
     };
     return Ember.computed(function(key, value, oldValue) {
-      var returnVal;
+      var collection,
+        _this = this;
 
       meta = this.constructor.metaForProperty(key);
       if (arguments.length > 1) {
         setAttr(this, key, value);
+        this.set("isDirty", true);
       } else {
-        if (meta.options.lazy && !getAttr(this, key)) {
-          returnVal = Emu.ModelCollection.create({
+        if (!getAttr(this, key)) {
+          collection = Emu.ModelCollection.create({
             type: meta.type,
-            store: this._store,
             parent: this
           });
-          this._store.loadAll(returnVal);
+          collection.addObserver("content.@each", function() {
+            return _this.set("isDirty", true);
+          });
+          setAttr(this, key, collection);
+        }
+        if (meta.options.lazy) {
+          this.get("store").loadAll(getAttr(this, key));
         } else if (meta.options.partial) {
-          this._store.loadModel(this);
+          this.get("store").loadModel(this);
         }
       }
-      return returnVal || getAttr(this, key);
+      return getAttr(this, key);
     }).property("data").meta(meta);
   };
 
 }).call(this);
 (function() {
   Emu.Model = Ember.Object.extend({
+    init: function() {
+      if (!this.get("store")) {
+        return this.set("store", Ember.get(Emu, "defaultStore"));
+      }
+    },
     getValueOf: function(key) {
       var _ref;
 
@@ -148,7 +161,14 @@
 
   Emu.Model.reopenClass({
     createRecord: Emu.proxyToStore("createRecord"),
-    find: Emu.proxyToStore("find")
+    find: Emu.proxyToStore("find"),
+    eachEmuField: function(callback) {
+      return this.eachComputedProperty(function(property, meta) {
+        if (meta.isEmuField) {
+          return callback(property, meta);
+        }
+      });
+    }
   });
 
 }).call(this);
@@ -160,7 +180,6 @@
         var model;
 
         model = this.get("type").create(hash);
-        model._store = this.get("store");
         return this.pushObject(model);
       };
       return this.find = function(predicate) {
@@ -198,7 +217,7 @@
       jsonData = {
         id: model.get("id")
       };
-      model.constructor.eachComputedProperty(function(property, meta) {
+      model.constructor.eachEmuField(function(property, meta) {
         return _this._serializeProperty(model, jsonData, property, meta);
       });
       return jsonData;
@@ -209,7 +228,7 @@
       if (jsonData.id) {
         model.set("id", jsonData.id);
       }
-      model.constructor.eachComputedProperty(function(property, meta) {
+      model.constructor.eachEmuField(function(property, meta) {
         return _this._deserializeProperty(model, property, jsonData[property], meta);
       });
       return model;
@@ -231,7 +250,6 @@
         if (value) {
           collection = Emu.ModelCollection.create({
             type: meta.type,
-            store: model._store,
             parent: model
           });
           this.deserializeCollection(collection, value);
@@ -250,7 +268,7 @@
         _this = this;
 
       if (meta.options.collection) {
-        collection = model.get(property);
+        collection = model.getValueOf(property);
         return jsonData[property] = collection.map(function(item) {
           return _this.serializeModel(item);
         });
