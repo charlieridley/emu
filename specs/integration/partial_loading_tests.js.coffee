@@ -3,7 +3,7 @@ describe "Partial loading property tests", ->
 		beforeEach ->
 			store = TestHelpers.createStore()
 			spyOn($, "ajax")
-			@models = store.findAll(App.Customer)
+			@models = App.Customer.find()
 			$.ajax.mostRecentCall.args[0].success [
 				id: "43"
 				name: "Harry"
@@ -16,7 +16,7 @@ describe "Partial loading property tests", ->
 		beforeEach ->
 			store = TestHelpers.createStore()
 			spyOn($, "ajax")
-			@model = store.findById(App.Customer, 43)
+			@model = App.Customer.find(43)
 			$.ajax.mostRecentCall.args[0].success
 				name: "Harry"
 			@model.get("town")

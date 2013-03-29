@@ -3,7 +3,7 @@ describe "Lazy loading collection tests", ->
 		beforeEach ->			
 			store = TestHelpers.createStore()
 			spyOn($, "ajax")
-			@customer = store.findById(App.Customer, 15)
+			@customer = App.Customer.find(15)
 			$.ajax.mostRecentCall.args[0].success
 				name: "Harry"
 			@customer.get("orders")
@@ -13,7 +13,7 @@ describe "Lazy loading collection tests", ->
 		beforeEach ->			
 			store = TestHelpers.createStore()
 			spyOn($, "ajax")
-			customer = store.findById(App.Customer, 5)
+			customer = App.Customer.find(5)
 			$.ajax.mostRecentCall.args[0].success
 				name: "Harry"
 			@orders = customer.get("orders")
@@ -29,7 +29,7 @@ describe "Lazy loading collection tests", ->
 		beforeEach ->			
 			store = TestHelpers.createStore()
 			spyOn($, "ajax")
-			customer = store.findById(App.Customer, 53)
+			customer = App.Customer.find(53)
 			$.ajax.mostRecentCall.args[0].success
 				name: "Harry"
 				orders: [

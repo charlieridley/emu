@@ -1,10 +1,14 @@
 Emu.Store = Ember.Object.extend
 	init: ->		
+		if not Ember.get(Emu, "defaultStore")
+			Ember.set(Emu, "defaultStore", this)
 		@set("modelCollections", {}) if @get("modelCollections") == undefined
 		@_adapter = @get("adapter")?.create() || Emu.RestAdapter.create()
 	createRecord: (type) ->
 		collection = @_getCollectionForType(type)
 		collection.createRecord(isDirty: true)
+	find: (type, id) -> 
+		if id then @findById(type, id) else @findAll(type)
 	findAll: (type) ->
 		collection = @_getCollectionForType(type)
 		@loadAll(collection)

@@ -9,10 +9,13 @@ describe "Emu.Store", ->
 	Person = Emu.Model.extend()
 	describe "When creating with no adapter specified", ->
 		beforeEach ->
+			Emu.set("defaultStore", undefined)
 			spyOn(Emu.RestAdapter, "create")
 			@store = Emu.Store.create()
 		it "should create a RestAdapter by default", ->
 			expect(Emu.RestAdapter.create).toHaveBeenCalled()
+		it "should set the instance of itself to the defaultStore property on the EMU namespecs", ->
+			expect(Emu.get("defaultStore")).toBe(@store)
 	describe "When finding all records", ->
 		beforeEach ->			
 			@models = Emu.ModelCollection.create(type: Person)
@@ -184,5 +187,21 @@ describe "Emu.Store", ->
 			@store.loadModel(@model)
 		it "should not call the findById method on the adapter", ->
 			expect(adapter.findById).not.toHaveBeenCalled()
+	describe "When calling the find method with an ID", ->
+		beforeEach ->
+			@store = Emu.Store.create()
+			spyOn(@store, "findById")
+			spyOn(@store, "findAll")
+			@store.find(Person, 5)
+		it "should forward the call to findById", ->
+			expect(@store.findById).toHaveBeenCalledWith(Person, 5)
+	describe "When calling the find method without an ID", ->
+		beforeEach ->
+			@store = Emu.Store.create()
+			spyOn(@store, "findById")
+			spyOn(@store, "findAll")
+			@store.find(Person)
+		it "should forward the call to findAll", ->
+			expect(@store.findAll).toHaveBeenCalledWith(Person)
 
 

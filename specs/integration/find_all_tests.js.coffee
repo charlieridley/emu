@@ -1,16 +1,16 @@
 describe "Find all tests", ->
 	describe "When finding all", ->	
 		beforeEach ->
-			store = TestHelpers.createStore()
+			TestHelpers.createStore()
 			spyOn($, "ajax")
-			store.findAll(App.Person)
+			App.Person.find()
 		it "should make a web request to get all the models", ->
 			expect($.ajax.mostRecentCall.args[0].url).toEqual("api/person")
 	describe "When finding all completes", ->
 		beforeEach ->
-			store = TestHelpers.createStore()
+			TestHelpers.createStore()
 			spyOn($, "ajax")
-			@result = store.findAll(App.Person)
+			@result = App.Person.find()
 			$.ajax.mostRecentCall.args[0].success [				
 				{name: "Harry"}
 			]
