@@ -85,7 +85,8 @@
     meta = {
       type: type,
       options: options,
-      isEmuField: true
+      isField: true,
+      isModel: type.isEmuModel
     };
     getAttr = function(record, key) {
       var _ref;
@@ -112,7 +113,7 @@
         setAttr(this, key, value);
         this.set("isDirty", true);
       } else {
-        if (!getAttr(this, key)) {
+        if (!getAttr(this, key) && meta.options.collection) {
           collection = Emu.ModelCollection.create({
             type: meta.type,
             parent: this
@@ -129,7 +130,7 @@
         }
       }
       return getAttr(this, key);
-    }).property("data").meta(meta);
+    }).property().meta(meta);
   };
 
 }).call(this);
@@ -160,11 +161,12 @@
   };
 
   Emu.Model.reopenClass({
+    isEmuModel: true,
     createRecord: Emu.proxyToStore("createRecord"),
     find: Emu.proxyToStore("find"),
     eachEmuField: function(callback) {
       return this.eachComputedProperty(function(property, meta) {
-        if (meta.isEmuField) {
+        if (meta.isField) {
           return callback(property, meta);
         }
       });
@@ -244,7 +246,7 @@
       });
     },
     _deserializeProperty: function(model, property, value, meta) {
-      var attributeSerializer, collection;
+      var attributeSerializer, collection, modelProperty;
 
       if (meta.options.collection) {
         if (value) {
@@ -255,6 +257,12 @@
           this.deserializeCollection(collection, value);
           return model.set(property, collection);
         }
+      } else if (meta.isModel) {
+        if (value) {
+          modelProperty = meta.type.create();
+          this.deserializeModel(modelProperty, value);
+          return model.set(property, modelProperty);
+        }
       } else {
         attributeSerializer = Emu.AttributeSerializers[meta.type];
         value = attributeSerializer.deserialize(value);
@@ -264,7 +272,7 @@
       }
     },
     _serializeProperty: function(model, jsonData, property, meta) {
-      var attributeSerializer, collection,
+      var attributeSerializer, collection, propertyValue,
         _this = this;
 
       if (meta.options.collection) {
@@ -272,6 +280,11 @@
         return jsonData[property] = collection.map(function(item) {
           return _this.serializeModel(item);
         });
+      } else if (meta.isModel) {
+        propertyValue = model.getValueOf(property);
+        if (propertyValue) {
+          return jsonData[property] = this.serializeModel(propertyValue);
+        }
       } else {
         attributeSerializer = Emu.AttributeSerializers[meta.type];
         return jsonData[property] = attributeSerializer.serialize(model.getValueOf(property));
