@@ -43,10 +43,9 @@ describe "Emu.Serializer", ->
 		it "should deserialize 2 items", ->
 			expect(@serializer.deserializeModel.calls.length).toEqual(2)
 	describe "When deserializing a json object with a nested collection", ->
-		Order = Emu.Model.extend()
 		Customer = Emu.Model.extend
 			name: Emu.field("string")
-			orders: Emu.field(Order, {collection: true})				
+			orders: Emu.field("App.Order", {collection: true})				
 		beforeEach ->			
 			@jsonData = 
 				name: "Donald Duck"
@@ -62,16 +61,15 @@ describe "Emu.Serializer", ->
 			@model = Customer.create()
 			@serializer.deserializeModel(@model, @jsonData)
 		it "should create a new model collection for that type", ->
-			expect(Emu.ModelCollection.create).toHaveBeenCalledWith(type: Order, parent: @model)
+			expect(Emu.ModelCollection.create).toHaveBeenCalledWith(type: App.Order, parent: @model)
 		it "should call deserializeCollection", ->
 			expect(@serializer.deserializeCollection).toHaveBeenCalledWith(@modelCollection, @jsonData.orders)
 		it "should set the result on the model", ->
 			expect(@model.get("orders")).toBe(@modelCollection)
 	describe "When deserializing a json object with a nested object", ->
-		Order = Emu.Model.extend()
 		Customer = Emu.Model.extend
 			name: Emu.field("string")
-			order: Emu.field(Order)	
+			order: Emu.field("App.Order")	
 		beforeEach ->
 			@jsonData = 
 				name: "Donald Duck"
@@ -84,12 +82,11 @@ describe "Emu.Serializer", ->
 		it "should deserialize the nested object property", ->
 			expect(@model.get("order.id")).toEqual(1)
 		it "should have deserialized the correct type for that property", ->
-			expect(@model.get("order").constructor).toBe(Order)
+			expect(@model.get("order").constructor).toBe(App.Order)
 	describe "When deserializing a json object with a nested object which there is no value for", ->
-		Order = Emu.Model.extend()
 		Customer = Emu.Model.extend
 			name: Emu.field("string")
-			order: Emu.field(Order)	
+			order: Emu.field("App.Order")	
 		beforeEach ->
 			@jsonData = 
 				name: "Donald Duck"
@@ -116,17 +113,15 @@ describe "Emu.Serializer", ->
 				name: "Terry the customer"
 				age: "47"
 	describe "When serializing a model with a nested collection", ->
-		Order = Emu.Model.extend
-			orderCode: Emu.field("string")
 		Customer = Emu.Model.extend
 			name: Emu.field("string")
-			orders: Emu.field(Order, {collection: true})						
+			orders: Emu.field("App.Order", {collection: true})						
 		beforeEach ->
 			@customer = Customer.create
 				name: "Terry the customer"				
-				orders: Emu.ModelCollection.create(type: Order)
-			@customer.get("orders").pushObject(Order.create(orderCode: "123"))
-			@customer.get("orders").pushObject(Order.create(orderCode: "456"))
+				orders: Emu.ModelCollection.create(type: App.Order)
+			@customer.get("orders").pushObject(App.Order.create(orderCode: "123"))
+			@customer.get("orders").pushObject(App.Order.create(orderCode: "456"))
 			spyOn(@customer, "getValueOf").andCallThrough()
 			@serializer = Emu.Serializer.create()
 			@jsonResult = @serializer.serializeModel(@customer)
@@ -157,15 +152,13 @@ describe "Emu.Serializer", ->
 				name: "Terry the customer"				
 				town: "Swindon"
 	describe "When serializing a model with nested model", ->
-		Order = Emu.Model.extend
-			orderCode: Emu.field("string")
 		Customer = Emu.Model.extend
 			name: Emu.field("string")
-			order: Emu.field(Order)	
+			order: Emu.field("App.Order")	
 		beforeEach ->
 			@customer = Customer.create
 				name: "Gladys the difficult customer"
-			@customer.set("order", Order.create(orderCode: "1234"))
+			@customer.set("order", App.Order.create(orderCode: "1234"))
 			@serializer = Emu.Serializer.create()
 			@jsonResult = @serializer.serializeModel(@customer)
 		it "should deserialize the object to json", ->
@@ -173,11 +166,9 @@ describe "Emu.Serializer", ->
 				name: "Gladys the difficult customer"				
 				order: {orderCode: "1234"}	
 	describe "When serializing a model with nested model which there is no value for", ->
-		Order = Emu.Model.extend
-			orderCode: Emu.field("string")
 		Customer = Emu.Model.extend
 			name: Emu.field("string")
-			order: Emu.field(Order)	
+			order: Emu.field("App.Order")	
 		beforeEach ->
 			@customer = Customer.create
 				name: "Gladys the difficult customer"

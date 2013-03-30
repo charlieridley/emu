@@ -1,9 +1,7 @@
 describe "Emu.Model", ->	
-	Order = Emu.Model.extend
-		orderNumber: Emu.field("string")
 	Person = Emu.Model.extend
 		name: Emu.field("string")
-		orders: Emu.field(Order, {collection:true})
+		orders: Emu.field("App.Order", {collection:true})
 	it "should have a flag to indicate the type is an Emu model", ->
 		expect(Person.isEmuModel).toBeTruthy()
 	describe "When creating a record", ->
@@ -40,7 +38,7 @@ describe "Emu.Model", ->
 		beforeEach ->
 			@model = Person.create
 				isDirty:false							
-			@model.get("orders").pushObject(Order.create())
+			@model.get("orders").pushObject(App.Order.create())
 		it "should be in a dirty state", ->
 			expect(@model.get("isDirty")).toBeTruthy()
 

@@ -6,23 +6,25 @@ describe "Emu.field", ->
 			@Person = Emu.Model.extend
 				name: Emu.field("string")			
 		it "should have a type of 'string'", ->
-			expect(@Person.metaForProperty("name").type).toEqual("string")
+			expect(@Person.metaForProperty("name").type()).toEqual("string")
 	describe "When creating as 'number'", ->
 		beforeEach ->
 			@Person = Emu.Model.extend
 				age: Emu.field("number")
 		it "should have a type of 'number'", ->
-			expect(@Person.metaForProperty("age").type).toEqual("number")
+			expect(@Person.metaForProperty("age").type()).toEqual("number")
 	describe "When creating as a type of model", ->
 		beforeEach ->
 			@Person = Emu.Model.extend
-				order: Emu.field(Order)
+				order: Emu.field("App.Order")
 		it "should mark the field as a model lazy", ->
-			expect(@Person.metaForProperty("order").isModel).toBeTruthy()
+			expect(@Person.metaForProperty("order").isModel()).toBeTruthy()
+		it "should have the type which was specified", ->
+			expect(@Person.metaForProperty("order").type()).toBe(App.Order)
 	describe "When creating and marking with options", ->
 		beforeEach ->
 			@Person = Emu.Model.extend
-				name: Emu.field("string", {lazy: true, partial: false})	
+				name: Emu.field("App.Order", {lazy: true, partial: false})	
 		it "should mark the field as lazy", ->
 			expect(@Person.metaForProperty("name").options).toEqual({lazy: true, partial: false})	
 	describe "When getting a normal field", ->
@@ -35,9 +37,9 @@ describe "Emu.field", ->
 			expect(@result).toEqual("henry")
 	describe "When getting the value for a collection", ->
 		beforeEach ->
-			@orders = Emu.ModelCollection.create(type: Order)			
+			@orders = Emu.ModelCollection.create(type: App.Order)			
 			Person = Emu.Model.extend
-				name: Emu.field(Order, {collection: true})			
+				name: Emu.field("App.Order", {collection: true})			
 			@model = Person.create(orders: @orders)
 			@result = @model.get("orders")
 		it "should return the collection", ->
@@ -47,11 +49,11 @@ describe "Emu.field", ->
 			@store = Ember.Object.create
 				loadAll: ->
 			spyOn(@store, "loadAll")
-			@orders = Emu.ModelCollection.create(type: Order)
+			@orders = Emu.ModelCollection.create(type: App.Order)
 			spyOn(Emu.ModelCollection, "create").andReturn(@orders)
 			Person = Emu.Model.extend
 				store: @store
-				orders: Emu.field(Order, {collection: true})
+				orders: Emu.field("App.Order", {collection: true})
 			@model = Person.create()
 			@result = @model.get("orders")
 		it "should return an empty collection", ->
@@ -62,12 +64,12 @@ describe "Emu.field", ->
 		beforeEach ->
 			@store = Ember.Object.create
 				loadAll: ->
-			@orders = Emu.ModelCollection.create(type: Order)
+			@orders = Emu.ModelCollection.create(type: App.Order)
 			spyOn(@store, "loadAll")
 			spyOn(Emu.ModelCollection, "create").andReturn(@orders)
 			Person = Emu.Model.extend
 				store: @store
-				orders: Emu.field(Order, {collection: true, lazy: true})
+				orders: Emu.field("App.Order", {collection: true, lazy: true})
 			@model = Person.create()
 			@result = @model.get("orders")		
 		it "should get all the models for the collection from the store", ->
@@ -78,12 +80,12 @@ describe "Emu.field", ->
 		beforeEach ->
 			@store = Ember.Object.create
 				loadAll: ->
-			@orders = Emu.ModelCollection.create(type: Order)
+			@orders = Emu.ModelCollection.create(type: App.Order)
 			spyOn(@store, "loadAll")
 			spyOn(Emu.ModelCollection, "create").andReturn(@orders)
 			Person = Emu.Model.extend
 				store: @store
-				orders: Emu.field(Order, {collection: true, lazy: true})
+				orders: Emu.field("App.Order", {collection: true, lazy: true})
 			@model = Person.create()
 			@model.get("orders")
 			@model.get("orders")
@@ -104,7 +106,7 @@ describe "Emu.field", ->
 	describe "When getting the value of a model property, when it has no value", ->
 		beforeEach ->
 			Person = Emu.Model.extend
-				order: Emu.field(Order)
+				order: Emu.field("App.Order")
 			@model = Person.create()
 		it "should not return anything", ->
 			expect(@model.get("order")).toBeFalsy()

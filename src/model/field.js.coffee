@@ -1,10 +1,10 @@
 Emu.field = (type, options)->
 	options ?= {}
 	meta =
-		type: type
+		type: -> Ember.get(type) or type
 		options: options
 		isField: true
-		isModel: type.isEmuModel
+		isModel: -> Ember.get(type)?.isEmuModel
 	getAttr = (record, key) ->
 		record._attributes ?= {}
 		record._attributes[key]
@@ -18,7 +18,7 @@ Emu.field = (type, options)->
 			@set("isDirty", true)
 		else
 			if not getAttr(this, key) and meta.options.collection				
-				collection = Emu.ModelCollection.create(type: meta.type, parent: this)	
+				collection = Emu.ModelCollection.create(type: meta.type(), parent: this)	
 				collection.addObserver "content.@each", => @set("isDirty", true)
 				setAttr(this, key, collection)
 			if meta.options.lazy				
