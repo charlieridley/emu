@@ -1,5 +1,4 @@
-Emu
-===
+#Emu [![Build Status](https://secure.travis-ci.org/charlieridley/emu.png?branch=master)](https://travis-ci.org/charlieridley/emu)
 
 Emu is a simple data access framework for Ember.js.
 
