@@ -1,6 +1,7 @@
 {
 	"name": "Emu",
 	"version": "0.1.0",
+	"description": "Simple data access framework for Ember.js",
 	"author": "Charlie Ridley charlieridley@gmail.com",
 	"homepage": "https://github.com/charlieridley/emu",
 	"repository":{
@@ -8,7 +9,7 @@
 		"url": "git://github.com/charlieridley/emu.git"
 	},
 	"devDependencies": {
-		"testacular": "~0.6"
+		"karma": "~0.6"
 	},
 	"scripts":{
 		"test": "./node_modules/.bin/karma start --single-run --browsers PhantomJS"
