@@ -17,8 +17,8 @@ To Start
 	App.Club = Emu.Model.extend({
 		name: Emu.field("string"),
 		location: Emu.field("string", {partial: true}),
-		boardMembers: Emu.field(App.Person, {collection: true, partial: true}),
-		members: Emu.field(App.Person, {collection: true, lazy: true})
+		boardMembers: Emu.field("App.Person", {collection: true, partial: true}),
+		members: Emu.field("App.Person", {collection: true, lazy: true})
 	});
 
 Partial Loading
