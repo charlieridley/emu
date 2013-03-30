@@ -9,7 +9,7 @@
 		"url": "git://github.com/charlieridley/emu.git"
 	},
 	"devDependencies": {
-		"karma": "~0.6"
+		"karma": "*"
 	},
 	"scripts":{
 		"test": "./node_modules/.bin/karma start --single-run --browsers PhantomJS"
