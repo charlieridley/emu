@@ -7,8 +7,15 @@ Emu.Store = Ember.Object.extend
 	createRecord: (type) ->
 		collection = @_getCollectionForType(type)
 		collection.createRecord(isDirty: true)
-	find: (type, id) -> 
-		if id then @findById(type, id) else @findAll(type)
+	find: (type, param) -> 
+		if not param 
+			return @findAll(type)
+		else if Em.typeOf(param) == "string" 
+			return @findById(type, param)
+		else if Em.typeOf(param) == "number" 
+			return @findById(type, param)
+		else if Em.typeOf(param) == "object"
+			@findQuery(type, param)
 	findAll: (type) ->
 		collection = @_getCollectionForType(type)
 		@loadAll(collection)
@@ -39,5 +46,10 @@ Emu.Store = Ember.Object.extend
 	didFindById: (model) ->
 		model.set("isLoading", false)
 		model.set("isLoaded", true)
+	findQuery: (type, paramHash) ->
+		 collection = Emu.ModelCollection.create(type: type, store: this)
+		 collection.set("isLoading", true)
+		 @_adapter.findQuery(type, this, collection, paramHash)
+		 collection
 	_getCollectionForType: (type) ->
 		@get("modelCollections")[type] || @get("modelCollections")[type] = Emu.ModelCollection.create(type: type, store: this)
