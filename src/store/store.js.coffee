@@ -3,6 +3,7 @@ Emu.Store = Ember.Object.extend
     if not Ember.get(Emu, "defaultStore")
       Ember.set(Emu, "defaultStore", this)
     @set("modelCollections", {}) if @get("modelCollections") == undefined
+    @set("queryCollections", {}) if @get("queryCollections") == undefined
     @_adapter = @get("adapter")?.create() || Emu.RestAdapter.create()
   createRecord: (type) ->
     collection = @_getCollectionForType(type)
@@ -28,10 +29,10 @@ Emu.Store = Ember.Object.extend
     collection  
   save: (model) ->
     if model.get("id") then @_adapter.update(this, model) else @_adapter.insert(this, model)
-  didFindAll: (collection, options) ->
-    collection.set("isLoaded", true)
-    collection.set("isLoading", false)
-    collection.get("content").forEach (item) -> item.set("isLoaded", options?.fullyLoad)
+  didFindAll: (collection) ->
+    @_didCollectionLoad(collection)
+  didFindQuery: (collection) ->
+    @_didCollectionLoad(collection)
   findById: (type, id) ->
     collection = @_getCollectionForType(type)
     model = collection.find (item) -> item.get("id") == id
@@ -46,10 +47,18 @@ Emu.Store = Ember.Object.extend
   didFindById: (model) ->
     model.set("isLoading", false)
     model.set("isLoaded", true)
-  findQuery: (type, paramHash) ->
-     collection = Emu.ModelCollection.create(type: type, store: this)
-     collection.set("isLoading", true)
-     @_adapter.findQuery(type, this, collection, paramHash)
+  findQuery: (type, queryHash) ->
+     collection = @_getCollectionForQuery(type, queryHash)
+     if not collection.get("isLoading")
+       collection.set("isLoading", true)
+       @_adapter.findQuery(type, this, collection, queryHash)
      collection
+  _didCollectionLoad: (collection) ->
+    collection.set("isLoaded", true)
+    collection.set("isLoading", false)
   _getCollectionForType: (type) ->
     @get("modelCollections")[type] || @get("modelCollections")[type] = Emu.ModelCollection.create(type: type, store: this)
+  _getCollectionForQuery: (type, queryHash) ->
+    key = JSON.stringify(queryHash)
+    queries = @get("queryCollections")[type] || @get("queryCollections")[type] = {}
+    @get("queryCollections")[type][key] || @get("queryCollections")[type][key] = Emu.ModelCollection.create(type: type, store: this)

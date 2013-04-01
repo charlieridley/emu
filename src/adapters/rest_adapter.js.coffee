@@ -14,6 +14,13 @@ Emu.RestAdapter = Ember.Object.extend
       type: "GET"
       success: (jsonData) =>
         @_didFindById(store, model, jsonData)
+  findQuery: (type, store, collection, queryHash) ->
+    $.ajax
+      url: @_getEndpointForModel(type) + @_serializer.serializeQueryHash(queryHash)
+      type: "GET"
+      success: (jsonData) =>
+        @_serializer.deserializeCollection(collection, jsonData)
+        store.didFindQuery(collection)
   insert: (store, model) ->
     jsonData = @_serializer.serializeModel(model)
     $.ajax

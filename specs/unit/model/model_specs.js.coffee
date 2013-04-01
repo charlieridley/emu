@@ -4,7 +4,7 @@ describe "Emu.Model", ->
     orders: Emu.field("App.Order", {collection:true})
   it "should have a flag to indicate the type is an Emu model", ->
     expect(Person.isEmuModel).toBeTruthy()
-  describe "When creating a record", ->
+  describe "createRecord", ->
     beforeEach ->
       Ember.set(Emu, "defaultStore", undefined)
       @store = Emu.Store.create()
@@ -12,15 +12,7 @@ describe "Emu.Model", ->
       @model = Person.createRecord()
     it "should proxy the call to the store", ->
       expect(@store.createRecord).toHaveBeenCalledWith(Person)
-  describe "When finding a record", ->
-    beforeEach ->
-      Ember.set(Emu, "defaultStore", undefined)
-      @store = Emu.Store.create()
-      spyOn(@store, "find")
-      @model = Person.find(5)
-    it "should proxy the call to the store", ->
-      expect(@store.find).toHaveBeenCalledWith(Person, 5)
-  describe "When finding a record", ->
+  describe "find", ->
     beforeEach ->
       Ember.set(Emu, "defaultStore", undefined)
       @store = Emu.Store.create()

@@ -24,6 +24,12 @@ App.Employee = Emu.Model.extend({
 	name: Emu.field("string"),
 });
 ```
+Querying
+--------
+```javascript
+var companies = App.Company.find({searchName: "inc", pageNumber: 3, recordCount: 20})
+	//GET request to: 	http://www.mysite.com/company?searchName=inc&pageNumber=3&recordCount=20
+```
 Partial loading
 ---------------
 ```javascript

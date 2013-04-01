@@ -18,6 +18,10 @@ describe "Emu.Store", ->
         expect(Emu.RestAdapter.create).toHaveBeenCalled()
       it "should set the instance of itself to the defaultStore property on the EMU namespecs", ->
         expect(Emu.get("defaultStore")).toBe(@store)
+      it "should create an new modelCollections", ->
+        expect(@store.get("modelCollections")).toEqual({})
+      it "should create an new queryCollections", ->
+        expect(@store.get("queryCollections")).toEqual({})
   describe "findAll", ->    
     describe "starts loading", ->
       beforeEach ->     
@@ -194,7 +198,7 @@ describe "Emu.Store", ->
       it "should not call the findById method on the adapter", ->
         expect(adapter.findById).not.toHaveBeenCalled()
   describe "findQuery", ->
-    describe "start loading", ->
+    describe "starts loading", ->
       beforeEach ->     
         @models = Emu.ModelCollection.create(type: Person)
         spyOn(Emu.ModelCollection, "create").andReturn(@models)
@@ -211,6 +215,40 @@ describe "Emu.Store", ->
         expect(@result.get("isLoading")).toBeTruthy()
       it "should return the model collection", ->
         expect(@result).toEqual(@models)
+    describe "finishes loaded", ->     
+      beforeEach ->
+        @models = Emu.ModelCollection.create(isLoading: true)     
+        @store = Emu.Store.create
+          adapter: Adapter
+        @store.didFindQuery(@models)      
+      it "should set isLoading true on the model collection", ->
+        expect(@models.get("isLoading")).toBeFalsy()
+      it "should set isLoaded false on the model collection", ->
+        expect(@models.get("isLoaded")).toBeTruthy()   
+    describe "same query twice", ->
+      beforeEach ->
+        spyOn(adapter, "findQuery")
+        @store = Emu.Store.create
+          adapter: Adapter
+        @query = {name: "Mr Bean"}
+        @result1 = @store.findQuery(Person, {age: "40", weight: "160lb"})
+        @result2 = @store.findQuery(Person, {age: "40", weight: "160lb"})
+      it "should call the findQuery method on the adapter only once", ->
+        expect(adapter.findQuery.calls.length).toEqual(1)
+      it "should return the same collection for both calls", ->
+        expect(@result1).toEqual(@result2)
+    describe "two different queries", ->
+      beforeEach ->
+        spyOn(adapter, "findQuery")
+        @store = Emu.Store.create
+          adapter: Adapter
+        @query = {name: "Mr Bean"}
+        @result1 = @store.findQuery(Person, {age: "50", weight: "160lb"})
+        @result2 = @store.findQuery(Person, {weight: "170lb", age: "40"})
+      it "should call the findQuery method on the adapter twice", ->
+        expect(adapter.findQuery.calls.length).toEqual(2)
+      it "should return a different collection for each call", ->
+        expect(@result1).not.toEqual(@result2)
   describe "find", ->
     describe "with ID", ->
       beforeEach ->

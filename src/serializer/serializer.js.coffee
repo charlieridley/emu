@@ -17,6 +17,11 @@ Emu.Serializer = Ember.Object.extend
     jsonData.forEach (item) =>
       model = collection.createRecord()
       @deserializeModel(model, item)      
+  serializeQueryHash: (queryHash) ->
+    queryString = "?"
+    for key, value of queryHash
+      queryString += key + "=" + value + "&"
+    queryString.slice(0, queryString.length - 1)
   _deserializeProperty: (model, property, value, meta) ->   
     if meta.options.collection
       if value
