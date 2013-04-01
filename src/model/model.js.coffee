@@ -4,6 +4,7 @@ Emu.Model = Ember.Object.extend
       @set("store", Ember.get(Emu, "defaultStore"))   
   getValueOf: (key) ->
     @_attributes?[key]
+  save: () -> Ember.get(Emu, "defaultStore").save(this)
 Emu.proxyToStore = (methodName) ->
   ->
     store = Ember.get(Emu, "defaultStore")
@@ -14,7 +15,7 @@ Emu.proxyToStore = (methodName) ->
 Emu.Model.reopenClass
   isEmuModel: true
   createRecord: Emu.proxyToStore("createRecord")
-  find: Emu.proxyToStore("find")
+  find: Emu.proxyToStore("find")  
   eachEmuField: (callback) ->
     @eachComputedProperty (property, meta) ->
       if meta.isField

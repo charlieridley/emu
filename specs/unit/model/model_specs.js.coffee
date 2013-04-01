@@ -20,6 +20,15 @@ describe "Emu.Model", ->
       @model = Person.find(5)
     it "should proxy the call to the store", ->
       expect(@store.find).toHaveBeenCalledWith(Person, 5)
+  describe "save", ->
+    beforeEach ->
+      Ember.set(Emu, "defaultStore", undefined)
+      @store = Emu.Store.create()
+      spyOn(@store, "save")
+      @model = Person.createRecord()
+      @model.save()
+    it "should proxy the call to the store", ->
+      expect(@store.save).toHaveBeenCalledWith(@model)
   describe "When modifying a property on a model", ->
     beforeEach ->
       @model = Person.create(isDirty:false)
@@ -32,6 +41,6 @@ describe "Emu.Model", ->
         isDirty:false             
       @model.get("orders").pushObject(App.Order.create())
     it "should be in a dirty state", ->
-      expect(@model.get("isDirty")).toBeTruthy()
+      expect(@model.get("isDirty")).toBeTruthy()      
 
   
