@@ -11,7 +11,7 @@ App.Store = Emu.Store.extend();
 // lets define some models
 App.Company = Emu.Model.extend({
 	name: Emu.field("string"),
-	address: Emu.field("App.Address", {partial: true})	
+	address: Emu.field("App.Address", {partial: true}),	
 	employees: Emu.field("App.Employee", {collection: true, lazy: true})
 });
 
@@ -21,14 +21,18 @@ App.Address = Emu.Model.extend({
 });
 
 App.Employee = Emu.Model.extend({
-	name: Emu.field("string"),
+	name: Emu.field("string")
 });
 ```
 Querying
 --------
 ```javascript
-var companies = App.Company.find({searchName: "inc", pageNumber: 3, recordCount: 20})
+var companies = App.Company.find({searchName: "inc", pageNumber: 3, recordCount: 20});
 	//GET request to: 	http://www.mysite.com/company?searchName=inc&pageNumber=3&recordCount=20
+
+var companies = App.Company.find(function(company){return company.get("name").indexOf("inc") > 0;});
+	//GET request to: 	http://www.mysite.com/company
+	//Filters results by function when collection has loaded
 ```
 Partial loading
 ---------------

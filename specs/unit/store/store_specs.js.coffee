@@ -249,6 +249,54 @@ describe "Emu.Store", ->
         expect(adapter.findQuery.calls.length).toEqual(2)
       it "should return a different collection for each call", ->
         expect(@result1).not.toEqual(@result2)
+  describe "findPredicate", ->
+    describe "when all of that type are loaded", ->
+      beforeEach ->
+        @collection = Emu.ModelCollection.create(isLoaded: true)
+        @collection.pushObject(Person.create(age: 20))
+        @collection.pushObject(Person.create(age: 30))
+        @store = Emu.Store.create()
+        spyOn(@store, "findAll").andReturn(@collection)
+        spyOn(Emu.ModelCollection, "create").andCallThrough()
+        @predicate = (person) -> person.get("age") > 25
+        spyOn(this, "predicate").andCallThrough()
+        @result = @store.findPredicate(Person, @predicate)
+      it "should find all the records", ->
+        expect(@store.findAll).toHaveBeenCalledWith(Person)
+      it "should create a new collection to contain the results", ->
+        expect(Emu.ModelCollection.create).toHaveBeenCalledWith(type: Person, store: @store)
+      it "should run the predicate on each item", ->
+        expect(@predicate).toHaveBeenCalledWith(@collection.get("firstObject"))
+        expect(@predicate).toHaveBeenCalledWith(@collection.get("lastObject"))
+      it "should return 1 result", ->
+        expect(@result.get("length")).toEqual(1)
+      it "should return the result which passes the predicate function", ->
+        expect(@result.get("firstObject")).toEqual(@collection.get("lastObject"))
+    describe "when all of that type are not loaded", ->
+      beforeEach ->
+        @collection = Emu.ModelCollection.create(isLoaded: false)
+        @store = Emu.Store.create()
+        spyOn(@store, "findAll").andReturn(@collection)
+        @result = @store.findPredicate(Person, -> true)
+      it "should find all the records", ->
+        expect(@store.findAll).toHaveBeenCalledWith(Person)
+      it "should not return an empty collection", ->
+        expect(@result.get("length")).toEqual(0)
+    describe "finishes loading", ->
+      beforeEach ->
+        @collection = Emu.ModelCollection.create(type:Person, isLoaded: false)
+        @store = Emu.Store.create()
+        spyOn(@store, "findAll").andReturn(@collection)
+        @predicate = (person) -> person.get("age") > 25
+        spyOn(this, "predicate").andCallThrough()
+        @result = @store.findPredicate(Person, @predicate)
+        @collection.pushObject(Person.create(age: 20))
+        @collection.pushObject(Person.create(age: 30))
+        @store.didFindAll(@collection)
+      it "should find all the records", ->
+        expect(@store.findAll).toHaveBeenCalledWith(Person)
+      it "should not return an empty collection", ->
+        expect(@result.get("length")).toEqual(1)
   describe "find", ->
     describe "with ID", ->
       beforeEach ->
@@ -271,12 +319,20 @@ describe "Emu.Store", ->
         @store.find(Person)
       it "should forward the call to findAll", ->
         expect(@store.findAll).toHaveBeenCalledWith(Person) 
-    describe "When calling the find method with a query parameter hash", ->
+    describe "with a query parameter hash", ->
       beforeEach ->
         @store = Emu.Store.create()
         spyOn(@store, "findQuery")
         @store.find(Person, {name: "charlie"})
       it "should forward the call to findQuery", ->
-        expect(@store.findQuery).toHaveBeenCalledWith(Person, {name: "charlie"})  
+        expect(@store.findQuery).toHaveBeenCalledWith(Person, {name: "charlie"}) 
+    describe "with a predicate function", -> 
+      beforeEach ->
+        @store = Emu.Store.create()
+        spyOn(@store, "findPredicate")
+        @predicate = (person) -> person.get("name")
+        @store.find(Person, @predicate)
+      it "should forward the call to findPredicate", ->
+        expect(@store.findPredicate).toHaveBeenCalledWith(Person, @predicate) 
 
 

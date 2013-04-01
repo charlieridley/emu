@@ -4,6 +4,7 @@ Emu.Store = Ember.Object.extend
       Ember.set(Emu, "defaultStore", this)
     @set("modelCollections", {}) if @get("modelCollections") == undefined
     @set("queryCollections", {}) if @get("queryCollections") == undefined
+    @set("deferredQueries", {}) if @get("deferredQueries") == undefined
     @_adapter = @get("adapter")?.create() || Emu.RestAdapter.create()
   createRecord: (type) ->
     collection = @_getCollectionForType(type)
@@ -17,6 +18,8 @@ Emu.Store = Ember.Object.extend
       return @findById(type, param)
     else if Em.typeOf(param) == "object"
       @findQuery(type, param)
+    else if Em.typeOf(param) == "function"
+      @findPredicate(type, param)
   findAll: (type) ->
     collection = @_getCollectionForType(type)
     @loadAll(collection)
@@ -31,6 +34,12 @@ Emu.Store = Ember.Object.extend
     if model.get("id") then @_adapter.update(this, model) else @_adapter.insert(this, model)
   didFindAll: (collection) ->
     @_didCollectionLoad(collection)
+    deferredQueries = @get("deferredQueries")[collection.type]
+    if deferredQueries
+      deferredQueries.forEach (deferredQuery) ->
+        queryResult = collection.filter(deferredQuery.predicate)
+        queryResult.forEach (item) ->
+          deferredQuery.results.pushObject(item)
   didFindQuery: (collection) ->
     @_didCollectionLoad(collection)
   findById: (type, id) ->
@@ -53,6 +62,17 @@ Emu.Store = Ember.Object.extend
        collection.set("isLoading", true)
        @_adapter.findQuery(type, this, collection, queryHash)
      collection
+  findPredicate: (type, predicate) ->
+    allModels = @findAll(type)    
+    results = Emu.ModelCollection.create(type: type, store: this)    
+    if allModels.get("isLoaded")
+      allModels.forEach (model) -> 
+        if predicate(model)
+          results.pushObject(model)
+    else
+      queries = @get("deferredQueries")[type] || @get("deferredQueries")[type] = []
+      queries.pushObject(predicate: predicate, results: results)
+    results
   _didCollectionLoad: (collection) ->
     collection.set("isLoaded", true)
     collection.set("isLoading", false)
