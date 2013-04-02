@@ -30,6 +30,7 @@ Emu.RestAdapter = Ember.Object.extend
     
   update: (store, model) ->   
     @_save(store, model, "PUT") 
+  
   _save: (store, model, requestType) ->
     jsonData = @_serializer.serializeModel(model)
     $.ajax
@@ -38,18 +39,24 @@ Emu.RestAdapter = Ember.Object.extend
       type: requestType
       success: (jsonData) =>
         @_didSave(store, model, jsonData)
+  
   _didFindAll: (store, collection, jsonData) ->
     @_serializer.deserializeCollection(collection, jsonData)
     store.didFindAll(collection)
+  
   _didFindById: (store, model, jsonData) ->
     @_serializer.deserializeModel(model, jsonData)
     store.didFindById(model)
+  
   _didSave: (store, model, jsonData) ->
     @_serializer.deserializeModel(model, jsonData)
     store.didSave(model)
+  
   _getEndpointNestedSubCollection: (collection) ->
     @_getBaseUrl() + @_serializer.serializeTypeName(collection.get("parent").constructor) + "/" + collection.get("parent.id") + "/" + @_serializer.serializeTypeName(collection.get("type"))
+  
   _getEndpointForModel: (type) ->
     @_getBaseUrl() + @_serializer.serializeTypeName(type)
+  
   _getBaseUrl: ->
     if @get("namespace") then @get("namespace") + "/" else ""

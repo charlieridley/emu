@@ -5,12 +5,15 @@ Emu.field = (type, options)->
     options: options
     isField: true
     isModel: -> Ember.get(type)?.isEmuModel
+  
   getAttr = (record, key) ->
     record._attributes ?= {}
     record._attributes[key]
+  
   setAttr = (record, key, value) ->
     record._attributes ?= {}
     record._attributes[key] = value
+  
   Ember.computed((key, value, oldValue) ->
     meta = @constructor.metaForProperty(key)    
     if arguments.length > 1

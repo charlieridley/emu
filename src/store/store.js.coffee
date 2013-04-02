@@ -6,9 +6,11 @@ Emu.Store = Ember.Object.extend
     @set("queryCollections", {}) if @get("queryCollections") == undefined
     @set("deferredQueries", {}) if @get("deferredQueries") == undefined
     @_adapter = @get("adapter")?.create() || Emu.RestAdapter.create()
+  
   createRecord: (type) ->
     collection = @_getCollectionForType(type)
     collection.createRecord(isDirty: true)
+  
   find: (type, param) -> 
     if not param 
       return @findAll(type)
