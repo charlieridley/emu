@@ -154,7 +154,7 @@ describe "Emu.RestAdapter", ->
       it "should notify the store", ->
         expect(@store.didFindQuery).toHaveBeenCalledWith(@models)
   describe "insert", ->
-    describe "start loading", ->
+    describe "start request", ->
       beforeEach ->
         @store = Ember.Object.create()
         spyOn($, "ajax")
@@ -176,7 +176,7 @@ describe "Emu.RestAdapter", ->
         expect(serializer.serializeTypeName).toHaveBeenCalledWith(@model.constructor)
       it "should send the request to the correct URL for the model", ->
         expect($.ajax.mostRecentCall.args[0].url).toEqual("api/person")
-    describe "loading finishes successfully", ->
+    describe "finish request successfully", ->
       beforeEach ->   
         @store = 
           didSave: ->
@@ -199,4 +199,27 @@ describe "Emu.RestAdapter", ->
         expect(serializer.deserializeModel).toHaveBeenCalledWith(@model, @response)
       it "should notify the store", ->
         expect(@store.didSave).toHaveBeenCalledWith(@model)
-
+  describe "update", ->
+    describe "start request", ->
+      beforeEach ->
+        @store = Ember.Object.create()
+        spyOn($, "ajax")
+        @jsonData = {name: "Henry"}
+        @model = Person.create()
+        @adapter = Emu.RestAdapter.create
+          namespace: "api"
+          serializer: Serializer
+        spyOn(serializer, "serializeModel").andReturn(@jsonData)
+        spyOn(serializer, "serializeTypeName").andReturn("person")
+        @adapter.update(@store, @model)
+      it "should deserialize the model", ->
+        expect(serializer.serializeModel).toHaveBeenCalledWith(@model)
+      it "should send a PUT request", ->
+        expect($.ajax.mostRecentCall.args[0].type).toEqual("PUT")
+      it "should send the deserialized model in the request", ->
+        expect($.ajax.mostRecentCall.args[0].data).toEqual(@jsonData)
+      it "should serialize the type name", ->
+        expect(serializer.serializeTypeName).toHaveBeenCalledWith(@model.constructor)
+      it "should send the request to the correct URL for the model", ->
+        expect($.ajax.mostRecentCall.args[0].url).toEqual("api/person")
+   
