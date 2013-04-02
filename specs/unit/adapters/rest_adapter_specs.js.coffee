@@ -8,13 +8,16 @@ describe "Emu.RestAdapter", ->
     serializeQueryHash: ->
   Serializer = 
     create: -> serializer
+  
   describe "create", ->
     beforeEach ->
       spyOn(Emu.Serializer, "create")
       @adapter = Emu.RestAdapter.create()
     it "should create the default serializer", ->
       expect(Emu.Serializer.create).toHaveBeenCalled()
+  
   describe "findAll", ->
+    
     describe "with namespace", ->
       beforeEach ->
         spyOn($, "ajax")      
@@ -28,6 +31,7 @@ describe "Emu.RestAdapter", ->
       it "should make a GET request to the endpoint for the entity", ->
         expect($.ajax.mostRecentCall.args[0].url).toEqual("api/person")
         expect($.ajax.mostRecentCall.args[0].type).toEqual("GET")
+    
     describe "no namespace", ->
       beforeEach ->
         spyOn($, "ajax")      
@@ -39,6 +43,7 @@ describe "Emu.RestAdapter", ->
         @adapter.findAll(Person, store, models)
       it "should make a GET request to the endpoint for the entity", ->
         expect($.ajax.mostRecentCall.args[0].url).toEqual("person")
+    
     describe "loading finishes successfully", ->
       beforeEach ->
         @jsonData = [
@@ -61,6 +66,7 @@ describe "Emu.RestAdapter", ->
         expect(serializer.deserializeCollection).toHaveBeenCalledWith(@models, @jsonData)
       it "should notify the store", ->
         expect(@store.didFindAll).toHaveBeenCalledWith(@models)
+    
     describe "collection that has a parent", ->
       beforeEach ->
         spyOn($, "ajax")      
@@ -80,7 +86,9 @@ describe "Emu.RestAdapter", ->
       it "should make a GET request to the endpoint for the entity", ->
         expect($.ajax.mostRecentCall.args[0].url).toEqual("api/parentperson/5/person")
         expect($.ajax.mostRecentCall.args[0].type).toEqual("GET")
+  
   describe "findById", ->
+    
     describe "starts loading", ->
       beforeEach ->
         spyOn($, "ajax")      
@@ -94,6 +102,7 @@ describe "Emu.RestAdapter", ->
       it "should make a GET request to the endpoint for the entity", ->
         expect($.ajax.mostRecentCall.args[0].url).toEqual("api/person/5")
         expect($.ajax.mostRecentCall.args[0].type).toEqual("GET")
+    
     describe "finishes loading", ->
       beforeEach ->
         @jsonData = 
@@ -114,7 +123,9 @@ describe "Emu.RestAdapter", ->
         expect(serializer.deserializeModel).toHaveBeenCalledWith(@model, @jsonData)
       it "should notify the store", ->
         expect(@store.didFindById).toHaveBeenCalledWith(@model)  
+  
   describe "findQuery", ->
+    
     describe "starts loading", ->
       beforeEach ->
         spyOn(serializer, "serializeQueryHash").andReturn("?age=40&hairColour=brown")
@@ -130,6 +141,7 @@ describe "Emu.RestAdapter", ->
       it "should make a GET request with the serialized query parameters", ->
           expect($.ajax.mostRecentCall.args[0].url).toEqual("api/person?age=40&hairColour=brown")
           expect($.ajax.mostRecentCall.args[0].type).toEqual("GET")
+    
     describe "finishes loading", ->
       beforeEach ->
         @jsonData = [
@@ -153,7 +165,9 @@ describe "Emu.RestAdapter", ->
         expect(serializer.deserializeCollection).toHaveBeenCalledWith(@models, @jsonData)
       it "should notify the store", ->
         expect(@store.didFindQuery).toHaveBeenCalledWith(@models)
+  
   describe "insert", ->
+    
     describe "start request", ->
       beforeEach ->
         @store = Ember.Object.create()
@@ -176,6 +190,7 @@ describe "Emu.RestAdapter", ->
         expect(serializer.serializeTypeName).toHaveBeenCalledWith(@model.constructor)
       it "should send the request to the correct URL for the model", ->
         expect($.ajax.mostRecentCall.args[0].url).toEqual("api/person")
+    
     describe "finish request successfully", ->
       beforeEach ->   
         @store = 
@@ -199,7 +214,9 @@ describe "Emu.RestAdapter", ->
         expect(serializer.deserializeModel).toHaveBeenCalledWith(@model, @response)
       it "should notify the store", ->
         expect(@store.didSave).toHaveBeenCalledWith(@model)
+  
   describe "update", ->
+    
     describe "start request", ->
       beforeEach ->
         @store = Ember.Object.create()

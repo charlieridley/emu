@@ -1,13 +1,16 @@
 describe "Emu.Serializer", -> 
   Person = Emu.Model.extend
     name: Emu.field("string")
+
   describe "serializeTypeName", ->
     beforeEach ->     
       @serializer = Emu.Serializer.create()
       @result = @serializer.serializeTypeName(App.Person)
     it "should serialize the name to lower case", ->
       expect(@result).toEqual("person")
+
   describe "deserializeModel", ->
+    
     describe "simple fields only", ->
       beforeEach -> 
         spyOn(Emu.AttributeSerializers.string, "deserialize").andReturn("WINSTON CHURCHILL")      
@@ -26,6 +29,7 @@ describe "Emu.Serializer", ->
         expect(@model.get("name")).toEqual("WINSTON CHURCHILL")
       it "should not deserialize the field which isn't defined in the model", ->
         expect(@model.get("age")).toBeUndefined()
+
     describe "nested collection", ->
       Customer = Emu.Model.extend
         name: Emu.field("string")
@@ -50,6 +54,7 @@ describe "Emu.Serializer", ->
         expect(@serializer.deserializeCollection).toHaveBeenCalledWith(@modelCollection, @jsonData.orders)
       it "should set the result on the model", ->
         expect(@model.get("orders")).toBe(@modelCollection)
+
     describe "nested object", ->
       Customer = Emu.Model.extend
         name: Emu.field("string")
@@ -67,6 +72,7 @@ describe "Emu.Serializer", ->
         expect(@model.get("order.id")).toEqual(1)
       it "should have deserialized the correct type for that property", ->
         expect(@model.get("order").constructor).toBe(App.Order)
+
     describe "nested object with no value", ->
       Customer = Emu.Model.extend
         name: Emu.field("string")
@@ -80,6 +86,7 @@ describe "Emu.Serializer", ->
         serializer.deserializeModel(@model, @jsonData)
       it "should have a null value for the object", ->
         expect(@model.get("order")).toBeFalsy()
+
   describe "deserializeCollection", ->
     beforeEach ->
       jsonData = [
@@ -97,6 +104,7 @@ describe "Emu.Serializer", ->
       expect(@modelCollection.createRecord.calls.length).toEqual(2)
     it "should deserialize 2 items", ->
       expect(@serializer.deserializeModel.calls.length).toEqual(2)  
+
   describe "serializeModel", ->
     describe "simple fields", ->
       Customer = Emu.Model.extend
@@ -114,6 +122,7 @@ describe "Emu.Serializer", ->
           id: "55"
           name: "Terry the customer"
           age: "47"
+
     describe "nested collection", ->
       Customer = Emu.Model.extend
         name: Emu.field("string")
@@ -136,6 +145,7 @@ describe "Emu.Serializer", ->
           ] 
       it "should have called the getValueOf for the property, to stop it lazy loading", ->
         expect(@customer.getValueOf).toHaveBeenCalledWith("orders")
+
     describe "computed property", ->
       Customer = Emu.Model.extend
         name: Emu.field("string")
@@ -153,6 +163,7 @@ describe "Emu.Serializer", ->
         expect(@jsonResult).toEqual
           name: "Terry the customer"        
           town: "Swindon"
+
     describe "nested model", ->
       Customer = Emu.Model.extend
         name: Emu.field("string")
@@ -167,6 +178,7 @@ describe "Emu.Serializer", ->
         expect(@jsonResult).toEqual
           name: "Gladys the difficult customer"       
           order: {orderCode: "1234"}  
+
     describe "nested model which there is no value for", ->
       Customer = Emu.Model.extend
         name: Emu.field("string")
@@ -179,6 +191,7 @@ describe "Emu.Serializer", ->
       it "should deserialize the object to json", ->
         expect(@jsonResult).toEqual
           name: "Gladys the difficult customer" 
+
   describe "serializeQueryHash", ->
     beforeEach ->
       serializer = Emu.Serializer.create()

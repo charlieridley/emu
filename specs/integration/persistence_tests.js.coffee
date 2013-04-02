@@ -8,6 +8,7 @@ describe "Saving a new model", ->
 		expect($.ajax.mostRecentCall.args[0].url).toEqual("api/person")
 	it "should send a POST request", ->
 		expect($.ajax.mostRecentCall.args[0].type).toEqual("POST")
+
 describe "Saving a existing model", ->
 	beforeEach ->
 		TestSetup.setup() 

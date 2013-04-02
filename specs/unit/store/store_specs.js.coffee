@@ -22,7 +22,9 @@ describe "Emu.Store", ->
         expect(@store.get("modelCollections")).toEqual({})
       it "should create an new queryCollections", ->
         expect(@store.get("queryCollections")).toEqual({})
-  describe "findAll", ->    
+
+  describe "findAll", ->   
+
     describe "starts loading", ->
       beforeEach ->     
         @models = Emu.ModelCollection.create(type: Person)
@@ -39,6 +41,7 @@ describe "Emu.Store", ->
         expect(@result.get("isLoading")).toBeTruthy()
       it "should return the model collection", ->
         expect(@result).toEqual(@models)
+
     describe "finish loading", ->
       beforeEach ->
         @models = Emu.ModelCollection.create(isLoading: true)     
@@ -49,6 +52,7 @@ describe "Emu.Store", ->
         expect(@models.get("isLoading")).toBeFalsy()
       it "should set isLoaded false on the model collection", ->
         expect(@models.get("isLoaded")).toBeTruthy()    
+
     describe "second query executes", ->
       beforeEach ->
         @models = Emu.ModelCollection.create()
@@ -62,6 +66,7 @@ describe "Emu.Store", ->
         expect(Emu.ModelCollection.create.calls.length).toEqual(1)
       it "should call the findAll method on the adapter only once", ->
         expect(adapter.findAll.calls.length).toEqual(1)
+
     describe "collection already loaded", ->
       beforeEach ->
         @models = Emu.ModelCollection.create(isLoaded: true)
@@ -74,7 +79,9 @@ describe "Emu.Store", ->
         expect(adapter.findAll).not.toHaveBeenCalled()
       it "should return the model collection", ->
         expect(@result).toEqual(@models)
+
   describe "findById", ->
+
     describe "starts loading", ->
       beforeEach ->
         @model = Person.create(id: 5)
@@ -93,6 +100,7 @@ describe "Emu.Store", ->
         expect(adapter.findById).toHaveBeenCalledWith(Person, @store, @model, 5)
       it "should return the model", ->
         expect(@result).toEqual(@model)
+
     describe "finishes loading", ->
       beforeEach ->
         @model = Person.create(isLoaded: false, isLoading: true)
@@ -104,6 +112,7 @@ describe "Emu.Store", ->
         expect(@model.get("isLoading")).toBeFalsy()
       it "should set isLoaded to true", ->
         expect(@model.get("isLoaded")).toBeTruthy()
+
     describe "query already pending", ->
       beforeEach ->
         spyOn(adapter, "findById")      
@@ -115,6 +124,7 @@ describe "Emu.Store", ->
         expect(@firstResult).toBe(@secondResult)
       it "should call the findById method on the adapter just once", ->
         expect(adapter.findById.calls.length).toEqual(1)
+
     describe "record already loaded", ->
       beforeEach ->
         spyOn(adapter, "findById")
@@ -130,6 +140,7 @@ describe "Emu.Store", ->
         expect(@result).toBe(@loadedModel)
       it "should not call the findById method", ->
         expect(adapter.findById).not.toHaveBeenCalled()
+
   describe "createRecord", ->
     beforeEach ->
       @modelCollections = {}
@@ -144,6 +155,7 @@ describe "Emu.Store", ->
       expect(@result).toEqual(@model)
     it "should should set the initial state of the model to be dirty", ->
       expect(@modelCollections[Person].createRecord).toHaveBeenCalledWith(isDirty: true)
+
   describe "save", ->
     describe "new record", ->
       beforeEach ->
@@ -154,6 +166,7 @@ describe "Emu.Store", ->
         @store.save(@model)
       it "should call insert on the adapter", ->
         expect(adapter.insert).toHaveBeenCalledWith(@store, @model)
+
     describe "existing record (one with an id assigned)", ->
       beforeEach ->
         @store = Emu.Store.create   
@@ -164,6 +177,7 @@ describe "Emu.Store", ->
         @store.save(@model)
       it "should call update on the adapter", ->
         expect(adapter.update).toHaveBeenCalledWith(@store, @model)
+
   describe "loadAll", ->
     beforeEach ->
       @collection = Emu.ModelCollection.create(type:Person)
@@ -176,6 +190,7 @@ describe "Emu.Store", ->
       expect(adapter.findAll).toHaveBeenCalledWith(Person, @store, @collection)
     it "should not create a new collection", ->
       expect(Emu.ModelCollection.create).not.toHaveBeenCalled()
+
   describe "loadModel", ->
     describe "start loading", ->
       beforeEach ->
@@ -188,6 +203,7 @@ describe "Emu.Store", ->
         expect(@model.get("isLoading")).toBeTruthy()
       it "should call the findById method on the adapter", ->
         expect(adapter.findById).toHaveBeenCalledWith(Person, @store, @model, 4)
+
     describe "already loading", ->
       beforeEach ->
         @model = Person.create(id: 4, isLoading: true)
@@ -197,6 +213,7 @@ describe "Emu.Store", ->
         @store.loadModel(@model)
       it "should not call the findById method on the adapter", ->
         expect(adapter.findById).not.toHaveBeenCalled()
+
   describe "findQuery", ->
     describe "starts loading", ->
       beforeEach ->     
@@ -215,6 +232,7 @@ describe "Emu.Store", ->
         expect(@result.get("isLoading")).toBeTruthy()
       it "should return the model collection", ->
         expect(@result).toEqual(@models)
+
     describe "finishes loaded", ->     
       beforeEach ->
         @models = Emu.ModelCollection.create(isLoading: true)     
@@ -225,6 +243,7 @@ describe "Emu.Store", ->
         expect(@models.get("isLoading")).toBeFalsy()
       it "should set isLoaded false on the model collection", ->
         expect(@models.get("isLoaded")).toBeTruthy()   
+
     describe "same query twice", ->
       beforeEach ->
         spyOn(adapter, "findQuery")
@@ -237,6 +256,7 @@ describe "Emu.Store", ->
         expect(adapter.findQuery.calls.length).toEqual(1)
       it "should return the same collection for both calls", ->
         expect(@result1).toEqual(@result2)
+
     describe "two different queries", ->
       beforeEach ->
         spyOn(adapter, "findQuery")
@@ -249,7 +269,9 @@ describe "Emu.Store", ->
         expect(adapter.findQuery.calls.length).toEqual(2)
       it "should return a different collection for each call", ->
         expect(@result1).not.toEqual(@result2)
+
   describe "findPredicate", ->
+
     describe "when all of that type are loaded", ->
       beforeEach ->
         @collection = Emu.ModelCollection.create(isLoaded: true)
@@ -272,6 +294,7 @@ describe "Emu.Store", ->
         expect(@result.get("length")).toEqual(1)
       it "should return the result which passes the predicate function", ->
         expect(@result.get("firstObject")).toEqual(@collection.get("lastObject"))
+
     describe "when all of that type are not loaded", ->
       beforeEach ->
         @collection = Emu.ModelCollection.create(isLoaded: false)
@@ -282,6 +305,7 @@ describe "Emu.Store", ->
         expect(@store.findAll).toHaveBeenCalledWith(Person)
       it "should not return an empty collection", ->
         expect(@result.get("length")).toEqual(0)
+
     describe "finishes loading", ->
       beforeEach ->
         @collection = Emu.ModelCollection.create(type:Person, isLoaded: false)
@@ -297,7 +321,9 @@ describe "Emu.Store", ->
         expect(@store.findAll).toHaveBeenCalledWith(Person)
       it "should not return an empty collection", ->
         expect(@result.get("length")).toEqual(1)
+
   describe "find", ->
+    
     describe "with ID", ->
       beforeEach ->
         @store = Emu.Store.create()
@@ -305,6 +331,7 @@ describe "Emu.Store", ->
         @store.find(Person, 5)
       it "should forward the call to findById", ->
         expect(@store.findById).toHaveBeenCalledWith(Person, 5)
+
     describe "with string ID", ->
       beforeEach ->
         @store = Emu.Store.create()
@@ -312,6 +339,7 @@ describe "Emu.Store", ->
         @store.find(Person, "5")
       it "should forward the call to findById", ->
         expect(@store.findById).toHaveBeenCalledWith(Person, "5")
+
     describe "without an ID", ->
       beforeEach ->
         @store = Emu.Store.create()
@@ -319,6 +347,7 @@ describe "Emu.Store", ->
         @store.find(Person)
       it "should forward the call to findAll", ->
         expect(@store.findAll).toHaveBeenCalledWith(Person) 
+
     describe "with a query parameter hash", ->
       beforeEach ->
         @store = Emu.Store.create()
@@ -326,6 +355,7 @@ describe "Emu.Store", ->
         @store.find(Person, {name: "charlie"})
       it "should forward the call to findQuery", ->
         expect(@store.findQuery).toHaveBeenCalledWith(Person, {name: "charlie"}) 
+
     describe "with a predicate function", -> 
       beforeEach ->
         @store = Emu.Store.create()

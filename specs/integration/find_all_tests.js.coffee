@@ -1,4 +1,5 @@
 describe "Find all tests", ->
+  
   describe "When finding all", -> 
     beforeEach ->   
       TestSetup.setup() 
@@ -6,6 +7,7 @@ describe "Find all tests", ->
       App.Person.find()
     it "should make a web request to get all the models", ->
       expect($.ajax.mostRecentCall.args[0].url).toEqual("api/person")
+  
   describe "When finding all completes", ->
     beforeEach ->
       TestSetup.setup() 

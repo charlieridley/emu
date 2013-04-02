@@ -1,5 +1,6 @@
 describe "Emu.ModelCollection", ->
   Person = Emu.Model.extend() 
+  
   describe "createRecord", ->
     beforeEach ->   
       @modelCollection = Emu.ModelCollection.create

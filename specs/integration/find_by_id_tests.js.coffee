@@ -1,4 +1,5 @@
 describe "Find by ID tests", -> 
+  
   describe "When finding by ID", ->
     beforeEach ->
       TestSetup.setup() 
@@ -8,6 +9,7 @@ describe "Find by ID tests", ->
       expect($.ajax.calls.length).toEqual(1)
     it "should make a request to the person URL with the correct ID", ->
       expect($.ajax.mostRecentCall.args[0].url).toEqual("api/person/5")   
+  
   describe "When finding by ID completes", ->
     beforeEach ->
       TestSetup.setup() 
@@ -17,6 +19,7 @@ describe "Find by ID tests", ->
         name: "Harry"
     it "should deserialize the simple field", ->
       expect(@result.get("name")).toEqual("Harry")
+  
   describe "When finding by ID on a model with a lazy property", ->
     beforeEach ->
       TestSetup.setup() 
