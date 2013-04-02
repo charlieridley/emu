@@ -146,16 +146,28 @@ describe "Emu.field", ->
           expect(@store.loadModel).toHaveBeenCalledWith(@person)  
 
       describe "not passing a store", ->
-        beforeEach ->
-          Emu.set("defaultStore", undefined)
-          @defaultStore = Emu.Store.create()            
-          spyOn(@defaultStore, "loadModel")
-          Person = Emu.Model.extend
-            name: Emu.field("string", {partial: true})
-          @person = Person.create(id: 5)               
-          @person.get("name")
-        it "should load the parent object", ->
-          expect(@defaultStore.loadModel).toHaveBeenCalledWith(@person)  
+        
+        describe "with default store", ->
+          beforeEach ->
+            Emu.set("defaultStore", undefined)
+            @defaultStore = Emu.Store.create()            
+            spyOn(@defaultStore, "loadModel")
+            Person = Emu.Model.extend
+              name: Emu.field("string", {partial: true})
+            @person = Person.create(id: 5)               
+            @person.get("name")
+          it "should load the parent object", ->
+            expect(@defaultStore.loadModel).toHaveBeenCalledWith(@person)  
+        
+        describe "without default store", ->
+          beforeEach ->
+            Emu.set("defaultStore", undefined)  
+            Person = Emu.Model.extend
+              name: Emu.field("string", {partial: true})
+            person = Person.create(id: 5)               
+            @result = person.get("name")
+          it "should return undefined", ->
+            expect(@result).toBeUndefined()  
 
     describe "as a model property", ->
 
