@@ -7,12 +7,12 @@ describe "Emu.Model", ->
 
   describe "createRecord", ->
     beforeEach ->
-      Ember.set(Emu, "defaultStore", undefined)
-      @store = Emu.Store.create()
-      spyOn(@store, "createRecord")
-      @model = Person.createRecord()
-    it "should proxy the call to the store", ->
-      expect(@store.createRecord).toHaveBeenCalledWith(Person)
+        Ember.set(Emu, "defaultStore", undefined)
+        @store = Emu.Store.create()
+        spyOn(@store, "createRecord")
+        @model = Person.createRecord()
+      it "should proxy the call to the default store", ->
+        expect(@store.createRecord).toHaveBeenCalledWith(Person)
 
   describe "find", ->
     beforeEach ->
@@ -20,18 +20,34 @@ describe "Emu.Model", ->
       @store = Emu.Store.create()
       spyOn(@store, "find")
       @model = Person.find(5)
-    it "should proxy the call to the store", ->
+    it "should proxy the call to the default store", ->
       expect(@store.find).toHaveBeenCalledWith(Person, 5)
 
   describe "save", ->
-    beforeEach ->
-      Ember.set(Emu, "defaultStore", undefined)
-      @store = Emu.Store.create()
-      spyOn(@store, "save")
-      @model = Person.createRecord()
-      @model.save()
-    it "should proxy the call to the store", ->
-      expect(@store.save).toHaveBeenCalledWith(@model)
+    
+    describe "no store specified", ->
+      beforeEach ->
+        Ember.set(Emu, "defaultStore", undefined)
+        @store = Emu.Store.create()
+        spyOn(@store, "save")
+        @model = Person.createRecord()
+        @model.save()
+      it "should proxy the call to the store", ->
+        expect(@store.save).toHaveBeenCalledWith(@model)
+    
+    describe "passing a store", ->
+      beforeEach ->
+        Ember.set(Emu, "defaultStore", undefined)
+        @defaultStore = Emu.Store.create()
+        @newStore = Emu.Store.create()
+        spyOn(@defaultStore, "save")
+        spyOn(@newStore, "save")
+        @model = Person.create(store: @newStore)
+        @model.save()
+      it "should proxy the call to the specified store", ->
+        expect(@newStore.save).toHaveBeenCalledWith(@model)
+      it "should not proxy the call to the default store", ->
+        expect(@defaultStore.save).not.toHaveBeenCalled()
 
   describe "When modifying a property on a model", ->
     beforeEach ->
@@ -46,6 +62,6 @@ describe "Emu.Model", ->
         isDirty:false             
       @model.get("orders").pushObject(App.Order.create())
     it "should be in a dirty state", ->
-      expect(@model.get("isDirty")).toBeTruthy()      
+      expect(@model.get("isDirty")).toBeTruthy()            
 
   

@@ -2,7 +2,7 @@ describe "Emu.field", ->
   Person = Emu.Model.extend() 
   Order = Emu.Model.extend()
   
-  describe "When creating", ->
+  describe "When creating", ->  
     
     describe "as string", ->
       beforeEach ->
@@ -66,7 +66,7 @@ describe "Emu.field", ->
             @result = @model.get("name")
           it "should get the value", ->
             expect(@result).toEqual("barry")
-            
+
     describe "as collection", ->
 
       describe "with is set", ->
@@ -97,6 +97,7 @@ describe "Emu.field", ->
           expect(@store.loadAll).not.toHaveBeenCalled()
   
     describe "as lazy collection", ->
+
       describe "which is not set", ->
         beforeEach ->
           @store = Ember.Object.create
@@ -132,16 +133,29 @@ describe "Emu.field", ->
           @result = @model.get("orders")
   
     describe "as a partial property", ->
-      beforeEach ->
-        @store = Ember.Object.create
-          loadModel: ->   
-        Person = Emu.Model.extend
-          name: Emu.field("string", {partial: true})
-        @person = Person.create(id: 5, store: @store)     
-        spyOn(@store, "loadModel")
-        @person.get("name")
-      it "should load the parent object", ->
-        expect(@store.loadModel).toHaveBeenCalledWith(@person)  
+      describe "passing a store", ->
+        beforeEach ->
+          @store = Ember.Object.create
+            loadModel: ->   
+          Person = Emu.Model.extend
+            name: Emu.field("string", {partial: true})
+          @person = Person.create(id: 5, store: @store)     
+          spyOn(@store, "loadModel")
+          @person.get("name")
+        it "should load the parent object", ->
+          expect(@store.loadModel).toHaveBeenCalledWith(@person)  
+
+      describe "not passing a store", ->
+        beforeEach ->
+          Emu.set("defaultStore", undefined)
+          @defaultStore = Emu.Store.create()            
+          spyOn(@defaultStore, "loadModel")
+          Person = Emu.Model.extend
+            name: Emu.field("string", {partial: true})
+          @person = Person.create(id: 5)               
+          @person.get("name")
+        it "should load the parent object", ->
+          expect(@defaultStore.loadModel).toHaveBeenCalledWith(@person)  
 
     describe "as a model property", ->
 
