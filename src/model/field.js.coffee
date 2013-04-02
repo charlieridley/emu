@@ -28,5 +28,7 @@ Emu.field = (type, options)->
         @get("store").loadAll(getAttr(this, key))
       else if meta.options.partial 
         @get("store").loadModel(this)
+      else if meta.options.defaultValue and not getAttr(this, key)
+        setAttr(this, key, meta.options.defaultValue)
     getAttr(this, key)
   ).property().meta(meta)
