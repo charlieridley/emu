@@ -33,6 +33,18 @@
         }
       });
     },
+    findQuery: function(type, store, collection, queryHash) {
+      var _this = this;
+
+      return $.ajax({
+        url: this._getEndpointForModel(type) + this._serializer.serializeQueryHash(queryHash),
+        type: "GET",
+        success: function(jsonData) {
+          _this._serializer.deserializeCollection(collection, jsonData);
+          return store.didFindQuery(collection);
+        }
+      });
+    },
     insert: function(store, model) {
       var jsonData,
         _this = this;
@@ -83,10 +95,16 @@
       options = {};
     }
     meta = {
-      type: type,
+      type: function() {
+        return Ember.get(type) || type;
+      },
       options: options,
       isField: true,
-      isModel: type.isEmuModel
+      isModel: function() {
+        var _ref;
+
+        return (_ref = Ember.get(type)) != null ? _ref.isEmuModel : void 0;
+      }
     };
     getAttr = function(record, key) {
       var _ref;
@@ -115,7 +133,7 @@
       } else {
         if (!getAttr(this, key) && meta.options.collection) {
           collection = Emu.ModelCollection.create({
-            type: meta.type,
+            type: meta.type(),
             parent: this
           });
           collection.addObserver("content.@each", function() {
@@ -145,6 +163,9 @@
       var _ref;
 
       return (_ref = this._attributes) != null ? _ref[key] : void 0;
+    },
+    save: function() {
+      return Ember.get(Emu, "defaultStore").save(this);
     }
   });
 
@@ -195,10 +216,39 @@
   Emu.AttributeSerializers = {
     string: {
       serialize: function(value) {
-        return value;
+        if (Ember.isEmpty(value)) {
+          return null;
+        } else {
+          return value;
+        }
       },
       deserialize: function(value) {
-        return value;
+        if (Ember.isEmpty(value)) {
+          return null;
+        } else {
+          return value;
+        }
+      }
+    },
+    array: {
+      serialize: function(value) {
+        if (Em.typeOf(value) === 'array') {
+          return value;
+        } else {
+          return null;
+        }
+      },
+      deserialize: function(value) {
+        switch (Em.typeOf(value)) {
+          case "array":
+            return value;
+          case "string":
+            return value.split(',').map(function(item) {
+              return jQuery.trim(item);
+            });
+          default:
+            return null;
+        }
       }
     }
   };
@@ -245,26 +295,36 @@
         return _this.deserializeModel(model, item);
       });
     },
+    serializeQueryHash: function(queryHash) {
+      var key, queryString, value;
+
+      queryString = "?";
+      for (key in queryHash) {
+        value = queryHash[key];
+        queryString += key + "=" + value + "&";
+      }
+      return queryString.slice(0, queryString.length - 1);
+    },
     _deserializeProperty: function(model, property, value, meta) {
       var attributeSerializer, collection, modelProperty;
 
       if (meta.options.collection) {
         if (value) {
           collection = Emu.ModelCollection.create({
-            type: meta.type,
+            type: meta.type(),
             parent: model
           });
           this.deserializeCollection(collection, value);
           return model.set(property, collection);
         }
-      } else if (meta.isModel) {
+      } else if (meta.isModel()) {
         if (value) {
-          modelProperty = meta.type.create();
+          modelProperty = meta.type().create();
           this.deserializeModel(modelProperty, value);
           return model.set(property, modelProperty);
         }
       } else {
-        attributeSerializer = Emu.AttributeSerializers[meta.type];
+        attributeSerializer = Emu.AttributeSerializers[meta.type()];
         value = attributeSerializer.deserialize(value);
         if (value) {
           return model.set(property, value);
@@ -280,13 +340,13 @@
         return jsonData[property] = collection.map(function(item) {
           return _this.serializeModel(item);
         });
-      } else if (meta.isModel) {
+      } else if (meta.isModel()) {
         propertyValue = model.getValueOf(property);
         if (propertyValue) {
           return jsonData[property] = this.serializeModel(propertyValue);
         }
       } else {
-        attributeSerializer = Emu.AttributeSerializers[meta.type];
+        attributeSerializer = Emu.AttributeSerializers[meta.type()];
         return jsonData[property] = attributeSerializer.serialize(model.getValueOf(property));
       }
     }
@@ -304,6 +364,12 @@
       if (this.get("modelCollections") === void 0) {
         this.set("modelCollections", {});
       }
+      if (this.get("queryCollections") === void 0) {
+        this.set("queryCollections", {});
+      }
+      if (this.get("deferredQueries") === void 0) {
+        this.set("deferredQueries", {});
+      }
       return this._adapter = ((_ref = this.get("adapter")) != null ? _ref.create() : void 0) || Emu.RestAdapter.create();
     },
     createRecord: function(type) {
@@ -314,11 +380,17 @@
         isDirty: true
       });
     },
-    find: function(type, id) {
-      if (id) {
-        return this.findById(type, id);
-      } else {
+    find: function(type, param) {
+      if (!param) {
         return this.findAll(type);
+      } else if (Em.typeOf(param) === "string") {
+        return this.findById(type, param);
+      } else if (Em.typeOf(param) === "number") {
+        return this.findById(type, param);
+      } else if (Em.typeOf(param) === "object") {
+        return this.findQuery(type, param);
+      } else if (Em.typeOf(param) === "function") {
+        return this.findPredicate(type, param);
       }
     },
     findAll: function(type) {
@@ -343,12 +415,24 @@
         return this._adapter.insert(this, model);
       }
     },
-    didFindAll: function(collection, options) {
-      collection.set("isLoaded", true);
-      collection.set("isLoading", false);
-      return collection.get("content").forEach(function(item) {
-        return item.set("isLoaded", options != null ? options.fullyLoad : void 0);
-      });
+    didFindAll: function(collection) {
+      var deferredQueries;
+
+      this._didCollectionLoad(collection);
+      deferredQueries = this.get("deferredQueries")[collection.type];
+      if (deferredQueries) {
+        return deferredQueries.forEach(function(deferredQuery) {
+          var queryResult;
+
+          queryResult = collection.filter(deferredQuery.predicate);
+          return queryResult.forEach(function(item) {
+            return deferredQuery.results.pushObject(item);
+          });
+        });
+      }
+    },
+    didFindQuery: function(collection) {
+      return this._didCollectionLoad(collection);
     },
     findById: function(type, id) {
       var collection, model;
@@ -375,8 +459,55 @@
       model.set("isLoading", false);
       return model.set("isLoaded", true);
     },
+    findQuery: function(type, queryHash) {
+      var collection;
+
+      collection = this._getCollectionForQuery(type, queryHash);
+      if (!collection.get("isLoading")) {
+        collection.set("isLoading", true);
+        this._adapter.findQuery(type, this, collection, queryHash);
+      }
+      return collection;
+    },
+    findPredicate: function(type, predicate) {
+      var allModels, queries, results;
+
+      allModels = this.findAll(type);
+      results = Emu.ModelCollection.create({
+        type: type,
+        store: this
+      });
+      if (allModels.get("isLoaded")) {
+        allModels.forEach(function(model) {
+          if (predicate(model)) {
+            return results.pushObject(model);
+          }
+        });
+      } else {
+        queries = this.get("deferredQueries")[type] || (this.get("deferredQueries")[type] = []);
+        queries.pushObject({
+          predicate: predicate,
+          results: results
+        });
+      }
+      return results;
+    },
+    _didCollectionLoad: function(collection) {
+      collection.set("isLoaded", true);
+      return collection.set("isLoading", false);
+    },
     _getCollectionForType: function(type) {
       return this.get("modelCollections")[type] || (this.get("modelCollections")[type] = Emu.ModelCollection.create({
+        type: type,
+        store: this
+      }));
+    },
+    _getCollectionForQuery: function(type, queryHash) {
+      var key, queries;
+
+      key = JSON.stringify(queryHash);
+      queries = this.get("queryCollections")[type] || (this.get("queryCollections")[type] = {});
+      return this.get("queryCollections")[type][key] || (this.get("queryCollections")[type][key] = Emu.ModelCollection.create({
         type: type,
         store: this
       }));
