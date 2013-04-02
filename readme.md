@@ -1,6 +1,10 @@
 #Emu [![Build Status](https://secure.travis-ci.org/charlieridley/emu.png?branch=master)](https://travis-ci.org/charlieridley/emu)
 
-Emu is a simple data access framework for [Ember.js](http://www.emberjs.com).
+Emu is a simple data access library for [Ember.js](http://www.emberjs.com).
+
+#### Just so you know
+
+I'm still working on Emu and it's a bit rough around the edges at the moment. It might not work perfik.
 
 To Start
 --------
