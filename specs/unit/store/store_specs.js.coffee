@@ -40,18 +40,7 @@ describe "Emu.Store", ->
       it "should set isLoading on the models to true" , ->
         expect(@result.get("isLoading")).toBeTruthy()
       it "should return the model collection", ->
-        expect(@result).toEqual(@models)
-
-    describe "finish loading", ->
-      beforeEach ->
-        @models = Emu.ModelCollection.create(isLoading: true)     
-        @store = Emu.Store.create
-          adapter: Adapter
-        @store.didFindAll(@models)      
-      it "should set isLoading true on the model collection", ->
-        expect(@models.get("isLoading")).toBeFalsy()
-      it "should set isLoaded false on the model collection", ->
-        expect(@models.get("isLoaded")).toBeTruthy()    
+        expect(@result).toEqual(@models)    
 
     describe "second query executes", ->
       beforeEach ->
@@ -80,6 +69,17 @@ describe "Emu.Store", ->
       it "should return the model collection", ->
         expect(@result).toEqual(@models)
 
+  describe "didFindAll", ->
+    beforeEach ->
+      @models = Emu.ModelCollection.create(isLoading: true)     
+      @store = Emu.Store.create
+        adapter: Adapter
+      @store.didFindAll(@models)      
+    it "should set isLoading true on the model collection", ->
+      expect(@models.get("isLoading")).toBeFalsy()
+    it "should set isLoaded false on the model collection", ->
+      expect(@models.get("isLoaded")).toBeTruthy()    
+
   describe "findById", ->
 
     describe "starts loading", ->
@@ -100,18 +100,6 @@ describe "Emu.Store", ->
         expect(adapter.findById).toHaveBeenCalledWith(Person, @store, @model, 5)
       it "should return the model", ->
         expect(@result).toEqual(@model)
-
-    describe "finishes loading", ->
-      beforeEach ->
-        @model = Person.create(isLoaded: false, isLoading: true)
-        spyOn(Person, "create").andReturn(@model)
-        @store = Emu.Store.create
-          adapter: Adapter
-        @store.didFindById(@model)
-      it "should set isLoading to false", ->
-        expect(@model.get("isLoading")).toBeFalsy()
-      it "should set isLoaded to true", ->
-        expect(@model.get("isLoaded")).toBeTruthy()
 
     describe "query already pending", ->
       beforeEach ->
@@ -140,6 +128,18 @@ describe "Emu.Store", ->
         expect(@result).toBe(@loadedModel)
       it "should not call the findById method", ->
         expect(adapter.findById).not.toHaveBeenCalled()
+
+  describe "didFindById", ->
+    beforeEach ->
+      @model = Person.create(isLoaded: false, isLoading: true)
+      spyOn(Person, "create").andReturn(@model)
+      @store = Emu.Store.create
+        adapter: Adapter
+      @store.didFindById(@model)
+    it "should set isLoading to false", ->
+      expect(@model.get("isLoading")).toBeFalsy()
+    it "should set isLoaded to true", ->
+      expect(@model.get("isLoaded")).toBeTruthy()
 
   describe "createRecord", ->
     beforeEach ->
@@ -177,6 +177,20 @@ describe "Emu.Store", ->
         @store.save(@model)
       it "should call update on the adapter", ->
         expect(adapter.update).toHaveBeenCalledWith(@store, @model)
+  
+  describe "didSave", ->
+    beforeEach ->
+      @store = Emu.Store.create   
+        adapter: Adapter
+      @model = @store.createRecord(Person)
+      @model.set("isLoading", true)
+      @store.didSave(@model)
+    it "should not be dirty", ->
+      expect(@model.get("isDirty")).toBeFalsy()
+    it "should be loaded", ->
+      expect(@model.get("isLoaded")).toBeTruthy()
+    it "should not be loading", ->
+      expect(@model.get("isLoading")).toBeFalsy()
 
   describe "loadAll", ->
     beforeEach ->
@@ -215,6 +229,7 @@ describe "Emu.Store", ->
         expect(adapter.findById).not.toHaveBeenCalled()
 
   describe "findQuery", ->
+    
     describe "starts loading", ->
       beforeEach ->     
         @models = Emu.ModelCollection.create(type: Person)
@@ -323,7 +338,7 @@ describe "Emu.Store", ->
         expect(@result.get("length")).toEqual(1)
 
   describe "find", ->
-    
+
     describe "with ID", ->
       beforeEach ->
         @store = Emu.Store.create()

@@ -1,6 +1,7 @@
 Emu.RestAdapter = Ember.Object.extend
   init: ->
     @_serializer = @get("serializer")?.create() or Emu.Serializer.create()
+
   findAll: (type, store, collection) -> 
     url = if collection.get("parent") then @_getEndpointNestedSubCollection(collection) else @_getEndpointForModel(type)
     $.ajax
@@ -8,12 +9,14 @@ Emu.RestAdapter = Ember.Object.extend
       type: "GET"
       success: (jsonData) =>
         @_didFindAll(store, collection, jsonData)
+
   findById: (type, store, model, id) ->
     $.ajax
       url: @_getEndpointForModel(type) + "/" + id
       type: "GET"
       success: (jsonData) =>
         @_didFindById(store, model, jsonData)
+
   findQuery: (type, store, collection, queryHash) ->
     $.ajax
       url: @_getEndpointForModel(type) + @_serializer.serializeQueryHash(queryHash)
@@ -21,8 +24,10 @@ Emu.RestAdapter = Ember.Object.extend
       success: (jsonData) =>
         @_serializer.deserializeCollection(collection, jsonData)
         store.didFindQuery(collection)
+
   insert: (store, model) ->
     @_save(store, model, "POST") 
+    
   update: (store, model) ->   
     @_save(store, model, "PUT") 
   _save: (store, model, requestType) ->
