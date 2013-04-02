@@ -10,7 +10,7 @@ describe "Emu.Serializer", ->
       expect(@result).toEqual("person")
 
   describe "deserializeModel", ->
-    
+
     describe "simple fields only", ->
       beforeEach -> 
         spyOn(Emu.AttributeSerializers.string, "deserialize").andReturn("WINSTON CHURCHILL")      
@@ -124,27 +124,41 @@ describe "Emu.Serializer", ->
           age: "47"
 
     describe "nested collection", ->
-      Customer = Emu.Model.extend
-        name: Emu.field("string")
-        orders: Emu.field("App.Order", {collection: true})            
-      beforeEach ->
-        @customer = Customer.create
-          name: "Terry the customer"        
-          orders: Emu.ModelCollection.create(type: App.Order)
-        @customer.get("orders").pushObject(App.Order.create(orderCode: "123"))
-        @customer.get("orders").pushObject(App.Order.create(orderCode: "456"))
-        spyOn(@customer, "getValueOf").andCallThrough()
-        @serializer = Emu.Serializer.create()
-        @jsonResult = @serializer.serializeModel(@customer)
-      it "should deserialize the object to json", ->
-        expect(@jsonResult).toEqual
-          name: "Terry the customer"        
-          orders: [
-            {orderCode: "123"}
-            {orderCode: "456"}
-          ] 
-      it "should have called the getValueOf for the property, to stop it lazy loading", ->
-        expect(@customer.getValueOf).toHaveBeenCalledWith("orders")
+      describe "not null value", ->
+        Customer = Emu.Model.extend
+          name: Emu.field("string")
+          orders: Emu.field("App.Order", {collection: true})            
+        beforeEach ->
+          @customer = Customer.create
+            name: "Terry the customer"        
+            orders: Emu.ModelCollection.create(type: App.Order)
+          @customer.get("orders").pushObject(App.Order.create(orderCode: "123"))
+          @customer.get("orders").pushObject(App.Order.create(orderCode: "456"))
+          spyOn(@customer, "getValueOf").andCallThrough()
+          @serializer = Emu.Serializer.create()
+          @jsonResult = @serializer.serializeModel(@customer)
+        it "should deserialize the object to json", ->
+          expect(@jsonResult).toEqual
+            name: "Terry the customer"        
+            orders: [
+              {orderCode: "123"}
+              {orderCode: "456"}
+            ] 
+        it "should have called the getValueOf for the property, to stop it lazy loading", ->
+          expect(@customer.getValueOf).toHaveBeenCalledWith("orders")
+      
+      describe "null value", ->
+        Customer = Emu.Model.extend
+          name: Emu.field("string")
+          orders: Emu.field("App.Order", {collection: true})            
+        beforeEach ->
+          @customer = Customer.create
+            name: "Terry the customer"                    
+          @serializer = Emu.Serializer.create()
+          @jsonResult = @serializer.serializeModel(@customer)
+        it "should deserialize the object to json without the collection value", ->
+          expect(@jsonResult).toEqual
+            name: "Terry the customer"            
 
     describe "computed property", ->
       Customer = Emu.Model.extend
