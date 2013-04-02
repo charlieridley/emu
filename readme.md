@@ -71,3 +71,14 @@ var company = App.Company.createRecord()
 App.store.save(company);
 	//POST request to:	http://www.mysite.com/company/1
 ```
+
+Default values
+--------------------
+```javascript
+App.Foo = Emu.Model.extend({
+	bar: Emu.field("string", {defaultValue: "moo"})
+});
+
+var foo = App.Foo.createRecord()
+foo.get("bar") // -> moo
+```
