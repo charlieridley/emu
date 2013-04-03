@@ -12,15 +12,15 @@ Emu.Store = Ember.Object.extend
     collection.createRecord(isDirty: true)
   
   find: (type, param) -> 
-    if not param 
-      return @findAll(type)
-    else if Em.typeOf(param) == "string" 
-      return @findById(type, param)
-    else if Em.typeOf(param) == "number" 
-      return @findById(type, param)
-    else if Em.typeOf(param) == "object"
+    return @findAll(type) unless param 
+    typeOf = Em.typeOf(param)
+    if typeOf == "string" 
+      @findById(type, param)
+    else if typeOf == "number" 
+      @findById(type, param)
+    else if typeOf == "object"
       @findQuery(type, param)
-    else if Em.typeOf(param) == "function"
+    else if typeOf == "function"
       @findPredicate(type, param)
   
   findAll: (type) ->
