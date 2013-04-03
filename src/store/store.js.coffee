@@ -2,9 +2,9 @@ Emu.Store = Ember.Object.extend
   init: ->    
     if not Ember.get(Emu, "defaultStore")
       Ember.set(Emu, "defaultStore", this)
-    @set("modelCollections", {}) if @get("modelCollections") == undefined
-    @set("queryCollections", {}) if @get("queryCollections") == undefined
-    @set("deferredQueries", {}) if @get("deferredQueries") == undefined
+    @set("modelCollections", {}) unless @get("modelCollections") 
+    @set("queryCollections", {}) unless @get("queryCollections")
+    @set("deferredQueries", {})  unless @get("deferredQueries")
     @_adapter = @get("adapter")?.create() || Emu.RestAdapter.create()
   
   createRecord: (type) ->
@@ -12,16 +12,11 @@ Emu.Store = Ember.Object.extend
     collection.createRecord(isDirty: true)
   
   find: (type, param) -> 
-    if not param 
-      return @findAll(type)
-    else if Em.typeOf(param) == "string" 
-      return @findById(type, param)
-    else if Em.typeOf(param) == "number" 
-      return @findById(type, param)
-    else if Em.typeOf(param) == "object"
-      @findQuery(type, param)
-    else if Em.typeOf(param) == "function"
-      @findPredicate(type, param)
+    return @findAll(type) unless param 
+    switch Em.typeOf(param)
+      when 'string', 'number' then @findById(type, param)
+      when 'object'           then @findQuery(type, param)
+      when 'function'         then @findPredicate(type, param)
   
   findAll: (type) ->
     collection = @_getCollectionForType(type)
