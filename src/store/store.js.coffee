@@ -66,7 +66,7 @@ Emu.Store = Ember.Object.extend
         if predicate(model)
           results.pushObject(model)
     else
-      queries = @get("deferredQueries")[type] || @get("deferredQueries")[type] = []
+      queries = @get("deferredQueries")[type] or @get("deferredQueries")[type] = []
       queries.pushObject(predicate: predicate, results: results)
     results
 
