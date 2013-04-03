@@ -2,9 +2,9 @@ Emu.Store = Ember.Object.extend
   init: ->    
     if not Ember.get(Emu, "defaultStore")
       Ember.set(Emu, "defaultStore", this)
-    @set("modelCollections", {}) if @get("modelCollections") == undefined
-    @set("queryCollections", {}) if @get("queryCollections") == undefined
-    @set("deferredQueries", {}) if @get("deferredQueries") == undefined
+    @set("modelCollections", {}) unless @get("modelCollections") 
+    @set("queryCollections", {}) unless @get("queryCollections")
+    @set("deferredQueries", {})  unless @get("deferredQueries")
     @_adapter = @get("adapter")?.create() || Emu.RestAdapter.create()
   
   createRecord: (type) ->
