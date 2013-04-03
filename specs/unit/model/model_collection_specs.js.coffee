@@ -3,8 +3,10 @@ describe "Emu.ModelCollection", ->
   
   describe "createRecord", ->
     beforeEach ->   
+      @store = Ember.Object.create()
       @modelCollection = Emu.ModelCollection.create
         type: Person
+        store: @store
       @model = Person.create()
       spyOn(Person, "create").andReturn(@model)
       @result = @modelCollection.createRecord(id: 1)
@@ -15,3 +17,5 @@ describe "Emu.ModelCollection", ->
       expect(@modelCollection.get("firstObject")).toBe(@model)
     it "should set the properties on the new object", ->
       expect(Person.create).toHaveBeenCalledWith(id: 1)
+    it "should pass the store to the child model", ->
+      expect(@result.get("store")).toBe(@store)
