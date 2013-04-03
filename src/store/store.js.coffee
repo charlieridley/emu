@@ -42,6 +42,7 @@ Emu.Store = Ember.Object.extend
   didFindById: (model) ->
     model.set("isLoading", false)
     model.set("isLoaded", true)
+    model.set("isDirty", false)
 
   findQuery: (type, queryHash) ->
     collection = @_getCollectionForQuery(type, queryHash)
