@@ -1,6 +1,6 @@
 describe "Find by ID tests", -> 
   
-  describe "When finding by ID", ->
+  describe "start request", ->
     beforeEach ->
       TestSetup.setup() 
       spyOn($, "ajax")
@@ -10,7 +10,7 @@ describe "Find by ID tests", ->
     it "should make a request to the person URL with the correct ID", ->
       expect($.ajax.mostRecentCall.args[0].url).toEqual("api/person/5")   
   
-  describe "When finding by ID completes", ->
+  describe "request completes", ->
     beforeEach ->
       TestSetup.setup() 
       spyOn($, "ajax")
@@ -19,8 +19,10 @@ describe "Find by ID tests", ->
         name: "Harry"
     it "should deserialize the simple field", ->
       expect(@result.get("name")).toEqual("Harry")
+    it "should not be dirty", ->
+      expect(@result.get("isDirty")).toBeFalsy()
   
-  describe "When finding by ID on a model with a lazy property", ->
+  describe "has lazy property", ->
     beforeEach ->
       TestSetup.setup() 
       spyOn($, "ajax")

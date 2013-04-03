@@ -131,7 +131,7 @@ describe "Emu.Store", ->
 
   describe "didFindById", ->
     beforeEach ->
-      @model = Person.create(isLoaded: false, isLoading: true)
+      @model = Person.create(isLoaded: false, isLoading: true, isDirty: true)
       spyOn(Person, "create").andReturn(@model)
       @store = Emu.Store.create
         adapter: Adapter
@@ -140,6 +140,8 @@ describe "Emu.Store", ->
       expect(@model.get("isLoading")).toBeFalsy()
     it "should set isLoaded to true", ->
       expect(@model.get("isLoaded")).toBeTruthy()
+    it "should have isDirty set to false", ->
+      expect(@model.get("isDirty")).toBeFalsy()
 
   describe "createRecord", ->
     beforeEach ->
