@@ -46,6 +46,12 @@
       });
     },
     insert: function(store, model) {
+      return this._save(store, model, "POST");
+    },
+    update: function(store, model) {
+      return this._save(store, model, "PUT");
+    },
+    _save: function(store, model, requestType) {
       var jsonData,
         _this = this;
 
@@ -53,7 +59,7 @@
       return $.ajax({
         url: this._getEndpointForModel(model.constructor),
         data: jsonData,
-        type: "POST",
+        type: requestType,
         success: function(jsonData) {
           return _this._didSave(store, model, jsonData);
         }
@@ -123,7 +129,7 @@
       return record._attributes[key] = value;
     };
     return Ember.computed(function(key, value, oldValue) {
-      var collection,
+      var collection, _ref, _ref1,
         _this = this;
 
       meta = this.constructor.metaForProperty(key);
@@ -142,9 +148,15 @@
           setAttr(this, key, collection);
         }
         if (meta.options.lazy) {
-          this.get("store").loadAll(getAttr(this, key));
+          if ((_ref = this.get("store")) != null) {
+            _ref.loadAll(getAttr(this, key));
+          }
         } else if (meta.options.partial) {
-          this.get("store").loadModel(this);
+          if ((_ref1 = this.get("store")) != null) {
+            _ref1.loadModel(this);
+          }
+        } else if (meta.options.defaultValue && !getAttr(this, key)) {
+          setAttr(this, key, meta.options.defaultValue);
         }
       }
       return getAttr(this, key);
@@ -165,7 +177,7 @@
       return (_ref = this._attributes) != null ? _ref[key] : void 0;
     },
     save: function() {
-      return Ember.get(Emu, "defaultStore").save(this);
+      return this.get("store").save(this);
     }
   });
 
@@ -336,10 +348,11 @@
         _this = this;
 
       if (meta.options.collection) {
-        collection = model.getValueOf(property);
-        return jsonData[property] = collection.map(function(item) {
-          return _this.serializeModel(item);
-        });
+        if (collection = model.getValueOf(property)) {
+          return jsonData[property] = collection.map(function(item) {
+            return _this.serializeModel(item);
+          });
+        }
       } else if (meta.isModel()) {
         propertyValue = model.getValueOf(property);
         if (propertyValue) {
@@ -400,21 +413,6 @@
       this.loadAll(collection);
       return collection;
     },
-    loadAll: function(collection) {
-      if (collection.get("isLoading") || collection.get("isLoaded")) {
-        return collection;
-      }
-      collection.set("isLoading", true);
-      this._adapter.findAll(collection.get("type"), this, collection);
-      return collection;
-    },
-    save: function(model) {
-      if (model.get("id")) {
-        return this._adapter.update(this, model);
-      } else {
-        return this._adapter.insert(this, model);
-      }
-    },
     didFindAll: function(collection) {
       var deferredQueries;
 
@@ -431,9 +429,6 @@
         });
       }
     },
-    didFindQuery: function(collection) {
-      return this._didCollectionLoad(collection);
-    },
     findById: function(type, id) {
       var collection, model;
 
@@ -448,13 +443,6 @@
       }
       return this.loadModel(model);
     },
-    loadModel: function(model) {
-      if (!model.get("isLoading") && !model.get("isLoaded")) {
-        model.set("isLoading", true);
-        this._adapter.findById(model.constructor, this, model, model.get("id"));
-      }
-      return model;
-    },
     didFindById: function(model) {
       model.set("isLoading", false);
       return model.set("isLoaded", true);
@@ -468,6 +456,9 @@
         this._adapter.findQuery(type, this, collection, queryHash);
       }
       return collection;
+    },
+    didFindQuery: function(collection) {
+      return this._didCollectionLoad(collection);
     },
     findPredicate: function(type, predicate) {
       var allModels, queries, results;
@@ -491,6 +482,33 @@
         });
       }
       return results;
+    },
+    save: function(model) {
+      if (model.get("id")) {
+        return this._adapter.update(this, model);
+      } else {
+        return this._adapter.insert(this, model);
+      }
+    },
+    didSave: function(model) {
+      model.set("isDirty", false);
+      model.set("isLoaded", true);
+      return model.set("isLoading", false);
+    },
+    loadAll: function(collection) {
+      if (collection.get("isLoading") || collection.get("isLoaded")) {
+        return collection;
+      }
+      collection.set("isLoading", true);
+      this._adapter.findAll(collection.get("type"), this, collection);
+      return collection;
+    },
+    loadModel: function(model) {
+      if (!model.get("isLoading") && !model.get("isLoaded")) {
+        model.set("isLoading", true);
+        this._adapter.findById(model.constructor, this, model, model.get("id"));
+      }
+      return model;
     },
     _didCollectionLoad: function(collection) {
       collection.set("isLoaded", true);
