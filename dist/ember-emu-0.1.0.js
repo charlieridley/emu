@@ -268,11 +268,17 @@
 }).call(this);
 (function() {
   Emu.Serializer = Ember.Object.extend({
+    serializeKey: function(key) {
+      return key[0].toLowerCase() + key.slice(1);
+    },
+    deserializeKey: function(key) {
+      return key;
+    },
     serializeTypeName: function(type) {
       var parts;
 
       parts = type.toString().split(".");
-      return parts[parts.length - 1].toLowerCase();
+      return this.serializeKey(parts[parts.length - 1]);
     },
     serializeModel: function(model) {
       var jsonData,
@@ -293,7 +299,10 @@
         model.set("id", jsonData.id);
       }
       model.constructor.eachEmuField(function(property, meta) {
-        return _this._deserializeProperty(model, property, jsonData[property], meta);
+        var serializedProperty;
+
+        serializedProperty = _this.serializeKey(property);
+        return _this._deserializeProperty(model, property, jsonData[serializedProperty], meta);
       });
       return model;
     },
@@ -313,7 +322,7 @@
       queryString = "?";
       for (key in queryHash) {
         value = queryHash[key];
-        queryString += key + "=" + value + "&";
+        queryString += this.serializeKey(key) + "=" + value + "&";
       }
       return queryString.slice(0, queryString.length - 1);
     },
@@ -344,24 +353,40 @@
       }
     },
     _serializeProperty: function(model, jsonData, property, meta) {
-      var attributeSerializer, collection, propertyValue,
+      var attributeSerializer, collection, propertyValue, serializedKey,
         _this = this;
 
+      serializedKey = this.serializeKey(property);
       if (meta.options.collection) {
         if (collection = model.getValueOf(property)) {
-          return jsonData[property] = collection.map(function(item) {
+          return jsonData[serializedKey] = collection.map(function(item) {
             return _this.serializeModel(item);
           });
         }
       } else if (meta.isModel()) {
         propertyValue = model.getValueOf(property);
         if (propertyValue) {
-          return jsonData[property] = this.serializeModel(propertyValue);
+          return jsonData[serializedKey] = this.serializeModel(propertyValue);
         }
       } else {
         attributeSerializer = Emu.AttributeSerializers[meta.type()];
-        return jsonData[property] = attributeSerializer.serialize(model.getValueOf(property));
+        return jsonData[serializedKey] = attributeSerializer.serialize(model.getValueOf(property));
       }
+    }
+  });
+
+}).call(this);
+(function() {
+  Emu.UnderscoreSerializer = Emu.Serializer.extend({
+    serializeKey: function(key) {
+      return this._super(key).replace(/([A-Z])/g, function(x) {
+        return "_" + x.toLowerCase();
+      });
+    },
+    deserializeKey: function(key) {
+      return key.replace(/(\_[a-z])/g, function(x) {
+        return x.toUpperCase().replace('_', '');
+      });
     }
   });
 
