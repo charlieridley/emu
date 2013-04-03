@@ -95,7 +95,7 @@
 }).call(this);
 (function() {
   Emu.field = function(type, options) {
-    var getAttr, meta, setAttr;
+    var meta;
 
     if (options == null) {
       options = {};
@@ -112,54 +112,27 @@
         return (_ref = Ember.get(type)) != null ? _ref.isEmuModel : void 0;
       }
     };
-    getAttr = function(record, key) {
-      var _ref;
-
-      if ((_ref = record._attributes) == null) {
-        record._attributes = {};
-      }
-      return record._attributes[key];
-    };
-    setAttr = function(record, key, value) {
-      var _ref;
-
-      if ((_ref = record._attributes) == null) {
-        record._attributes = {};
-      }
-      return record._attributes[key] = value;
-    };
     return Ember.computed(function(key, value, oldValue) {
-      var collection, _ref, _ref1,
-        _this = this;
+      var _ref, _ref1;
 
       meta = this.constructor.metaForProperty(key);
       if (arguments.length > 1) {
-        setAttr(this, key, value);
+        Emu.Model.setAttr(this, key, value);
         this.set("isDirty", true);
       } else {
-        if (!getAttr(this, key) && meta.options.collection) {
-          collection = Emu.ModelCollection.create({
-            type: meta.type(),
-            parent: this
-          });
-          collection.addObserver("content.@each", function() {
-            return _this.set("isDirty", true);
-          });
-          setAttr(this, key, collection);
-        }
         if (meta.options.lazy) {
           if ((_ref = this.get("store")) != null) {
-            _ref.loadAll(getAttr(this, key));
+            _ref.loadAll(Emu.Model.getAttr(this, key));
           }
         } else if (meta.options.partial) {
           if ((_ref1 = this.get("store")) != null) {
             _ref1.loadModel(this);
           }
-        } else if (meta.options.defaultValue && !getAttr(this, key)) {
-          setAttr(this, key, meta.options.defaultValue);
+        } else if (meta.options.defaultValue && !Emu.Model.getAttr(this, key)) {
+          Emu.Model.setAttr(this, key, meta.options.defaultValue);
         }
       }
-      return getAttr(this, key);
+      return Emu.Model.getAttr(this, key);
     }).property().meta(meta);
   };
 
@@ -170,11 +143,6 @@
       if (!this.get("store")) {
         return this.set("store", Ember.get(Emu, "defaultStore"));
       }
-    },
-    getValueOf: function(key) {
-      var _ref;
-
-      return (_ref = this._attributes) != null ? _ref[key] : void 0;
     },
     save: function() {
       return this.get("store").save(this);
@@ -203,6 +171,32 @@
           return callback(property, meta);
         }
       });
+    },
+    getAttr: function(record, key) {
+      var meta, _ref;
+
+      meta = record.constructor.metaForProperty(key);
+      if ((_ref = record._attributes) == null) {
+        record._attributes = {};
+      }
+      if (meta.options.collection && !record._attributes[key]) {
+        record._attributes[key] = Emu.ModelCollection.create({
+          parent: record,
+          type: meta.type()
+        });
+        record._attributes[key].addObserver("content.@each", function() {
+          return record.set("isDirty", true);
+        });
+      }
+      return record._attributes[key];
+    },
+    setAttr: function(record, key, value) {
+      var _ref;
+
+      if ((_ref = record._attributes) == null) {
+        record._attributes = {};
+      }
+      return record._attributes[key] = value;
     }
   });
 
@@ -327,16 +321,11 @@
       return queryString.slice(0, queryString.length - 1);
     },
     _deserializeProperty: function(model, property, value, meta) {
-      var attributeSerializer, collection, modelProperty;
+      var attributeSerializer, modelProperty;
 
       if (meta.options.collection) {
         if (value) {
-          collection = Emu.ModelCollection.create({
-            type: meta.type(),
-            parent: model
-          });
-          this.deserializeCollection(collection, value);
-          return model.set(property, collection);
+          return this.deserializeCollection(Emu.Model.getAttr(model, property), value);
         }
       } else if (meta.isModel()) {
         if (value) {
@@ -358,19 +347,19 @@
 
       serializedKey = this.serializeKey(property);
       if (meta.options.collection) {
-        if (collection = model.getValueOf(property)) {
-          return jsonData[serializedKey] = collection.map(function(item) {
+        if (collection = Emu.Model.getAttr(model, property)) {
+          return jsonData[serializedKey] = collection.get("length") > 0 ? collection.map(function(item) {
             return _this.serializeModel(item);
-          });
+          }) : void 0;
         }
       } else if (meta.isModel()) {
-        propertyValue = model.getValueOf(property);
+        propertyValue = Emu.Model.getAttr(model, property);
         if (propertyValue) {
           return jsonData[serializedKey] = this.serializeModel(propertyValue);
         }
       } else {
         attributeSerializer = Emu.AttributeSerializers[meta.type()];
-        return jsonData[serializedKey] = attributeSerializer.serialize(model.getValueOf(property));
+        return jsonData[serializedKey] = attributeSerializer.serialize(Emu.Model.getAttr(model, property));
       }
     }
   });
@@ -399,13 +388,13 @@
       if (!Ember.get(Emu, "defaultStore")) {
         Ember.set(Emu, "defaultStore", this);
       }
-      if (this.get("modelCollections") === void 0) {
+      if (!this.get("modelCollections")) {
         this.set("modelCollections", {});
       }
-      if (this.get("queryCollections") === void 0) {
+      if (!this.get("queryCollections")) {
         this.set("queryCollections", {});
       }
-      if (this.get("deferredQueries") === void 0) {
+      if (!this.get("deferredQueries")) {
         this.set("deferredQueries", {});
       }
       return this._adapter = ((_ref = this.get("adapter")) != null ? _ref.create() : void 0) || Emu.RestAdapter.create();
@@ -421,14 +410,15 @@
     find: function(type, param) {
       if (!param) {
         return this.findAll(type);
-      } else if (Em.typeOf(param) === "string") {
-        return this.findById(type, param);
-      } else if (Em.typeOf(param) === "number") {
-        return this.findById(type, param);
-      } else if (Em.typeOf(param) === "object") {
-        return this.findQuery(type, param);
-      } else if (Em.typeOf(param) === "function") {
-        return this.findPredicate(type, param);
+      }
+      switch (Em.typeOf(param)) {
+        case 'string':
+        case 'number':
+          return this.findById(type, param);
+        case 'object':
+          return this.findQuery(type, param);
+        case 'function':
+          return this.findPredicate(type, param);
       }
     },
     findAll: function(type) {
