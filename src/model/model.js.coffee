@@ -1,10 +1,9 @@
 Emu.Model = Ember.Object.extend 
   init: ->
-    if not @get("store")
-      @set("store", Ember.get(Emu, "defaultStore"))
-  
-  save: () -> 
-    @get("store").save(this)
+    unless @get("store")
+      @set("store", Ember.get(Emu, "defaultStore"))      
+
+  save: -> @get("store").save(this)
 
 Emu.proxyToStore = (methodName) ->
   ->

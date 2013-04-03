@@ -1,7 +1,11 @@
 Emu.Serializer = Ember.Object.extend
+  serializeKey: (key) -> key[0].toLowerCase() + key.slice(1);
+
+  deserializeKey: (key) -> key
+
   serializeTypeName: (type) ->
     parts = type.toString().split(".")
-    parts[parts.length - 1].toLowerCase()
+    @serializeKey(parts[parts.length - 1])
   
   serializeModel: (model) ->
     jsonData = 
@@ -13,7 +17,8 @@ Emu.Serializer = Ember.Object.extend
   deserializeModel: (model, jsonData) ->
     model.set("id", jsonData.id) if jsonData.id
     model.constructor.eachEmuField (property, meta) =>
-      @_deserializeProperty(model, property, jsonData[property], meta)  
+      serializedProperty = @serializeKey(property)
+      @_deserializeProperty(model, property, jsonData[serializedProperty], meta)  
     model
   
   deserializeCollection: (collection, jsonData) ->
@@ -24,7 +29,7 @@ Emu.Serializer = Ember.Object.extend
   serializeQueryHash: (queryHash) ->
     queryString = "?"
     for key, value of queryHash
-      queryString += key + "=" + value + "&"
+      queryString += @serializeKey(key) + "=" + value + "&"
     queryString.slice(0, queryString.length - 1)
   
   _deserializeProperty: (model, property, value, meta) ->   
@@ -41,12 +46,13 @@ Emu.Serializer = Ember.Object.extend
       model.set(property, value) if value
   
   _serializeProperty: (model, jsonData, property, meta) ->    
+    serializedKey = @serializeKey(property)
     if meta.options.collection
       if collection = Emu.Model.getAttr(model, property)
-        jsonData[property] = if collection.get("length") > 0 then collection.map (item) => @serializeModel(item)
+        jsonData[serializedKey] = if collection.get("length") > 0 then collection.map (item) => @serializeModel(item)
     else if meta.isModel()
       propertyValue = Emu.Model.getAttr(model, property)
-      jsonData[property] = @serializeModel(propertyValue) if propertyValue
+      jsonData[serializedKey] = @serializeModel(propertyValue) if propertyValue
     else
       attributeSerializer = Emu.AttributeSerializers[meta.type()]
-      jsonData[property] = attributeSerializer.serialize(Emu.Model.getAttr(model, property))
+      jsonData[serializedKey] = attributeSerializer.serialize(Emu.Model.getAttr(model, property))
