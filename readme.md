@@ -100,7 +100,7 @@ will serialize to
 However, if your backend prefers underscore seperated property names then you can easly switch the serializer when defining your store:
 
 ```javascript
-App.Store.extend({
+App.Store = Emu.Store.extend({
 	adapter: Emu.RestAdapter.extend({
 		serializer: Emu.UnderscoreSerializer.extend()
 	})
