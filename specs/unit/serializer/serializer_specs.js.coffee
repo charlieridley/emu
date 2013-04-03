@@ -82,22 +82,53 @@ describe "Emu.Serializer", ->
         expect(@model.get("order")).toBeFalsy()
 
   describe "deserializeCollection", ->
-    beforeEach ->
-      jsonData = [
-        {name: "Donald Duck"}
-        {name: "Micky Mouse"}
-      ]
-      @modelCollection = Emu.ModelCollection.create(type: Person)
-      @serializer = Emu.Serializer.create()
-      spyOn(@serializer, "deserializeModel").andCallThrough()
-      spyOn(@modelCollection, "createRecord").andCallThrough()
-      @serializer.deserializeCollection(@modelCollection, jsonData)
-    it "should populate the model collection with 2 items", ->
-      expect(@modelCollection.get("length")).toEqual(2)
-    it "should create 2 models", ->
-      expect(@modelCollection.createRecord.calls.length).toEqual(2)
-    it "should deserialize 2 items", ->
-      expect(@serializer.deserializeModel.calls.length).toEqual(2)  
+    describe "collection is empty", ->
+      beforeEach ->
+        jsonData = [
+          {id:1 ,name: "Donald Duck"}
+          {id:2 ,name: "Micky Mouse"}
+        ]
+        @modelCollection = Emu.ModelCollection.create(type: Person)
+        @serializer = Emu.Serializer.create()
+        spyOn(@serializer, "deserializeModel").andCallThrough()
+        spyOn(@modelCollection, "createRecord").andCallThrough()
+        @serializer.deserializeCollection(@modelCollection, jsonData)
+      it "should populate the model collection with 2 items", ->
+        expect(@modelCollection.get("length")).toEqual(2)
+      it "should create 2 models", ->
+        expect(@modelCollection.createRecord.calls.length).toEqual(2)
+      it "should deserialize 2 items", ->
+        expect(@serializer.deserializeModel.calls.length).toEqual(2)  
+    
+    describe "collection has some items loaded", ->
+      beforeEach ->
+        jsonData = [
+          {id:1, name: "Donald Duck"}
+          {id:2, name: "Micky Mouse"}
+          {id:4, name: "Sonic"}
+        ]
+        @modelCollection = Emu.ModelCollection.create(type: Person)
+        @person1 = Person.create(id:1, name: "Mr Duck")        
+        @person2 = Person.create(id:4, name: "Lord Hedgehog")        
+        @modelCollection.pushObject(@person1)
+        @modelCollection.pushObject(Person.create(id:3, name: "eeyore"))
+        @modelCollection.pushObject(@person2)
+        @modelCollection.pushObject(Person.create(id:5, name: "Road Runner"))
+        @serializer = Emu.Serializer.create()
+        spyOn(@serializer, "deserializeModel").andCallThrough()
+        spyOn(@modelCollection, "createRecord").andCallThrough()
+        @serializer.deserializeCollection(@modelCollection, jsonData)
+      it "should populate the model collection with 2 items", ->
+        expect(@modelCollection.get("length")).toEqual(3)
+      it "should have updated the names of the existing models", ->
+        expect(@person1.get("name")).toEqual("Donald Duck")
+        expect(@person2.get("name")).toEqual("Sonic")
+      it "should have maintained the reference to the existing models", ->
+        expect(@modelCollection.find((x) -> x.get("id") == 4)).toBe(@person2)
+      it "should have maintained the collection order", ->
+        expect(@modelCollection.get("firstObject.id")).toEqual(1)
+        expect(@modelCollection.get("lastObject.id")).toEqual(4)
+
 
   describe "serializeModel", ->
     
