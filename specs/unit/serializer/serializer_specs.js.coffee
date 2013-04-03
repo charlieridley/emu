@@ -106,6 +106,7 @@ describe "Emu.Serializer", ->
       expect(@serializer.deserializeModel.calls.length).toEqual(2)  
 
   describe "serializeModel", ->
+    
     describe "simple fields", ->
       Customer = Emu.Model.extend
         name: Emu.field("string")
@@ -214,15 +215,15 @@ describe "Emu.Serializer", ->
       expect(@result).toEqual("?foo=bar&bar=foo&colour=green&code=10")
 
   describe "serializeKey", ->
-    describe "non caps first character" ->
-      beforeEach ->, 
+    describe "non caps first character", ->
+      beforeEach ->
         @serializer = Emu.Serializer.create()
         @result = @serializer.serializeKey("daddyFellIntoThePond")
       it "have the same result", ->
         expect(@result).toEqual "daddyFellIntoThePond"
     
     describe "caps first character", ->
-      beforeEach ->, 
+      beforeEach -> 
         @serializer = Emu.Serializer.create()
         @result = @serializer.serializeKey("DaddyFellIntoThePond")
       it "have lowercase the first letter", ->
