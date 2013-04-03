@@ -13,15 +13,10 @@ Emu.Store = Ember.Object.extend
   
   find: (type, param) -> 
     return @findAll(type) unless param 
-    typeOf = Em.typeOf(param)
-    if typeOf == "string" 
-      @findById(type, param)
-    else if typeOf == "number" 
-      @findById(type, param)
-    else if typeOf == "object"
-      @findQuery(type, param)
-    else if typeOf == "function"
-      @findPredicate(type, param)
+    switch Em.typeOf(param)
+      when 'string', 'number' then @findById(type, param)
+      when 'object'           then @findQuery(type, param)
+      when 'function'         then @findPredicate(type, param)
   
   findAll: (type) ->
     collection = @_getCollectionForType(type)
