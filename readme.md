@@ -73,7 +73,7 @@ App.store.save(company);
 ```
 
 Default values
---------------------
+--------------
 ```javascript
 App.Foo = Emu.Model.extend({
 	bar: Emu.field("string", {defaultValue: "moo"})
@@ -81,4 +81,38 @@ App.Foo = Emu.Model.extend({
 
 var foo = App.Foo.createRecord()
 foo.get("bar") // -> moo
+```
+
+Serialization
+-------------
+The default serializer creates a json representation of the object
+```javascript
+App.FunnyPerson = Emu.Model.extend({
+	firstName: Emu.field("string"),
+	lastName: Emu.field("string")
+});
+```
+will serialize to
+```javascript
+{firstName:"Barry", lastName: "Chuckle"}
+```
+
+However, if your backend prefers underscore seperated property names then you can easly switch the serializer when defining your store:
+
+```javascript
+App.Store.extend({
+	adapter: Emu.RestAdapter.extend({
+		serializer: Emu.UnderscoreSerializer.extend()
+	})
+})
+```
+
+which will serialize to
+```javascript
+{first_name:"Paul", last_name: "Chuckle"}
+```
+This will also serialize the URLs with underscores
+
+```
+/funny_person?search_term=chuckle
 ```
