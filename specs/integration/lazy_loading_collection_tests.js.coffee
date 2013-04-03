@@ -1,6 +1,6 @@
-describe "Lazy loading collection tests", ->
+describe "Lazy loading collection", ->
   
-  describe "When getting a lazy loaded collection which hasn't been loaded", ->
+  describe "collection not loaded", ->
     beforeEach ->     
       TestSetup.setup() 
       spyOn($, "ajax")
@@ -13,14 +13,14 @@ describe "Lazy loading collection tests", ->
     it "should make an request to the the orders for that customer", ->
       expect($.ajax.mostRecentCall.args[0].url).toEqual("api/customer/15/order")
   
-  describe "When getting a lazy loaded collection and the property finishes loading", ->
+  describe "collection finishes loading", ->
     beforeEach ->   
       TestSetup.setup()   
       spyOn($, "ajax")
-      customer = App.Customer.find(5)
+      @customer = App.Customer.find(5)
       $.ajax.mostRecentCall.args[0].success
         name: "Harry"
-      @orders = customer.get("orders")
+      @orders = @customer.get("orders")
       $.ajax.mostRecentCall.args[0].success [
         {orderCode: "123"}
         {orderCode: "456"}
@@ -29,22 +29,5 @@ describe "Lazy loading collection tests", ->
       expect(@orders.get("length")).toEqual(2)
       expect(@orders.get("firstObject.orderCode")).toEqual("123")
       expect(@orders.get("lastObject.orderCode")).toEqual("456")
-  
-  describe "When loading a lazy collection upfront", ->
-    beforeEach -> 
-      TestSetup.setup()     
-      spyOn($, "ajax")
-      customer = App.Customer.find(53)
-      $.ajax.mostRecentCall.args[0].success
-        name: "Harry"
-        orders: [
-          {orderCode: "123"}
-          {orderCode: "456"}
-        ]
-      @orders = customer.get("orders")
-    it "should have the orders in the returned collection", ->
-      expect(@orders.get("length")).toEqual(2)
-      expect(@orders.get("firstObject.orderCode")).toEqual("123")
-      expect(@orders.get("lastObject.orderCode")).toEqual("456")
-    it "should not make an request to the the orders for that customer", ->
-      expect($.ajax.mostRecentCall.args[0].url).not.toEqual("api/customer/53/order")
+    it "should have maintained the same collection reference as returned", ->
+      expect(@customer.get("orders")).toEqual(@orders)

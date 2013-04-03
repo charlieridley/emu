@@ -1,12 +1,10 @@
 Emu.Model = Ember.Object.extend 
   init: ->
     if not @get("store")
-      @set("store", Ember.get(Emu, "defaultStore"))         
+      @set("store", Ember.get(Emu, "defaultStore"))
   
-  getValueOf: (key) ->
-    @_attributes?[key]
-  
-  save: () -> @get("store").save(this)
+  save: () -> 
+    @get("store").save(this)
 
 Emu.proxyToStore = (methodName) ->
   ->
@@ -25,3 +23,15 @@ Emu.Model.reopenClass
     @eachComputedProperty (property, meta) ->
       if meta.isField
         callback(property, meta)
+
+  getAttr: (record, key) ->
+    meta = record.constructor.metaForProperty(key)
+    record._attributes ?= {}    
+    if meta.options.collection and not record._attributes[key]
+      record._attributes[key] = Emu.ModelCollection.create(parent: record, type: meta.type())
+      record._attributes[key].addObserver "content.@each", -> record.set("isDirty", true)
+    record._attributes[key] 
+  
+  setAttr: (record, key, value) ->
+    record._attributes ?= {}
+    record._attributes[key] = value

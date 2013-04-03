@@ -30,7 +30,7 @@ describe "Emu.Serializer", ->
       it "should not deserialize the field which isn't defined in the model", ->
         expect(@model.get("age")).toBeUndefined()
 
-    describe "nested collection", ->
+    describe "collection field", ->
       Customer = Emu.Model.extend
         name: Emu.field("string")
         orders: Emu.field("App.Order", {collection: true})        
@@ -43,19 +43,13 @@ describe "Emu.Serializer", ->
           ]     
         @store = Ember.Object.create()
         @serializer = Emu.Serializer.create()
-        spyOn(@serializer, "deserializeCollection") 
-        @modelCollection = Emu.ModelCollection.create()
-        spyOn(Emu.ModelCollection, "create").andReturn(@modelCollection)
+        spyOn(@serializer, "deserializeCollection")      
         @model = Customer.create()
-        @serializer.deserializeModel(@model, @jsonData)
-      it "should create a new model collection for that type", ->
-        expect(Emu.ModelCollection.create).toHaveBeenCalledWith(type: App.Order, parent: @model)
+        @serializer.deserializeModel(@model, @jsonData)      
       it "should call deserializeCollection", ->
-        expect(@serializer.deserializeCollection).toHaveBeenCalledWith(@modelCollection, @jsonData.orders)
-      it "should set the result on the model", ->
-        expect(@model.get("orders")).toBe(@modelCollection)
+        expect(@serializer.deserializeCollection).toHaveBeenCalledWith(@model.get("orders"), @jsonData.orders)      
 
-    describe "nested object", ->
+    describe "model field", ->
       Customer = Emu.Model.extend
         name: Emu.field("string")
         order: Emu.field("App.Order") 
@@ -73,7 +67,7 @@ describe "Emu.Serializer", ->
       it "should have deserialized the correct type for that property", ->
         expect(@model.get("order").constructor).toBe(App.Order)
 
-    describe "nested object with no value", ->
+    describe "model field with no value", ->
       Customer = Emu.Model.extend
         name: Emu.field("string")
         order: Emu.field("App.Order") 
@@ -134,7 +128,7 @@ describe "Emu.Serializer", ->
             orders: Emu.ModelCollection.create(type: App.Order)
           @customer.get("orders").pushObject(App.Order.create(orderCode: "123"))
           @customer.get("orders").pushObject(App.Order.create(orderCode: "456"))
-          spyOn(@customer, "getValueOf").andCallThrough()
+          spyOn(Emu.Model, "getAttr").andCallThrough()
           @serializer = Emu.Serializer.create()
           @jsonResult = @serializer.serializeModel(@customer)
         it "should deserialize the object to json", ->
@@ -144,8 +138,8 @@ describe "Emu.Serializer", ->
               {orderCode: "123"}
               {orderCode: "456"}
             ] 
-        it "should have called the getValueOf for the property, to stop it lazy loading", ->
-          expect(@customer.getValueOf).toHaveBeenCalledWith("orders")
+        it "should have called the Emu.Model.getAttr for the property, to stop it lazy loading", ->
+          expect(Emu.Model.getAttr).toHaveBeenCalledWith(@customer, "orders")
       
       describe "null value", ->
         Customer = Emu.Model.extend
@@ -153,11 +147,13 @@ describe "Emu.Serializer", ->
           orders: Emu.field("App.Order", {collection: true})            
         beforeEach ->
           @customer = Customer.create
+            id: 6
             name: "Terry the customer"                    
           @serializer = Emu.Serializer.create()
           @jsonResult = @serializer.serializeModel(@customer)
         it "should deserialize the object to json without the collection value", ->
           expect(@jsonResult).toEqual
+            id: 6
             name: "Terry the customer"            
 
     describe "computed property", ->

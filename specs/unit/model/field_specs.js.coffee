@@ -69,7 +69,7 @@ describe "Emu.field", ->
 
     describe "as collection", ->
 
-      describe "with is set", ->
+      describe "which is set", ->
         beforeEach ->
           @orders = Emu.ModelCollection.create(type: App.Order)     
           Person = Emu.Model.extend

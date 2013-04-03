@@ -62,6 +62,32 @@ describe "Emu.Model", ->
         isDirty:false             
       @model.get("orders").pushObject(App.Order.create())
     it "should be in a dirty state", ->
-      expect(@model.get("isDirty")).toBeTruthy()            
+      expect(@model.get("isDirty")).toBeTruthy()  
 
+  describe "getAttr", ->    
+    
+    describe "collection", ->      
+      
+      describe "not set", ->
+        
+        describe "get once", ->
+          beforeEach ->
+            spyOn(Emu.ModelCollection, "create").andCallThrough()
+            @model = Person.create()           
+            @result = Emu.Model.getAttr(@model, "orders")
+          it "should create an empty collection", ->
+            expect(Emu.ModelCollection.create).toHaveBeenCalled()
+          it "should have the model as the parent", ->
+            expect(@result.get("parent")).toBe(@model)
+          it "should be of the type specified in the meta data for the field", ->
+            expect(@result.get("type")).toBe(App.Order)
+
+        describe "get twice", ->
+          beforeEach ->
+            spyOn(Emu.ModelCollection, "create").andCallThrough()
+            @model = Person.create()           
+            @result1 = Emu.Model.getAttr(@model, "orders")
+            @result2 = Emu.Model.getAttr(@model, "orders")
+          it "should return the same collection", ->
+            expect(@result1).toBe(@result2)
   
