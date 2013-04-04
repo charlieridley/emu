@@ -1,1 +1,0 @@
-window.Emu = Ember.Namespace.create()
