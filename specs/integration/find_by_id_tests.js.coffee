@@ -13,15 +13,25 @@ describe "Find by ID tests", ->
   describe "request completes", ->
     beforeEach ->
       TestSetup.setup() 
-      spyOn($, "ajax")
+      spyOn($, "ajax").andCallFake (params) ->
+        params.success {name: "Harry"}
       @result = App.Person.find(5)
-      $.ajax.mostRecentCall.args[0].success
-        name: "Harry"
     it "should deserialize the simple field", ->
       expect(@result.get("name")).toEqual("Harry")
     it "should not be dirty", ->
       expect(@result.get("isDirty")).toBeFalsy()
   
+  describe "request failes", ->
+    beforeEach ->
+      TestSetup.setup()
+      spyOn($, "ajax").andCallFake (params) ->
+        params.error()
+      @result = App.Person.find(5)
+    it "should be error", ->
+      expect(@result.get('isError')).toBeTruthy()
+    it "should not be loading", ->
+      expect(@result.get('isLoading')).toBeFalsy()
+
   describe "has lazy property", ->
     beforeEach ->
       TestSetup.setup() 
