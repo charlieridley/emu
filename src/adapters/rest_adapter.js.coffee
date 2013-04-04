@@ -16,6 +16,8 @@ Emu.RestAdapter = Ember.Object.extend
       type: "GET"
       success: (jsonData) =>
         @_didFindById(store, model, jsonData)
+      error: =>
+        @_didError(store, model)
 
   findQuery: (type, store, collection, queryHash) ->
     $.ajax
@@ -47,6 +49,9 @@ Emu.RestAdapter = Ember.Object.extend
   _didFindById: (store, model, jsonData) ->
     @_serializer.deserializeModel(model, jsonData)
     store.didFindById(model)
+
+  _didError: (store, model) ->
+    store.didError(model)
   
   _didSave: (store, model, jsonData) ->
     @_serializer.deserializeModel(model, jsonData)
