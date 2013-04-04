@@ -1,7 +1,7 @@
 require "rake-pipeline-web-filters"
 EMU_VERSION = File.read("VERSION").strip
 output "dist"
-input "src" do
+input "src/emu" do
 	match "**/*.coffee" do
 		coffee_script
 		concat [

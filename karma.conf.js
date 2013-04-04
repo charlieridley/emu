@@ -18,14 +18,14 @@ files = [
   'jquery-1.9.0.js',
   'handlebars.js',
   'ember.js',   
-  'src/core.js.coffee',
-  'src/model/field.js.coffee',
-  'src/**/*.js.coffee',
-  'specs/application.js.coffee',
-  'specs/models.js.coffee',
-  'specs/unit/**/*.js.coffee',  
-  'specs/integration/test_setup.js.coffee',
-  'specs/integration/*.js.coffee'
+  'src/emu/core.js.coffee',
+  'src/emu/model/field.js.coffee',
+  'src/emu/**/*.js.coffee',
+  'specs/emu/application.js.coffee',
+  'specs/emu/models.js.coffee',
+  'specs/emu/unit/**/*.js.coffee',  
+  'specs/emu/integration/test_setup.js.coffee',
+  'specs/emu/integration/*.js.coffee'
 ];
 
 // list of files to exclude
