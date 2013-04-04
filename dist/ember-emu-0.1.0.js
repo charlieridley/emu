@@ -30,6 +30,9 @@
         type: "GET",
         success: function(jsonData) {
           return _this._didFindById(store, model, jsonData);
+        },
+        error: function() {
+          return _this._didError(store, model);
         }
       });
     },
@@ -73,6 +76,9 @@
       this._serializer.deserializeModel(model, jsonData);
       return store.didFindById(model);
     },
+    _didError: function(store, model) {
+      return store.didError(model);
+    },
     _didSave: function(store, model, jsonData) {
       this._serializer.deserializeModel(model, jsonData);
       return store.didSave(model);
@@ -89,6 +95,64 @@
       } else {
         return "";
       }
+    }
+  });
+
+}).call(this);
+(function() {
+  var set;
+
+  set = Ember.set;
+
+  Ember.onLoad("Ember.Application", function(Application) {
+    if (Application.registerInjection) {
+      Application.registerInjection({
+        name: "store",
+        before: "controllers",
+        injection: function(app, stateManager, property) {
+          if (!stateManager) {
+            return;
+          }
+          if (property === "Store") {
+            return set(stateManager, "store", app[property].create());
+          }
+        }
+      });
+      return Application.registerInjection({
+        name: "giveStoreToControllers",
+        after: ["store", "controllers"],
+        injection: function(app, stateManager, property) {
+          var controller, controllerName, store;
+
+          if (!stateManager) {
+            return;
+          }
+          if (/^[A-Z].*Controller$/.test(property)) {
+            controllerName = property.charAt(0).toLowerCase() + property.substr(1);
+            store = stateManager.get("store");
+            controller = stateManager.get(controllerName);
+            if (!controller) {
+              return;
+            }
+            return controller.set("store", store);
+          }
+        }
+      });
+    } else if (Application.initializer) {
+      Application.initializer({
+        name: "store",
+        initialize: function(container, application) {
+          application.register("store:main", application.Store);
+          return container.lookup("store:main");
+        }
+      });
+      return Application.initializer({
+        name: "injectStore",
+        initialize: function(container, application) {
+          application.inject("controller", "store", "store:main");
+          return application.inject("route", "store", "store:main");
+        }
+      });
     }
   });
 
@@ -209,6 +273,7 @@
         var model;
 
         model = this.get("type").create(hash);
+        model.set("store", this.get("store"));
         return this.pushObject(model);
       };
       return this.find = function(predicate) {
@@ -301,12 +366,18 @@
       return model;
     },
     deserializeCollection: function(collection, jsonData) {
-      var _this = this;
+      var oldModels,
+        _this = this;
 
+      oldModels = collection.toArray();
+      collection.clear();
       return jsonData.forEach(function(item) {
-        var model;
+        var existingModel, model;
 
-        model = collection.createRecord();
+        existingModel = oldModels.find(function(x) {
+          return x.get("id") === item.id;
+        });
+        model = existingModel ? collection.pushObject(existingModel) : collection.createRecord();
         return _this.deserializeModel(model, item);
       });
     },
@@ -460,7 +531,12 @@
     },
     didFindById: function(model) {
       model.set("isLoading", false);
-      return model.set("isLoaded", true);
+      model.set("isLoaded", true);
+      return model.set("isDirty", false);
+    },
+    didError: function(model) {
+      model.set('isError', true);
+      return model.set('isLoading', false);
     },
     findQuery: function(type, queryHash) {
       var collection;

@@ -5,7 +5,7 @@ input "src" do
 	match "**/*.coffee" do
 		coffee_script
 		concat [
-			"core.js.js"			
+			"core.js.js"
 		], "ember-emu-#{EMU_VERSION}.js"
 	end	
 end
