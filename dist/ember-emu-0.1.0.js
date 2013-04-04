@@ -3,6 +3,64 @@
 
 }).call(this);
 (function() {
+  var set;
+
+  set = Ember.set;
+
+  Ember.onLoad("Ember.Application", function(Application) {
+    if (Application.registerInjection) {
+      Application.registerInjection({
+        name: "store",
+        before: "controllers",
+        injection: function(app, stateManager, property) {
+          if (!stateManager) {
+            return;
+          }
+          if (property === "Store") {
+            return set(stateManager, "store", app[property].create());
+          }
+        }
+      });
+      return Application.registerInjection({
+        name: "giveStoreToControllers",
+        after: ["store", "controllers"],
+        injection: function(app, stateManager, property) {
+          var controller, controllerName, store;
+
+          if (!stateManager) {
+            return;
+          }
+          if (/^[A-Z].*Controller$/.test(property)) {
+            controllerName = property.charAt(0).toLowerCase() + property.substr(1);
+            store = stateManager.get("store");
+            controller = stateManager.get(controllerName);
+            if (!controller) {
+              return;
+            }
+            return controller.set("store", store);
+          }
+        }
+      });
+    } else if (Application.initializer) {
+      Application.initializer({
+        name: "store",
+        initialize: function(container, application) {
+          application.register("store:main", application.Store);
+          return container.lookup("store:main");
+        }
+      });
+      return Application.initializer({
+        name: "injectStore",
+        initialize: function(container, application) {
+          application.inject("controller", "store", "store:main");
+          return application.inject("route", "store", "store:main");
+        }
+      });
+    }
+  });
+
+}).call(this);
+(function() {
   Emu.RestAdapter = Ember.Object.extend({
     init: function() {
       var _ref;
@@ -95,64 +153,6 @@
       } else {
         return "";
       }
-    }
-  });
-
-}).call(this);
-(function() {
-  var set;
-
-  set = Ember.set;
-
-  Ember.onLoad("Ember.Application", function(Application) {
-    if (Application.registerInjection) {
-      Application.registerInjection({
-        name: "store",
-        before: "controllers",
-        injection: function(app, stateManager, property) {
-          if (!stateManager) {
-            return;
-          }
-          if (property === "Store") {
-            return set(stateManager, "store", app[property].create());
-          }
-        }
-      });
-      return Application.registerInjection({
-        name: "giveStoreToControllers",
-        after: ["store", "controllers"],
-        injection: function(app, stateManager, property) {
-          var controller, controllerName, store;
-
-          if (!stateManager) {
-            return;
-          }
-          if (/^[A-Z].*Controller$/.test(property)) {
-            controllerName = property.charAt(0).toLowerCase() + property.substr(1);
-            store = stateManager.get("store");
-            controller = stateManager.get(controllerName);
-            if (!controller) {
-              return;
-            }
-            return controller.set("store", store);
-          }
-        }
-      });
-    } else if (Application.initializer) {
-      Application.initializer({
-        name: "store",
-        initialize: function(container, application) {
-          application.register("store:main", application.Store);
-          return container.lookup("store:main");
-        }
-      });
-      return Application.initializer({
-        name: "injectStore",
-        initialize: function(container, application) {
-          application.inject("controller", "store", "store:main");
-          return application.inject("route", "store", "store:main");
-        }
-      });
     }
   });
 
