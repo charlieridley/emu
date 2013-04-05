@@ -19,7 +19,6 @@ files = [
   'handlebars.js',
   'ember.js',   
   'src/emu/core.js.coffee',
-  'src/emu/mixins/*.js.coffee',
   'src/emu/model/field.js.coffee',
   'src/emu/**/*.js.coffee',  
   'specs/emu/application.js.coffee',
@@ -28,7 +27,8 @@ files = [
   'specs/emu/integration/test_setup.js.coffee',
   'specs/emu/integration/*.js.coffee',
   'src/**/signalr_push_data_adapter.js.coffee',
-  'specs/emu-signalr/unit/*.js.coffee'
+  'specs/emu-signalr/unit/*.js.coffee',
+  'specs/emu-signalr/integration/*.js.coffee'
 ];
 
 // list of files to exclude

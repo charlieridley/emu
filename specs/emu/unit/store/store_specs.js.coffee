@@ -23,6 +23,17 @@ describe "Emu.Store", ->
       it "should create an new queryCollections", ->
         expect(@store.get("queryCollections")).toEqual({})
 
+    describe "with push data adapter", ->
+      beforeEach ->
+        Emu.updatableModels = [App.Person, App.Address]
+        @pushAdapter =
+          create: -> this
+          listenForUpdates: jasmine.createSpy()
+        @store = Emu.Store.create(pushAdapter: @pushAdapter)
+      it "should tell the adapter to listen for updates for all the updatable types", ->
+        expect(@pushAdapter.listenForUpdates).toHaveBeenCalledWith(@store, App.Person)
+        expect(@pushAdapter.listenForUpdates).toHaveBeenCalledWith(@store, App.Address)
+
   describe "findAll", ->   
 
     describe "starts loading", ->
@@ -424,11 +435,10 @@ describe "Emu.Store", ->
         beforeEach ->
           @model = Person.create(id:9)
           @pushAdapter = 
+            create: -> this
             listenForUpdates: jasmine.createSpy()
           @store = Emu.Store.create(pushAdapter: @pushAdapter)
-          @store.registerUpdatable(@model)
-        it "should listen for update for that type", ->
-          expect(@pushAdapter.listenForUpdates).toHaveBeenCalledWith(@store, Person)
+          @store.registerUpdatable(@model)        
         it "should have the model registered as updatable", ->
           expect(@store.findUpdatable(Person, 9)).toBe(@model)
       
@@ -436,6 +446,7 @@ describe "Emu.Store", ->
         beforeEach ->
           @model = Person.create(id:9)
           @pushAdapter = 
+            create: -> this
             listenForUpdates: jasmine.createSpy()
           @store = Emu.Store.create(pushAdapter: @pushAdapter)
           @store.registerUpdatable(@model)

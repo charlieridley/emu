@@ -27,3 +27,13 @@ describe "Emu.SignalrPushDataAdapter", ->
       $.connection.personHub.updated(@json)
     it "should call didUpdate on the adapter", ->
       expect(@adapter.didUpdate).toHaveBeenCalledWith(App.Person, @store, @json)
+
+  describe "start", ->
+    beforeEach ->
+      $.connection =
+        start: jasmine.createSpy()
+      @store = jasmine.createSpy()
+      @adapter = Emu.SignalrPushDataAdapter.create(serializer: Serializer)
+      @adapter.start(@store)
+    it "should start the signalr connection", ->
+      expect($.connection.start).toHaveBeenCalled()

@@ -17,5 +17,5 @@ describe "Emu.ModelCollection", ->
       expect(@modelCollection.get("firstObject")).toBe(@model)
     it "should set the properties on the new object", ->
       expect(Person.create).toHaveBeenCalledWith(id: 1)
-    it "should pass the store to the child model", ->
+    it "should have the store on the model", ->
       expect(@result.get("store")).toBe(@store)

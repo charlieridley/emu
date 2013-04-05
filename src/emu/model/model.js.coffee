@@ -3,7 +3,7 @@ Emu.Model = Ember.Object.extend
     unless @get("store")
       @set("store", Ember.get(Emu, "defaultStore"))  
     @_primaryKey = Emu.Model.primaryKey(@constructor)
-    
+  
   save: -> @get("store").save(this)
 
   primaryKey: -> @_primaryKey
