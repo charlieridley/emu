@@ -1,6 +1,6 @@
 Emu.Store = Ember.Object.extend
   init: ->    
-    if not Ember.get(Emu, "defaultStore")
+    unless Ember.get(Emu, "defaultStore")
       Ember.set(Emu, "defaultStore", this)
     @set("modelCollections", {}) unless @get("modelCollections") 
     @set("queryCollections", {}) unless @get("queryCollections")
@@ -35,7 +35,7 @@ Emu.Store = Ember.Object.extend
   findById: (type, id) ->
     collection = @_getCollectionForType(type)
     model = collection.find (item) -> item.primaryKeyValue() == id
-    if not model
+    unless model
       model = collection.createRecord()    
       model.primaryKeyValue(id) 
     @loadModel(model)
@@ -51,7 +51,7 @@ Emu.Store = Ember.Object.extend
 
   findQuery: (type, queryHash) ->
     collection = @_getCollectionForQuery(type, queryHash)
-    if not collection.get("isLoading")
+    unless collection.get("isLoading")
       collection.set("isLoading", true)
       @_adapter.findQuery(type, this, collection, queryHash)
     collection
