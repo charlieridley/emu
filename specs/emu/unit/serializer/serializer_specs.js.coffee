@@ -125,7 +125,9 @@ describe "Emu.Serializer", ->
           {id:4, name: "Sonic"}
         ]
         @modelCollection = Emu.ModelCollection.create(type: Person)
-        @person1 = Person.create(id:1, name: "Mr Duck")        
+        @person1 = Person.create(id:1, name: "Mr Duck")    
+        spyOn(@person1, "primaryKey").andCallThrough()
+        spyOn(@person1, "primaryKeyValue").andCallThrough()
         @person2 = Person.create(id:4, name: "Lord Hedgehog")        
         @modelCollection.pushObject(@person1)
         @modelCollection.pushObject(Person.create(id:3, name: "eeyore"))
@@ -135,6 +137,10 @@ describe "Emu.Serializer", ->
         spyOn(@serializer, "deserializeModel").andCallThrough()
         spyOn(@modelCollection, "createRecord").andCallThrough()
         @serializer.deserializeCollection(@modelCollection, jsonData)
+      it "should have used the model.primaryKey", ->
+        expect(@person1.primaryKey).toHaveBeenCalled()
+      it "should have used the model.primaryKeyValue", ->
+        expect(@person1.primaryKeyValue).toHaveBeenCalled()
       it "should populate the model collection with 2 items", ->
         expect(@modelCollection.get("length")).toEqual(3)
       it "should have updated the names of the existing models", ->

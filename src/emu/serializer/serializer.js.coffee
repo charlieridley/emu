@@ -26,7 +26,7 @@ Emu.Serializer = Ember.Object.extend
     oldModels = collection.toArray()
     collection.clear()
     jsonData.forEach (item) =>      
-      existingModel = oldModels.find (x) -> x.get("id") == item.id
+      existingModel = oldModels.find (x) -> x.primaryKeyValue() == item[x.primaryKey()]
       model = if existingModel then collection.pushObject(existingModel) else collection.createRecord()
       @deserializeModel(model, item)      
   

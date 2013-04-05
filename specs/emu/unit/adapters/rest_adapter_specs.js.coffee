@@ -10,11 +10,21 @@ describe "Emu.RestAdapter", ->
     create: -> serializer
   
   describe "create", ->
-    beforeEach ->
-      spyOn(Emu.Serializer, "create")
-      @adapter = Emu.RestAdapter.create()
-    it "should create the default serializer", ->
-      expect(Emu.Serializer.create).toHaveBeenCalled()
+
+    describe "no serializer specified", ->
+      beforeEach ->
+        spyOn(Emu.Serializer, "create")
+        @adapter = Emu.RestAdapter.create()
+      it "should create the default serializer", ->
+        expect(Emu.Serializer.create).toHaveBeenCalled()
+
+    describe "serializer specified", ->
+      MySerializer = Ember.Object.extend()      
+      beforeEach ->        
+        spyOn(MySerializer, "create")
+        @adapter = Emu.RestAdapter.create(serializer: MySerializer)
+      it "should create the default serializer", ->
+        expect(MySerializer.create).toHaveBeenCalled()
   
   describe "findAll", ->
     

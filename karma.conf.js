@@ -7,7 +7,7 @@
 
 
 // base path, that will be used to resolve files and exclude
-basePath = '';
+basePath = './';
 
 frameworks = ['jasmine'];
 
@@ -19,13 +19,16 @@ files = [
   'handlebars.js',
   'ember.js',   
   'src/emu/core.js.coffee',
+  'src/emu/mixins/*.js.coffee',
   'src/emu/model/field.js.coffee',
-  'src/emu/**/*.js.coffee',
+  'src/emu/**/*.js.coffee',  
   'specs/emu/application.js.coffee',
   'specs/emu/models.js.coffee',
   'specs/emu/unit/**/*.js.coffee',  
   'specs/emu/integration/test_setup.js.coffee',
-  'specs/emu/integration/*.js.coffee'
+  'specs/emu/integration/*.js.coffee',
+  'src/**/signalr_push_data_adapter.js.coffee',
+  'specs/emu-signalr/unit/*.js.coffee'
 ];
 
 // list of files to exclude

@@ -417,4 +417,40 @@ describe "Emu.Store", ->
       it "should forward the call to findPredicate", ->
         expect(@store.findPredicate).toHaveBeenCalledWith(Person, @predicate) 
 
+  describe "registerUpdatable", ->
+    
+    describe "when there is a push data adapter", ->
+      describe "registering once", ->
+        beforeEach ->
+          @model = Person.create(id:9)
+          @pushAdapter = 
+            listenForUpdates: jasmine.createSpy()
+          @store = Emu.Store.create(pushAdapter: @pushAdapter)
+          @store.registerUpdatable(@model)
+        it "should listen for update for that type", ->
+          expect(@pushAdapter.listenForUpdates).toHaveBeenCalledWith(@store, Person)
+        it "should have the model registered as updatable", ->
+          expect(@store.findUpdatable(Person, 9)).toBe(@model)
+      
+      describe "registering twice", ->
+        beforeEach ->
+          @model = Person.create(id:9)
+          @pushAdapter = 
+            listenForUpdates: jasmine.createSpy()
+          @store = Emu.Store.create(pushAdapter: @pushAdapter)
+          @store.registerUpdatable(@model)
+          @store.registerUpdatable(@model)
+        it "should only have 1 registration in the internal collection", ->
+          expect(@store.get("updatableModels")[@model.constructor.toString()]?.length).toEqual(1)
+
+    describe "when there is no push data adapter", ->
+      beforeEach ->
+        @model = Person.create(id:9)
+        @store = Emu.Store.create()
+        try
+          @store.registerUpdatable(@model)
+        catch exception
+          @exception = exception
+      it "should throw an exception", ->
+        expect(@exception.message).toEqual("You need to register a Emu.PushDataAdapter on your store: Emu.Store.create({pushAdapter: App.MyPushAdapter.create()});")
 

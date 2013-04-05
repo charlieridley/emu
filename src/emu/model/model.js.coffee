@@ -2,16 +2,8 @@ Emu.Model = Ember.Object.extend
   init: ->
     unless @get("store")
       @set("store", Ember.get(Emu, "defaultStore"))  
-
-    primaryKeyCount = 0
-    @constructor.eachComputedProperty (property, meta) =>
-      if meta.options?.primaryKey
-        @_primaryKey = property 
-        primaryKeyCount++
-    @_primaryKey ?= "id"  
-    if primaryKeyCount > 1 
-      throw new Error("Error with #{this}: You can only mark one field as a primary key")
-
+    @_primaryKey = Emu.Model.primaryKey(@constructor)
+    
   save: -> @get("store").save(this)
 
   primaryKey: -> @_primaryKey
@@ -32,6 +24,17 @@ Emu.Model.reopenClass
   isEmuModel: true
   createRecord: Emu.proxyToStore("createRecord")
   find: Emu.proxyToStore("find")  
+
+  primaryKey: (type) ->
+    primaryKey = "id"  
+    primaryKeyCount = 0
+    type.eachComputedProperty (property, meta) =>
+      if meta.options?.primaryKey
+        primaryKey = property 
+        primaryKeyCount++
+    if primaryKeyCount > 1 
+      throw new Error("Error with #{this}: You can only mark one field as a primary key")
+    primaryKey
   
   eachEmuField: (callback) ->
     @eachComputedProperty (property, meta) ->

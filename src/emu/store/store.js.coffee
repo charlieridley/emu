@@ -5,6 +5,7 @@ Emu.Store = Ember.Object.extend
     @set("modelCollections", {}) unless @get("modelCollections") 
     @set("queryCollections", {}) unless @get("queryCollections")
     @set("deferredQueries", {})  unless @get("deferredQueries")
+    @set("updatableModels", {})  unless @get("updatableModels")
     @_adapter = @get("adapter")?.create() || Emu.RestAdapter.create()
   
   createRecord: (type) ->
@@ -91,6 +92,18 @@ Emu.Store = Ember.Object.extend
       model.set("isLoading", true)
       @_adapter.findById(model.constructor, this, model, model.primaryKeyValue())
     model
+
+  registerUpdatable: (model) ->
+    unless @get("pushAdapter")
+      throw new Error("You need to register a Emu.PushDataAdapter on your store: Emu.Store.create({pushAdapter: App.MyPushAdapter.create()});")
+    unless @findUpdatable(model.constructor, model.primaryKeyValue())
+      @get("updatableModels")[model.constructor] ?= []
+      @get("updatableModels")[model.constructor].pushObject(model)
+      @get("pushAdapter").listenForUpdates(this, model.constructor)
+
+  findUpdatable: (type, id) ->
+    @get("updatableModels")[type]?.find (model) -> 
+      model.primaryKeyValue() == id
     
   _didCollectionLoad: (collection) ->
     collection.set("isLoaded", true)
