@@ -83,35 +83,69 @@ describe "Emu.Store", ->
   describe "findById", ->
 
     describe "starts loading", ->
-      beforeEach ->
-        @model = Person.create(id: 5)
-        @modelCollection = Emu.ModelCollection.create(Person)
-        spyOn(Emu.ModelCollection, "create").andReturn(@modelCollection)
-        spyOn(@modelCollection, "createRecord").andReturn(@model)
-        spyOn(adapter, "findById")
-        @store = Emu.Store.create
-          adapter: Adapter
-        @result = @store.findById(Person, 5)
-      it "should set the id on the model with the ID", ->
-        expect(@modelCollection.createRecord).toHaveBeenCalledWith(id: 5)
-      it "should set the model in a loading state", ->
-        expect(@model.get("isLoading")).toBeTruthy()
-      it "should call the findById method on the adapter", ->
-        expect(adapter.findById).toHaveBeenCalledWith(Person, @store, @model, 5)
-      it "should return the model", ->
-        expect(@result).toEqual(@model)
+      
+      describe "without custom primaryKey", ->
+        beforeEach ->
+          @model = Person.create(id: 5)
+          @modelCollection = Emu.ModelCollection.create(Person)
+          spyOn(Emu.ModelCollection, "create").andReturn(@modelCollection)
+          spyOn(@modelCollection, "createRecord").andReturn(@model)
+          spyOn(adapter, "findById")
+          @store = Emu.Store.create
+            adapter: Adapter
+          @result = @store.findById(Person, 5)
+        it "should set the id on the model with the ID", ->
+          expect(@modelCollection.createRecord).toHaveBeenCalled()
+        it "should set the model in a loading state", ->
+          expect(@model.get("isLoading")).toBeTruthy()
+        it "should call the findById method on the adapter", ->
+          expect(adapter.findById).toHaveBeenCalledWith(Person, @store, @model, 5)
+        it "should return the model", ->
+          expect(@result).toEqual(@model)
+
+      describe "with custom primaryKey", ->
+        Foo = Emu.Model.extend
+            personId: 10
+        beforeEach ->
+          @model = Foo.create()
+          @modelCollection = Emu.ModelCollection.create()
+          spyOn(Emu.ModelCollection, "create").andReturn(@modelCollection)
+          spyOn(@modelCollection, "createRecord").andReturn(@model)
+          spyOn(adapter, "findById")
+          @store = Emu.Store.create
+            adapter: Adapter
+          @result = @store.findById(Foo, 10)
+        it "should set the id on the model with the personId", ->
+          expect(@result.get("personId")).toEqual(10)
+        it "should call the findById method on the adapter", ->
+          expect(adapter.findById).toHaveBeenCalledWith(Foo, @store, @model, 10)
 
     describe "query already pending", ->
-      beforeEach ->
-        spyOn(adapter, "findById")      
-        @store = Emu.Store.create
-          adapter: Adapter      
-        @firstResult = @store.findById(Person, 5)   
-        @secondResult = @store.findById(Person, 5)
-      it "should return the same model for both calls", ->
-        expect(@firstResult).toBe(@secondResult)
-      it "should call the findById method on the adapter just once", ->
-        expect(adapter.findById.calls.length).toEqual(1)
+      describe "default primaryKey", ->
+        beforeEach ->
+          spyOn(adapter, "findById")      
+          @store = Emu.Store.create
+            adapter: Adapter      
+          @firstResult = @store.findById(Person, 5)   
+          @secondResult = @store.findById(Person, 5)
+        it "should return the same model for both calls", ->
+          expect(@firstResult).toBe(@secondResult)
+        it "should call the findById method on the adapter just once", ->
+          expect(adapter.findById.calls.length).toEqual(1)
+      
+      describe "custom primaryKey", ->
+        beforeEach ->
+          Foo = Emu.Model.extend
+            fooId: Emu.field("string", {primaryKey: true})
+          spyOn(adapter, "findById")      
+          @store = Emu.Store.create
+            adapter: Adapter      
+          @firstResult = @store.findById(Foo, 5)   
+          @secondResult = @store.findById(Foo, 5)
+        it "should return the same model for both calls", ->
+          expect(@firstResult).toBe(@secondResult)
+        it "should call the findById method on the adapter just once", ->
+          expect(adapter.findById.calls.length).toEqual(1)
 
     describe "record already loaded", ->
       beforeEach ->
@@ -159,6 +193,7 @@ describe "Emu.Store", ->
       expect(@modelCollections[Person].createRecord).toHaveBeenCalledWith(isDirty: true)
 
   describe "save", ->
+    
     describe "new record", ->
       beforeEach ->
         @store = Emu.Store.create   
@@ -175,7 +210,7 @@ describe "Emu.Store", ->
           adapter: Adapter
         spyOn(adapter, "update")
         @model = @store.createRecord(Person)
-        @model.set("id", 5)
+        spyOn(@model, "primaryKeyValue").andReturn(10)
         @store.save(@model)
       it "should call update on the adapter", ->
         expect(adapter.update).toHaveBeenCalledWith(@store, @model)

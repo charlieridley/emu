@@ -1,4 +1,4 @@
-Emu.field = (type, options)->
+Emu.field = (type, options) ->
   options ?= {}
   meta =
     type: -> Ember.get(type) or type

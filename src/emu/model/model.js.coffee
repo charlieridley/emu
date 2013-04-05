@@ -8,8 +8,9 @@ Emu.Model = Ember.Object.extend
       if meta.options?.primaryKey
         @_primaryKey = property 
         primaryKeyCount++
-    @_primaryKey ?= "id"   
-    Ember.assert("You can only mark one field with primaryKey", primaryKeyCount < 2)
+    @_primaryKey ?= "id"  
+    if primaryKeyCount > 1 
+      throw new Error("Error with #{this}: You can only mark one field as a primary key")
 
   save: -> @get("store").save(this)
 

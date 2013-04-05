@@ -9,15 +9,15 @@ describe "Emu.Model", ->
 
     describe "multiple primary keys specified", ->
       beforeEach ->
-        Foo = Emu.Model.extend
+        @Foo = Emu.Model.extend
           fooId: Emu.field("string", {primaryKey: true})
           barId: Emu.field("string", {primaryKey: true})
         try 
-          @foo = Foo.create()
+          @foo = @Foo.create()
         catch exception
           @exception = exception
       it "should throw an exception", ->
-        expect(@exception.message).toEqual("assertion failed: You can only mark one field with primaryKey")
+        expect(@exception.message).toContain("You can only mark one field as a primary key")
   
   describe "primaryKey", ->
 

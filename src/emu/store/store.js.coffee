@@ -34,9 +34,10 @@ Emu.Store = Ember.Object.extend
   
   findById: (type, id) ->
     collection = @_getCollectionForType(type)
-    model = collection.find (item) -> item.get("id") == id
+    model = collection.find (item) -> item.primaryKeyValue() == id
     if not model
-      model = collection.createRecord(id: id)     
+      model = collection.createRecord()    
+      model.primaryKeyValue(id) 
     @loadModel(model)
 
   didFindById: (model) ->
@@ -71,7 +72,7 @@ Emu.Store = Ember.Object.extend
     results
 
   save: (model) ->
-    if model.get("id") then @_adapter.update(this, model) else @_adapter.insert(this, model)
+    if model.primaryKeyValue() then @_adapter.update(this, model) else @_adapter.insert(this, model)
 
   didSave: (model) ->
     model.set("isDirty", false)
@@ -88,7 +89,7 @@ Emu.Store = Ember.Object.extend
   loadModel: (model) ->
     if not model.get("isLoading") and not model.get("isLoaded")
       model.set("isLoading", true)
-      @_adapter.findById(model.constructor, this, model, model.get("id"))
+      @_adapter.findById(model.constructor, this, model, model.primaryKeyValue())
     model
     
   _didCollectionLoad: (collection) ->

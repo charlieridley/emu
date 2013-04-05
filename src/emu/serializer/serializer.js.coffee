@@ -8,14 +8,15 @@ Emu.Serializer = Ember.Object.extend
     @serializeKey(parts[parts.length - 1])
   
   serializeModel: (model) ->
-    jsonData = 
-      id: model.get("id")
+    jsonData = {}
+    jsonData[model.primaryKey()] = model.primaryKeyValue()
     model.constructor.eachEmuField (property, meta) =>    
       @_serializeProperty(model, jsonData, property, meta)      
     jsonData
   
   deserializeModel: (model, jsonData) ->
-    model.set("id", jsonData.id) if jsonData.id
+    primaryKeyValue = jsonData[model.primaryKey()]
+    model.primaryKeyValue(primaryKeyValue) if primaryKeyValue
     model.constructor.eachEmuField (property, meta) =>
       serializedProperty = @serializeKey(property)
       @_deserializeProperty(model, property, jsonData[serializedProperty], meta)  

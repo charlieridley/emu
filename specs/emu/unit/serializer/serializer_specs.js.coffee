@@ -12,23 +12,40 @@ describe "Emu.Serializer", ->
   describe "deserializeModel", ->
 
     describe "simple fields only", ->
-      beforeEach -> 
-        spyOn(Emu.AttributeSerializers.string, "deserialize").andReturn("WINSTON CHURCHILL")      
-        @jsonData = 
-          id: "78"
-          name: "Winston Churchill"
-          age: "60"
-        @serializer = Emu.Serializer.create()
-        @model = Person.create()
-        @serializer.deserializeModel(@model, @jsonData)
-      it "should get the deserialized value from the attribute serializer for type string", ->
-        expect(Emu.AttributeSerializers.string.deserialize).toHaveBeenCalledWith("Winston Churchill")
-      it "should always deserialize the id", ->
-        expect(@model.get("id")).toEqual("78")
-      it "should set the deserialized value on the name field", ->
-        expect(@model.get("name")).toEqual("WINSTON CHURCHILL")
-      it "should not deserialize the field which isn't defined in the model", ->
-        expect(@model.get("age")).toBeUndefined()
+
+      describe "default primaryKey", ->
+        beforeEach -> 
+          spyOn(Emu.AttributeSerializers.string, "deserialize").andReturn("WINSTON CHURCHILL")      
+          @jsonData = 
+            id: "78"
+            name: "Winston Churchill"
+            age: "60"
+          @serializer = Emu.Serializer.create()
+          @model = Person.create()
+          @serializer.deserializeModel(@model, @jsonData)
+        it "should get the deserialized value from the attribute serializer for type string", ->
+          expect(Emu.AttributeSerializers.string.deserialize).toHaveBeenCalledWith("Winston Churchill")
+        it "should always deserialize the id", ->
+          expect(@model.get("id")).toEqual("78")
+        it "should set the deserialized value on the name field", ->
+          expect(@model.get("name")).toEqual("WINSTON CHURCHILL")
+        it "should not deserialize the field which isn't defined in the model", ->
+          expect(@model.get("age")).toBeUndefined()
+
+      describe "custom primaryKey", ->
+        beforeEach ->
+          Customer = Emu.Model.extend
+            customerId: Emu.field("string", {primaryKey: true})
+          @jsonData = 
+            id: 8
+            customerId: "78"
+          @serializer = Emu.Serializer.create()
+          @model = Customer.create()
+          @serializer.deserializeModel(@model, @jsonData)
+        it "should have deserialized the id", ->
+          expect(@model.get("customerId")).toEqual("78")
+        it "should not have deserialized the default id", ->
+          expect(@model.get("id")).toBeUndefined()
 
     describe "collection field", ->
       Customer = Emu.Model.extend
@@ -133,21 +150,42 @@ describe "Emu.Serializer", ->
   describe "serializeModel", ->
     
     describe "simple fields", ->
-      Customer = Emu.Model.extend
-        name: Emu.field("string")
-        age: Emu.field("string")      
-      beforeEach ->
-        customer = Customer.create
-          id: "55"
-          name: "Terry the customer"
-          age: "47"
-        @serializer = Emu.Serializer.create()
-        @jsonResult = @serializer.serializeModel(customer)
-      it "should deserialize the object to json", ->
-        expect(@jsonResult).toEqual
-          id: "55"
-          name: "Terry the customer"
-          age: "47"
+
+      describe "default primaryKey", ->
+        Customer = Emu.Model.extend
+          name: Emu.field("string")
+          age: Emu.field("string")      
+        beforeEach ->
+          customer = Customer.create
+            id: "55"
+            name: "Terry the customer"
+            age: "47"
+          @serializer = Emu.Serializer.create()
+          @jsonResult = @serializer.serializeModel(customer)
+        it "should deserialize the object to json", ->
+          expect(@jsonResult).toEqual
+            id: "55"
+            name: "Terry the customer"
+            age: "47"
+
+      describe "default primaryKey", ->
+        Customer = Emu.Model.extend
+          customerId: Emu.field("string", {primaryKey: true})
+          name: Emu.field("string")
+          age: Emu.field("string")      
+        beforeEach ->
+          customer = Customer.create
+            id: "8"
+            customerId: "55"
+            name: "Terry the customer"
+            age: "47"
+          @serializer = Emu.Serializer.create()
+          @jsonResult = @serializer.serializeModel(customer)
+        it "should deserialize the object to json", ->
+          expect(@jsonResult).toEqual
+            customerId: "55"
+            name: "Terry the customer"
+            age: "47"
 
     describe "nested collection", ->
       describe "not null value", ->
