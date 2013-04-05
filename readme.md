@@ -2,10 +2,6 @@
 
 Emu is a simple data access library for [Ember.js](http://www.emberjs.com).
 
-#### Just so you know
-
-I'm still working on Emu and it's a bit rough around the edges at the moment. It might not work perfik.
-
 To Start
 --------
 ```javascript
@@ -25,6 +21,7 @@ App.Address = Emu.Model.extend({
 });
 
 App.Employee = Emu.Model.extend({
+	employeeId: Emu.field("string", {primaryKey: true}), //custom primary key, overrides default 'id' field
 	name: Emu.field("string")
 });
 ```
