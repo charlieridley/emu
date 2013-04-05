@@ -204,12 +204,39 @@
 (function() {
   Emu.Model = Ember.Object.extend({
     init: function() {
+      var primaryKeyCount, _ref,
+        _this = this;
+
       if (!this.get("store")) {
-        return this.set("store", Ember.get(Emu, "defaultStore"));
+        this.set("store", Ember.get(Emu, "defaultStore"));
+      }
+      primaryKeyCount = 0;
+      this.constructor.eachComputedProperty(function(property, meta) {
+        var _ref;
+
+        if ((_ref = meta.options) != null ? _ref.primaryKey : void 0) {
+          _this._primaryKey = property;
+          return primaryKeyCount++;
+        }
+      });
+      if ((_ref = this._primaryKey) == null) {
+        this._primaryKey = "id";
+      }
+      if (primaryKeyCount > 1) {
+        throw new Error("Error with " + this + ": You can only mark one field as a primary key");
       }
     },
     save: function() {
       return this.get("store").save(this);
+    },
+    primaryKey: function() {
+      return this._primaryKey;
+    },
+    primaryKeyValue: function(value) {
+      if (value) {
+        this.set(this.primaryKey(), value);
+      }
+      return this.get(this.primaryKey());
     }
   });
 
@@ -343,19 +370,20 @@
       var jsonData,
         _this = this;
 
-      jsonData = {
-        id: model.get("id")
-      };
+      jsonData = {};
+      jsonData[model.primaryKey()] = model.primaryKeyValue();
       model.constructor.eachEmuField(function(property, meta) {
         return _this._serializeProperty(model, jsonData, property, meta);
       });
       return jsonData;
     },
     deserializeModel: function(model, jsonData) {
-      var _this = this;
+      var primaryKeyValue,
+        _this = this;
 
-      if (jsonData.id) {
-        model.set("id", jsonData.id);
+      primaryKeyValue = jsonData[model.primaryKey()];
+      if (primaryKeyValue) {
+        model.primaryKeyValue(primaryKeyValue);
       }
       model.constructor.eachEmuField(function(property, meta) {
         var serializedProperty;
@@ -520,12 +548,11 @@
 
       collection = this._getCollectionForType(type);
       model = collection.find(function(item) {
-        return item.get("id") === id;
+        return item.primaryKeyValue() === id;
       });
       if (!model) {
-        model = collection.createRecord({
-          id: id
-        });
+        model = collection.createRecord();
+        model.primaryKeyValue(id);
       }
       return this.loadModel(model);
     },
@@ -575,7 +602,7 @@
       return results;
     },
     save: function(model) {
-      if (model.get("id")) {
+      if (model.primaryKeyValue()) {
         return this._adapter.update(this, model);
       } else {
         return this._adapter.insert(this, model);
@@ -597,7 +624,7 @@
     loadModel: function(model) {
       if (!model.get("isLoading") && !model.get("isLoaded")) {
         model.set("isLoading", true);
-        this._adapter.findById(model.constructor, this, model, model.get("id"));
+        this._adapter.findById(model.constructor, this, model, model.primaryKeyValue());
       }
       return model;
     },
