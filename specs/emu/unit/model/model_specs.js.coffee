@@ -5,6 +5,57 @@ describe "Emu.Model", ->
   it "should have a flag to indicate the type is an Emu model", ->
     expect(Person.isEmuModel).toBeTruthy()
 
+  describe "create", ->
+
+    describe "multiple primary keys specified", ->
+      beforeEach ->
+        Foo = Emu.Model.extend
+          fooId: Emu.field("string", {primaryKey: true})
+          barId: Emu.field("string", {primaryKey: true})
+        try 
+          @foo = Foo.create()
+        catch exception
+          @exception = exception
+      it "should throw an exception", ->
+        expect(@exception.message).toEqual("assertion failed: You can only mark one field with primaryKey")
+  
+  describe "primaryKey", ->
+
+    describe "no primary key specified", ->
+      beforeEach ->
+        Foo = Emu.Model.extend()
+        @foo = Foo.create(id:"10")
+      it "should have primaryKey as 'id'", ->
+        expect(@foo.primaryKey()).toEqual("id")
+
+    describe "primary key specified", ->
+      beforeEach ->
+        Foo = Emu.Model.extend
+          fooId: Emu.field("string", {primaryKey: true})
+        @foo = Foo.create()
+      it "should have primaryKey as 'fooId'", ->
+        expect(@foo.primaryKey()).toEqual("fooId")
+
+  describe "primaryKeyValue", ->
+
+    describe "get", ->
+      beforeEach ->
+        Foo = Emu.Model.extend
+          fooId: Emu.field("string", {primaryKey: true})
+        @foo = Foo.create(fooId:"10")
+      it "should have primaryKeyValue as '10'", ->
+        expect(@foo.primaryKeyValue()).toEqual("10")
+
+    describe "set", ->
+      beforeEach ->
+        Foo = Emu.Model.extend
+          fooId: Emu.field("string", {primaryKey: true})
+        @foo = Foo.create(fooId:"10")
+        @foo.primaryKeyValue("20")
+      it "should have primaryKeyValue as '20'", ->
+        expect(@foo.primaryKeyValue()).toEqual("20")
+
+  
   describe "createRecord", ->
     beforeEach ->
         Ember.set(Emu, "defaultStore", undefined)

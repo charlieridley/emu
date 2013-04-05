@@ -1,16 +1,30 @@
 Emu.Model = Ember.Object.extend 
   init: ->
     unless @get("store")
-      @set("store", Ember.get(Emu, "defaultStore"))      
+      @set("store", Ember.get(Emu, "defaultStore"))  
+
+    primaryKeyCount = 0
+    @constructor.eachComputedProperty (property, meta) =>
+      if meta.options?.primaryKey
+        @_primaryKey = property 
+        primaryKeyCount++
+    @_primaryKey ?= "id"   
+    Ember.assert("You can only mark one field with primaryKey", primaryKeyCount < 2)
 
   save: -> @get("store").save(this)
+
+  primaryKey: -> @_primaryKey
+
+  primaryKeyValue: (value) -> 
+    @set(@primaryKey(), value) if value
+    @get(@primaryKey())
 
 Emu.proxyToStore = (methodName) ->
   ->
     store = Ember.get(Emu, "defaultStore")
     args = [].slice.call(arguments)
     args.unshift(this)
-    Ember.assert("Cannot call " + methodName + ". You need define a store first like this: App.Store = Emu.Store.extend()", !!store);
+    Ember.assert("Cannot call " + methodName + ". You need define a store first like this: App.Store = Emu.Store.extend()", !!store)
     store[methodName].apply(store, args)
 
 Emu.Model.reopenClass
