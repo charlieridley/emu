@@ -1,3 +1,3 @@
 Emu.Updatable = Ember.Mixin.create
-	init: ->
+  init: ->
     @get("store").registerUpdatable(this)
