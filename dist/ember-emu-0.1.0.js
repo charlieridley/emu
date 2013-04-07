@@ -307,7 +307,7 @@
             parent: record,
             type: meta.type()
           });
-          record._attributes[key].addObserver("content.@each", function() {
+          record._attributes[key].addObserver("isDirty", function() {
             return record.set("isDirty", true);
           });
         } else if (meta.isModel()) {
@@ -330,6 +330,8 @@
 (function() {
   Emu.ModelCollection = Ember.ArrayProxy.extend({
     init: function() {
+      var _this = this;
+
       this.set("content", Ember.A([]));
       this.createRecord = function(hash) {
         var model;
@@ -338,6 +340,10 @@
         model.set("store", this.get("store"));
         return this.pushObject(model);
       };
+      this.addObserver("content.@each", function() {
+        _this.set("hasValue", true);
+        return _this.set("isDirty", true);
+      });
       return this.find = function(predicate) {
         return this.get("content").find(predicate);
       };
@@ -481,7 +487,7 @@
       serializedKey = this.serializeKey(property);
       if (meta.options.collection) {
         if (collection = Emu.Model.getAttr(model, property)) {
-          return jsonData[serializedKey] = collection.get("length") > 0 ? collection.map(function(item) {
+          return jsonData[serializedKey] = collection.get("hasValue") ? collection.map(function(item) {
             return _this.serializeModel(item);
           }) : void 0;
         }
