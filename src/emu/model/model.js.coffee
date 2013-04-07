@@ -43,10 +43,13 @@ Emu.Model.reopenClass
 
   getAttr: (record, key) ->
     meta = record.constructor.metaForProperty(key)
-    record._attributes ?= {}    
-    if meta.options.collection and not record._attributes[key]
-      record._attributes[key] = Emu.ModelCollection.create(parent: record, type: meta.type())
-      record._attributes[key].addObserver "content.@each", -> record.set("isDirty", true)
+    record._attributes ?= {}   
+    unless record._attributes[key]
+      if meta.options.collection
+        record._attributes[key] = Emu.ModelCollection.create(parent: record, type: meta.type())
+        record._attributes[key].addObserver "content.@each", -> record.set("isDirty", true)
+      else if meta.isModel()
+        record._attributes[key] = meta.type().create()
     record._attributes[key] 
   
   setAttr: (record, key, value) ->

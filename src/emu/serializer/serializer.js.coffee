@@ -41,9 +41,8 @@ Emu.Serializer = Ember.Object.extend
       if value then @deserializeCollection(Emu.Model.getAttr(model, property), value) 
     else if meta.isModel()
       if value
-        modelProperty = meta.type().create()
+        modelProperty = Emu.Model.getAttr(model, property)
         @deserializeModel(modelProperty, value) 
-        model.set(property, modelProperty)
     else
       attributeSerializer = Emu.AttributeSerializers[meta.type()]
       value = attributeSerializer.deserialize(value)
@@ -56,7 +55,7 @@ Emu.Serializer = Ember.Object.extend
         jsonData[serializedKey] = if collection.get("length") > 0 then collection.map (item) => @serializeModel(item)
     else if meta.isModel()
       propertyValue = Emu.Model.getAttr(model, property)
-      jsonData[serializedKey] = @serializeModel(propertyValue) if propertyValue
+      jsonData[serializedKey] = @serializeModel(propertyValue) if propertyValue.get("hasValue")
     else
       attributeSerializer = Emu.AttributeSerializers[meta.type()]
       jsonData[serializedKey] = attributeSerializer.serialize(Emu.Model.getAttr(model, property))

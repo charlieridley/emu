@@ -2,7 +2,7 @@ describe "Emu.field", ->
   Person = Emu.Model.extend() 
   Order = Emu.Model.extend()
   
-  describe "When creating", ->  
+  describe "creating", ->  
     
     describe "as string", ->
       beforeEach ->
@@ -34,9 +34,9 @@ describe "Emu.field", ->
       it "should mark the field as lazy", ->
         expect(@Person.metaForProperty("name").options).toEqual({lazy: true, partial: false}) 
   
-  describe "When getting field", ->
+  describe "get", ->
     
-    describe "as normal value", ->
+    describe "normal value", ->
       
       describe "when it has a value", ->
         beforeEach ->
@@ -47,7 +47,7 @@ describe "Emu.field", ->
         it "should get the value", ->
           expect(@result).toEqual("henry")
 
-      describe "when it doesn't have a value", ->
+      describe "no value", ->
         
         describe "without a defaultValue", ->
           beforeEach ->
@@ -67,7 +67,7 @@ describe "Emu.field", ->
           it "should get the value", ->
             expect(@result).toEqual("barry")
 
-    describe "as collection", ->
+    describe "collection", ->
 
       describe "which is set", ->
         beforeEach ->
@@ -96,7 +96,7 @@ describe "Emu.field", ->
         it "should not query the store", ->
           expect(@store.loadAll).not.toHaveBeenCalled()
   
-    describe "as lazy collection", ->
+    describe "lazy collection", ->
 
       describe "which is not set", ->
         beforeEach ->
@@ -115,7 +115,7 @@ describe "Emu.field", ->
         it "should return the collection", ->
           expect(@result).toBe(@orders)
   
-      describe "after it has been loaded", ->
+      describe "is loaded", ->
         beforeEach ->
           @store = Ember.Object.create
             loadAll: ->
@@ -132,7 +132,7 @@ describe "Emu.field", ->
           expect(@store.loadAll.calls.length).toEqual(1)
           @result = @model.get("orders")
   
-    describe "as a partial property", ->
+    describe "partial property", ->
       describe "passing a store", ->
         beforeEach ->
           @store = Ember.Object.create
@@ -169,13 +169,15 @@ describe "Emu.field", ->
           it "should return undefined", ->
             expect(@result).toBeUndefined()  
 
-    describe "as a model property", ->
+    describe "model property", ->
 
       describe "when it has no value", ->
         beforeEach ->
           Person = Emu.Model.extend
             order: Emu.field("App.Order")
           @model = Person.create()
-        it "should not return anything", ->
-          expect(@model.get("order")).toBeFalsy()
+        it "should return App.Order", ->
+          expect(@model.get("order").constructor.toString()).toEqual("App.Order")
+        it "should have hasValue false on the return object", ->
+          expect(@model.get("hasValue")).toBeFalsy()
 

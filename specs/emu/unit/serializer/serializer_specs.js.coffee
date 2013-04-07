@@ -67,36 +67,40 @@ describe "Emu.Serializer", ->
         expect(@serializer.deserializeCollection).toHaveBeenCalledWith(@model.get("orders"), @jsonData.orders)      
 
     describe "model field", ->
-      Customer = Emu.Model.extend
-        name: Emu.field("string")
-        order: Emu.field("App.Order") 
-      beforeEach ->
-        @jsonData = 
-          name: "Donald Duck"
-          order: 
-            id: 1
-        @store = Ember.Object.create()
-        serializer = Emu.Serializer.create()
-        @model = Customer.create()
-        serializer.deserializeModel(@model, @jsonData)
-      it "should deserialize the nested object property", ->
-        expect(@model.get("order.id")).toEqual(1)
-      it "should have deserialized the correct type for that property", ->
-        expect(@model.get("order").constructor).toBe(App.Order)
 
-    describe "model field with no value", ->
-      Customer = Emu.Model.extend
-        name: Emu.field("string")
-        order: Emu.field("App.Order") 
-      beforeEach ->
-        @jsonData = 
-          name: "Donald Duck"
-        @store = Ember.Object.create()
-        serializer = Emu.Serializer.create()
-        @model = Customer.create()
-        serializer.deserializeModel(@model, @jsonData)
-      it "should have a null value for the object", ->
-        expect(@model.get("order")).toBeFalsy()
+      describe "with value", ->
+        Customer = Emu.Model.extend
+          name: Emu.field("string")
+          order: Emu.field("App.Order") 
+        beforeEach ->
+          @jsonData = 
+            name: "Donald Duck"
+            order: 
+              id: 1
+          @store = Ember.Object.create()
+          serializer = Emu.Serializer.create()
+          @model = Customer.create()
+          serializer.deserializeModel(@model, @jsonData)
+        it "should deserialize the nested object property", ->
+          expect(@model.get("order.id")).toEqual(1)
+        it "should have deserialized the correct type for that property", ->
+          expect(@model.get("order").constructor).toBe(App.Order)
+
+      describe "with no value", ->
+        Customer = Emu.Model.extend
+          name: Emu.field("string")
+          order: Emu.field("App.Order") 
+        beforeEach ->
+          @jsonData = 
+            name: "Donald Duck"
+          @store = Ember.Object.create()
+          serializer = Emu.Serializer.create()
+          @model = Customer.create()
+          serializer.deserializeModel(@model, @jsonData)
+        it "should return App.Order", ->
+          expect(@model.get("order").constructor.toString()).toEqual("App.Order")
+        it "should have hasValue false on the return object", ->
+          expect(@model.get("order.hasValue")).toBeFalsy()
 
   describe "deserializeCollection", ->
     describe "collection is empty", ->
