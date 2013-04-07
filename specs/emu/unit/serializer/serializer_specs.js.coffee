@@ -50,21 +50,35 @@ describe "Emu.Serializer", ->
     describe "collection field", ->
       Customer = Emu.Model.extend
         name: Emu.field("string")
-        orders: Emu.field("App.Order", {collection: true})        
-      beforeEach ->     
-        @jsonData = 
-          name: "Donald Duck"
-          orders: [
-            {id: 1}
-            {id: 2}
-          ]     
-        @store = Ember.Object.create()
-        @serializer = Emu.Serializer.create()
-        spyOn(@serializer, "deserializeCollection")      
-        @model = Customer.create()
-        @serializer.deserializeModel(@model, @jsonData)      
-      it "should call deserializeCollection", ->
-        expect(@serializer.deserializeCollection).toHaveBeenCalledWith(@model.get("orders"), @jsonData.orders)      
+        orders: Emu.field("App.Order", {collection: true})    
+      
+      describe "has value", ->    
+        beforeEach ->     
+          @jsonData = 
+            name: "Donald Duck"
+            orders: [
+              {id: 1}
+              {id: 2}
+            ]     
+          @store = Ember.Object.create()
+          @serializer = Emu.Serializer.create()
+          spyOn(@serializer, "deserializeCollection")      
+          @model = Customer.create()
+          @serializer.deserializeModel(@model, @jsonData)      
+        it "should call deserializeCollection", ->
+          expect(@serializer.deserializeCollection).toHaveBeenCalledWith(@model.get("orders"), @jsonData.orders)      
+
+      describe "has no value", ->
+        beforeEach ->     
+          @jsonData = 
+            name: "Donald Duck"    
+          @store = Ember.Object.create()
+          @serializer = Emu.Serializer.create()
+          spyOn(@serializer, "deserializeCollection")      
+          @model = Customer.create()
+          @serializer.deserializeModel(@model, @jsonData)
+        it "should not call deserializeCollection", ->
+          expect(@serializer.deserializeCollection).not.toHaveBeenCalled()     
 
     describe "model field", ->
 
@@ -204,8 +218,7 @@ describe "Emu.Serializer", ->
           orders: Emu.field("App.Order", {collection: true})            
         beforeEach ->
           @customer = Customer.create
-            name: "Terry the customer"        
-            orders: Emu.ModelCollection.create(type: App.Order)
+            name: "Terry the customer"
           @customer.get("orders").pushObject(App.Order.create(orderCode: "123"))
           @customer.get("orders").pushObject(App.Order.create(orderCode: "456"))
           spyOn(Emu.Model, "getAttr").andCallThrough()

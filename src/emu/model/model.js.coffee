@@ -47,7 +47,7 @@ Emu.Model.reopenClass
     unless record._attributes[key]
       if meta.options.collection
         record._attributes[key] = Emu.ModelCollection.create(parent: record, type: meta.type())
-        record._attributes[key].addObserver "content.@each", -> record.set("isDirty", true)
+        record._attributes[key].addObserver "isDirty", -> record.set("isDirty", true)
       else if meta.isModel()
         record._attributes[key] = meta.type().create()
     record._attributes[key] 

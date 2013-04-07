@@ -1,5 +1,24 @@
 describe "Emu.ModelCollection", ->
   Person = Emu.Model.extend() 
+  describe "create", ->
+    beforeEach ->
+      @modelCollection = Emu.ModelCollection.create
+        type: Person
+        store: @store
+    it "should have hasValue false", ->
+      expect(@modelCollection.get("hasValue")).toBeFalsy()
+    it "should have isDirty false", ->
+      expect(@modelCollection.get("isDirty")).toBeFalsy()
+
+  describe "isDirty", ->
+    beforeEach ->
+      beforeEach ->
+      @modelCollection = Emu.ModelCollection.create
+        type: Person
+        store: @store
+      @modelCollection.pushObject(Person.create())
+    it "should have isDirty true", ->
+      expect(@modelCollection.get("isDirty")).toBeTruthy()
   
   describe "createRecord", ->
     beforeEach ->   
@@ -19,3 +38,5 @@ describe "Emu.ModelCollection", ->
       expect(Person.create).toHaveBeenCalledWith(id: 1)
     it "should pass the store to the child model", ->
       expect(@result.get("store")).toBe(@store)
+    it "should have hasValue true", ->
+      expect(@modelCollection.get("hasValue")).toBeTruthy()
