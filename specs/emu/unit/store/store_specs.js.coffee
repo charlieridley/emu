@@ -7,7 +7,8 @@ describe "Emu.Store", ->
     update: ->
   Adapter = 
     create: -> adapter
-  Person = Emu.Model.extend()
+  Person = Emu.Model.extend
+    name: Emu.field("string")
   describe "create", ->
     describe "no adapter specified", ->
       beforeEach ->
@@ -195,11 +196,13 @@ describe "Emu.Store", ->
         modelCollections: @modelCollections           
       @model = Person.create()
       spyOn(@modelCollections[Person], "createRecord").andReturn(@model)
-      @result = @store.createRecord(Person)
+      @result = @store.createRecord(Person, name: "bert")
     it "should return the created model", ->
       expect(@result).toEqual(@model)
-    it "should should set the initial state of the model to be dirty", ->
-      expect(@modelCollections[Person].createRecord).toHaveBeenCalledWith(isDirty: true)
+    it "should should create the model with the propert hash", ->
+      expect(@modelCollections[Person].createRecord).toHaveBeenCalledWith(name: "bert")
+    it "should set the model to dirty", ->
+      expect(@result.get("isDirty")).toEqual(true)
 
   describe "save", ->
     

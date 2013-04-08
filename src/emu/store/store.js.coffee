@@ -9,9 +9,11 @@ Emu.Store = Ember.Object.extend
     @_adapter = @get("adapter")?.create() || Emu.RestAdapter.create()
     @_pushAdapter = @get("pushAdapter")?.create()
 
-  createRecord: (type) ->
+  createRecord: (type, hash) ->
     collection = @_getCollectionForType(type)
-    collection.createRecord(isDirty: true)
+    model = collection.createRecord(hash)
+    model.set("isDirty", true)
+    model
   
   find: (type, param) -> 
     return @findAll(type) unless param 
