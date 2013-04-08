@@ -24,18 +24,17 @@ describe "Emu.ModelCollection", ->
     beforeEach ->   
       @store = Ember.Object.create()
       @modelCollection = Emu.ModelCollection.create
-        type: Person
+        type: App.Person
         store: @store
-      @model = Person.create()
-      spyOn(Person, "create").andReturn(@model)
-      @result = @modelCollection.createRecord(id: 1)
-    it "should create and return the model", ->
-      expect(@result).toBe(@model)
+      @result = @modelCollection.createRecord(id: 1, name: "larry")
+    it "should return a model of type Person", ->
+      expect(@result.constructor.toString()).toBe("App.Person")
     it "should add the item to the collection", ->
       expect(@modelCollection.get("length")).toEqual(1)
-      expect(@modelCollection.get("firstObject")).toBe(@model)
+      expect(@modelCollection.get("firstObject")).toBe(@result)
     it "should set the properties on the new object", ->
-      expect(Person.create).toHaveBeenCalledWith(id: 1)
+      expect(@result.get("id")).toEqual(1)
+      expect(@result.get("name")).toEqual("larry")
     it "should pass the store to the child model", ->
       expect(@result.get("store")).toBe(@store)
     it "should have hasValue true", ->

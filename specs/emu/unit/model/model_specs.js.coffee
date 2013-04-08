@@ -161,3 +161,14 @@ describe "Emu.Model", ->
             @result = Emu.Model.getAttr(@model, "address")
           it "should create an empty model", ->
             expect(App.Address.create).toHaveBeenCalled()
+
+    describe "save", ->
+      beforeEach ->
+          Ember.set(Emu, "defaultStore", undefined)
+          @store = Emu.Store.create()
+          spyOn(@store, "startListening")
+          @model = Person.createRecord()
+          @model.startListening()
+        it "should proxy the call to the store", ->
+          expect(@store.startListening).toHaveBeenCalledWith(@model)
+        

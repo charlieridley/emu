@@ -25,14 +25,12 @@ describe "Emu.Store", ->
 
     describe "with push data adapter", ->
       beforeEach ->
-        Emu.updatableModels = [App.Person, App.Address]
         @pushAdapter =
           create: -> this
-          listenForUpdates: jasmine.createSpy()
+        spyOn(@pushAdapter, "create")
         @store = Emu.Store.create(pushAdapter: @pushAdapter)
-      it "should tell the adapter to listen for updates for all the updatable types", ->
-        expect(@pushAdapter.listenForUpdates).toHaveBeenCalledWith(@store, App.Person)
-        expect(@pushAdapter.listenForUpdates).toHaveBeenCalledWith(@store, App.Address)
+      it "should create a push adapter", ->
+        expect(@pushAdapter.create).toHaveBeenCalled()
 
   describe "findAll", ->   
 
@@ -428,7 +426,7 @@ describe "Emu.Store", ->
       it "should forward the call to findPredicate", ->
         expect(@store.findPredicate).toHaveBeenCalledWith(Person, @predicate) 
 
-  describe "registerUpdatable", ->
+  describe "startListening", ->
     
     describe "when there is a push data adapter", ->
       describe "registering once", ->
@@ -438,9 +436,11 @@ describe "Emu.Store", ->
             create: -> this
             listenForUpdates: jasmine.createSpy()
           @store = Emu.Store.create(pushAdapter: @pushAdapter)
-          @store.registerUpdatable(@model)        
+          @store.startListening(@model)        
         it "should have the model registered as updatable", ->
           expect(@store.findUpdatable(Person, 9)).toBe(@model)
+        it "should call listenForUpdates on the pushAdapter", ->
+          expect(@pushAdapter.listenForUpdates).toHaveBeenCalledWith(@store, Person)
       
       describe "registering twice", ->
         beforeEach ->
@@ -449,8 +449,8 @@ describe "Emu.Store", ->
             create: -> this
             listenForUpdates: jasmine.createSpy()
           @store = Emu.Store.create(pushAdapter: @pushAdapter)
-          @store.registerUpdatable(@model)
-          @store.registerUpdatable(@model)
+          @store.startListening(@model)
+          @store.startListening(@model)
         it "should only have 1 registration in the internal collection", ->
           expect(@store.get("updatableModels")[@model.constructor.toString()]?.length).toEqual(1)
 
@@ -459,7 +459,7 @@ describe "Emu.Store", ->
         @model = Person.create(id:9)
         @store = Emu.Store.create()
         try
-          @store.registerUpdatable(@model)
+          @store.startListening(@model)
         catch exception
           @exception = exception
       it "should throw an exception", ->

@@ -38,19 +38,34 @@ describe "Emu.PushDataAdapter", ->
         expect(@adapter.registerForUpdates).toHaveBeenCalledWith(@store, App.Person)  
 
   describe "didUpdate", ->
-    beforeEach ->
-      @json = {id: 6, address: {town: "Exeter"}}
-      spyOn(Emu.Model, "primaryKey").andCallThrough()
-      @adapter = Emu.PushDataAdapter.create(serializer: Serializer)
-      @model = App.Person.create()
-      @store = 
-        findUpdatable: ->          
-      spyOn(@store, "findUpdatable").andReturn(@model)
-      spyOn(serializer, "deserializeModel")
-      @adapter.didUpdate(App.Person, @store, @json)
-    it "should find the primary key for the type", ->
-      expect(Emu.Model.primaryKey).toHaveBeenCalledWith(App.Person)
-    it "should find from the store", ->
-      expect(@store.findUpdatable).toHaveBeenCalledWith(App.Person, 6)
-    it "should deserialize the json payload to the model", ->
-      expect(serializer.deserializeModel).toHaveBeenCalledWith(@model, @json)
+
+    describe "registered as updatable in store", ->
+      beforeEach ->
+        @json = {id: 6, address: {town: "Exeter"}}
+        spyOn(Emu.Model, "primaryKey").andCallThrough()
+        @adapter = Emu.PushDataAdapter.create(serializer: Serializer)
+        @model = App.Person.create()
+        @store = 
+          findUpdatable: ->          
+        spyOn(@store, "findUpdatable").andReturn(@model)
+        spyOn(serializer, "deserializeModel")
+        @adapter.didUpdate(App.Person, @store, @json)
+      it "should find the primary key for the type", ->
+        expect(Emu.Model.primaryKey).toHaveBeenCalledWith(App.Person)
+      it "should find from the store", ->
+        expect(@store.findUpdatable).toHaveBeenCalledWith(App.Person, 6)
+      it "should deserialize the json payload to the model", ->
+        expect(serializer.deserializeModel).toHaveBeenCalledWith(@model, @json)
+
+    describe "not registered as updatable in store", ->
+      beforeEach ->
+        @json = {id: 6, address: {town: "Exeter"}}
+        spyOn(Emu.Model, "primaryKey").andCallThrough()
+        @adapter = Emu.PushDataAdapter.create(serializer: Serializer)
+        @model = App.Person.create()
+        @store = 
+          findUpdatable: ->          
+        spyOn(serializer, "deserializeModel")
+        @adapter.didUpdate(App.Person, @store, @json)
+      it "should not deserialize the json payload to the model", ->
+        expect(serializer.deserializeModel).not.toHaveBeenCalled()

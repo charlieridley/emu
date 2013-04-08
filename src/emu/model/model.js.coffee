@@ -6,6 +6,8 @@ Emu.Model = Ember.Object.extend
   
   save: -> @get("store").save(this)
 
+  startListening: -> @get("store").startListening(this)
+
   primaryKey: -> @_primaryKey
 
   primaryKeyValue: (value) -> 
@@ -40,6 +42,10 @@ Emu.Model.reopenClass
     @eachComputedProperty (property, meta) ->
       if meta.isField
         callback(property, meta)
+
+  eachUpdatableModel: (callback) ->
+    for property, value of Emu
+      callback(value) if value?.isUpdatableModel
 
   getAttr: (record, key) ->
     meta = record.constructor.metaForProperty(key)

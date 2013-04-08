@@ -1,9 +1,13 @@
 Emu.ModelCollection = Ember.ArrayProxy.extend
   init: ->
     @set("content", Ember.A([]))
-    @createRecord = (hash) ->
-      model = @get("type").create(hash)           
-      model.set("store", @get("store"))
+    @createRecord = (hash) ->      
+      primaryKey = Emu.Model.primaryKey(@get("type"))
+      paramHash = 
+        store: @get("store")
+      paramHash[primaryKey] = hash?.id
+      model = @get("type").create(paramHash)     
+      model.setProperties(hash)            
       @pushObject(model)
     @addObserver "content.@each", =>
       @set("hasValue", true)
