@@ -556,13 +556,13 @@
       this._adapter = ((_ref = this.get("adapter")) != null ? _ref.create() : void 0) || Emu.RestAdapter.create();
       return this._pushAdapter = (_ref1 = this.get("pushAdapter")) != null ? _ref1.create() : void 0;
     },
-    createRecord: function(type) {
-      var collection;
+    createRecord: function(type, hash) {
+      var collection, model;
 
       collection = this._getCollectionForType(type);
-      return collection.createRecord({
-        isDirty: true
-      });
+      model = collection.createRecord(hash);
+      model.set("isDirty", true);
+      return model;
     },
     find: function(type, param) {
       if (!param) {
