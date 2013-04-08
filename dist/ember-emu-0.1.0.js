@@ -241,7 +241,7 @@
       return this.get("store").subscribeToUpdates(this);
     },
     primaryKey: function() {
-      return this._primaryKey;
+      return this._primaryKey || (this._primaryKey = Emu.Model.primaryKey(this.constructor));
     },
     primaryKeyValue: function(value) {
       if (value) {
@@ -304,7 +304,8 @@
         if (meta.options.collection) {
           record._attributes[key] = Emu.ModelCollection.create({
             parent: record,
-            type: meta.type()
+            type: meta.type(),
+            store: record.get("store")
           });
           record._attributes[key].addObserver("isDirty", function() {
             return record.set("isDirty", true);
