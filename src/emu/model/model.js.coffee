@@ -50,7 +50,7 @@ Emu.Model.reopenClass
     record._attributes ?= {}   
     unless record._attributes[key]
       if meta.options.collection
-        record._attributes[key] = Emu.ModelCollection.create(parent: record, type: meta.type())
+        record._attributes[key] = Emu.ModelCollection.create(parent: record, type: meta.type(), store: record.get("store"))
         record._attributes[key].addObserver "isDirty", -> record.set("isDirty", true)
         record._attributes[key].subscribeToUpdates() if meta.options.updatable
       else if meta.isModel()

@@ -132,7 +132,8 @@ describe "Emu.Model", ->
         describe "get once", ->
           beforeEach ->
             spyOn(Emu.ModelCollection, "create").andCallThrough()
-            @model = Person.create()           
+            @store = {}
+            @model = Person.create(store: @store)           
             @result = Emu.Model.getAttr(@model, "orders")
           it "should create an empty collection", ->
             expect(Emu.ModelCollection.create).toHaveBeenCalled()
@@ -140,6 +141,8 @@ describe "Emu.Model", ->
             expect(@result.get("parent")).toBe(@model)
           it "should be of the type specified in the meta data for the field", ->
             expect(@result.get("type")).toBe(App.Order)
+          it "should pass the store refernece", ->
+            expect(@result.get("store")).toBe(@store)
 
         describe "get twice", ->
           beforeEach ->
