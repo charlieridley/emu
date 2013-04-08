@@ -1,2 +1,2 @@
-App.UpdatablePerson = Emu.UpdatableModel.extend
+App.UpdatablePerson = Emu.Model.extend
   name: Emu.field("string")
