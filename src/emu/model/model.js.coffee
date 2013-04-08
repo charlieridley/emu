@@ -10,7 +10,7 @@ Emu.Model = Ember.Object.extend
   subscribeToUpdates: -> 
     @get("store").subscribeToUpdates(this)
 
-  primaryKey: -> @_primaryKey
+  primaryKey: -> @_primaryKey or @_primaryKey = Emu.Model.primaryKey(@constructor)
 
   primaryKeyValue: (value) -> 
     @set(@primaryKey(), value) if value
