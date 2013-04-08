@@ -10,3 +10,13 @@ input "src/emu" do
 		], "ember-emu-#{EMU_VERSION}.js"
 	end	
 end
+
+output "dist"
+input "src/emu-signalr" do
+	match "**/*.coffee" do
+		coffee_script
+		concat [
+			"signalr_pus_data_adapter.js.js"
+		], "ember-emu-signalr-#{EMU_VERSION}.js"
+	end	
+end

@@ -1,5 +1,7 @@
 (function() {
-  window.Emu = Ember.Namespace.create();
+  window.Emu = Ember.Namespace.create({
+    VERSION: "0.1.0"
+  });
 
 }).call(this);
 (function() {
@@ -75,7 +77,9 @@
 
       primaryKey = Emu.Model.primaryKey(type);
       model = store.findUpdatable(type, json[primaryKey]);
-      return this._serializer.deserializeModel(model, json);
+      if (model) {
+        return this._serializer.deserializeModel(model, json);
+      }
     }
   });
 
@@ -178,14 +182,6 @@
 
 }).call(this);
 (function() {
-  Emu.Updatable = Ember.Mixin.create({
-    init: function() {
-      return this.get("store").registerUpdatable(this);
-    }
-  });
-
-}).call(this);
-(function() {
   Emu.field = function(type, options) {
     var meta;
 
@@ -241,6 +237,9 @@
     save: function() {
       return this.get("store").save(this);
     },
+    startListening: function() {
+      return this.get("store").startListening(this);
+    },
     primaryKey: function() {
       return this._primaryKey;
     },
@@ -294,6 +293,20 @@
         }
       });
     },
+    eachUpdatableModel: function(callback) {
+      var property, value, _results;
+
+      _results = [];
+      for (property in Emu) {
+        value = Emu[property];
+        if (value != null ? value.isUpdatableModel : void 0) {
+          _results.push(callback(value));
+        } else {
+          _results.push(void 0);
+        }
+      }
+      return _results;
+    },
     getAttr: function(record, key) {
       var meta, _ref;
 
@@ -334,10 +347,15 @@
 
       this.set("content", Ember.A([]));
       this.createRecord = function(hash) {
-        var model;
+        var model, paramHash, primaryKey;
 
-        model = this.get("type").create(hash);
-        model.set("store", this.get("store"));
+        primaryKey = Emu.Model.primaryKey(this.get("type"));
+        paramHash = {
+          store: this.get("store")
+        };
+        paramHash[primaryKey] = hash != null ? hash.id : void 0;
+        model = this.get("type").create(paramHash);
+        model.setProperties(hash);
         return this.pushObject(model);
       };
       this.addObserver("content.@each", function() {
@@ -348,6 +366,14 @@
         return this.get("content").find(predicate);
       };
     }
+  });
+
+}).call(this);
+(function() {
+  Emu.UpdatableModel = Emu.Model.extend();
+
+  Emu.UpdatableModel.reopenClass({
+    isUpdatableModel: true
   });
 
 }).call(this);
@@ -481,24 +507,24 @@
       }
     },
     _serializeProperty: function(model, jsonData, property, meta) {
-      var attributeSerializer, collection, propertyValue, serializedKey,
+      var attributeSerializer, serializedKey, value,
         _this = this;
 
+      value = Emu.Model.getAttr(model, property);
       serializedKey = this.serializeKey(property);
       if (meta.options.collection) {
-        if (collection = Emu.Model.getAttr(model, property)) {
-          return jsonData[serializedKey] = collection.get("hasValue") ? collection.map(function(item) {
-            return _this.serializeModel(item);
-          }) : void 0;
-        }
+        return jsonData[serializedKey] = (value != null ? value.get("hasValue") : void 0) ? value.map(function(item) {
+          return _this.serializeModel(item);
+        }) : void 0;
       } else if (meta.isModel()) {
-        propertyValue = Emu.Model.getAttr(model, property);
-        if (propertyValue.get("hasValue")) {
-          return jsonData[serializedKey] = this.serializeModel(propertyValue);
+        if (value.get("hasValue")) {
+          return jsonData[serializedKey] = this.serializeModel(value);
         }
       } else {
-        attributeSerializer = Emu.AttributeSerializers[meta.type()];
-        return jsonData[serializedKey] = attributeSerializer.serialize(Emu.Model.getAttr(model, property));
+        if (value) {
+          attributeSerializer = Emu.AttributeSerializers[meta.type()];
+          return jsonData[serializedKey] = attributeSerializer.serialize(value);
+        }
       }
     }
   });
@@ -522,7 +548,7 @@
 (function() {
   Emu.Store = Ember.Object.extend({
     init: function() {
-      var _ref;
+      var _ref, _ref1;
 
       if (!Ember.get(Emu, "defaultStore")) {
         Ember.set(Emu, "defaultStore", this);
@@ -539,7 +565,8 @@
       if (!this.get("updatableModels")) {
         this.set("updatableModels", {});
       }
-      return this._adapter = ((_ref = this.get("adapter")) != null ? _ref.create() : void 0) || Emu.RestAdapter.create();
+      this._adapter = ((_ref = this.get("adapter")) != null ? _ref.create() : void 0) || Emu.RestAdapter.create();
+      return this._pushAdapter = (_ref1 = this.get("pushAdapter")) != null ? _ref1.create() : void 0;
     },
     createRecord: function(type) {
       var collection;
@@ -580,9 +607,7 @@
           var queryResult;
 
           queryResult = collection.filter(deferredQuery.predicate);
-          return queryResult.forEach(function(item) {
-            return deferredQuery.results.pushObject(item);
-          });
+          return deferredQuery.results.pushObjects(queryResult);
         });
       }
     },
@@ -594,7 +619,9 @@
         return item.primaryKeyValue() === id;
       });
       if (!model) {
-        model = collection.createRecord();
+        model = collection.createRecord({
+          id: id
+        });
         model.primaryKeyValue(id);
       }
       return this.loadModel(model);
@@ -622,7 +649,7 @@
       return this._didCollectionLoad(collection);
     },
     findPredicate: function(type, predicate) {
-      var allModels, queries, results;
+      var allModels, filtered, queries, results;
 
       allModels = this.findAll(type);
       results = Emu.ModelCollection.create({
@@ -630,11 +657,10 @@
         store: this
       });
       if (allModels.get("isLoaded")) {
-        allModels.forEach(function(model) {
-          if (predicate(model)) {
-            return results.pushObject(model);
-          }
+        filtered = allModels.filter(function(m) {
+          return predicate(m);
         });
+        results.pushObjects(filtered);
       } else {
         queries = this.get("deferredQueries")[type] || (this.get("deferredQueries")[type] = []);
         queries.pushObject({
@@ -671,10 +697,10 @@
       }
       return model;
     },
-    registerUpdatable: function(model) {
+    startListening: function(model) {
       var _base, _name, _ref;
 
-      if (!this.get("pushAdapter")) {
+      if (!this._pushAdapter) {
         throw new Error("You need to register a Emu.PushDataAdapter on your store: Emu.Store.create({pushAdapter: App.MyPushAdapter.create()});");
       }
       if (!this.findUpdatable(model.constructor, model.primaryKeyValue())) {
@@ -682,7 +708,7 @@
           _base[_name] = [];
         }
         this.get("updatableModels")[model.constructor].pushObject(model);
-        return this.get("pushAdapter").listenForUpdates(this, model.constructor);
+        return this._pushAdapter.listenForUpdates(this, model.constructor);
       }
     },
     findUpdatable: function(type, id) {
