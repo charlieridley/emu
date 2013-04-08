@@ -64,9 +64,8 @@ Emu.Store = Ember.Object.extend
     allModels = @findAll(type)    
     results = Emu.ModelCollection.create(type: type, store: this)    
     if allModels.get("isLoaded")
-      allModels.forEach (model) -> 
-        if predicate(model)
-          results.pushObject(model)
+      filtered = allModels.filter (m) -> predicate(m)
+      results.pushObjects filtered
     else
       queries = @get("deferredQueries")[type] or @get("deferredQueries")[type] = []
       queries.pushObject(predicate: predicate, results: results)
