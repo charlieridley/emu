@@ -211,6 +211,23 @@ describe "Emu.Serializer", ->
             name: "Terry the customer"
             age: "47"
 
+      describe "null value", ->
+        Customer = Emu.Model.extend
+          customerId: Emu.field("string", {primaryKey: true})
+          name: Emu.field("string")
+          age: Emu.field("string")      
+        beforeEach ->
+          customer = Customer.create
+            id: "8"
+            customerId: "55"
+            name: "Terry the customer"
+          @serializer = Emu.Serializer.create()
+          @jsonResult = @serializer.serializeModel(customer)
+        it "should not include the null value in the serialized object", ->
+          expect(@jsonResult).toEqual
+            customerId: "55"
+            name: "Terry the customer"
+
     describe "nested collection", ->
       describe "not null value", ->
         Customer = Emu.Model.extend
