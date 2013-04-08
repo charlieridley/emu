@@ -30,8 +30,7 @@ Emu.Store = Ember.Object.extend
     if deferredQueries
       deferredQueries.forEach (deferredQuery) ->
         queryResult = collection.filter(deferredQuery.predicate)
-        queryResult.forEach (item) ->
-          deferredQuery.results.pushObject(item)
+        deferredQuery.results.pushObjects(queryResult)
   
   findById: (type, id) ->
     collection = @_getCollectionForType(type)
