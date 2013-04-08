@@ -6,18 +6,32 @@ describe "Emu.SignalrPushDataAdapter", ->
   $.connection = 
     personHub: {}
   describe "registerForUpdates", ->
-    beforeEach ->      
-      @store = {}
-      spyOn(serializer, "serializeTypeName").andReturn("person")
-      @adapter = Emu.SignalrPushDataAdapter.create(serializer: Serializer)
-      @adapter.registerForUpdates(@store, App.Person)
-    it "should serialize the type name", ->
-      expect(serializer.serializeTypeName).toHaveBeenCalledWith(App.Person)
-    it "should register for 'updated' updates", ->
-      expect($.connection.personHub.updated).not.toBeUndefined()
+    describe "once", ->
+      beforeEach ->      
+        @store = {}
+        spyOn(serializer, "serializeTypeName").andReturn("person")
+        @adapter = Emu.SignalrPushDataAdapter.create(serializer: Serializer)
+        @adapter.registerForUpdates(@store, App.Person)
+      it "should serialize the type name", ->
+        expect(serializer.serializeTypeName).toHaveBeenCalledWith(App.Person)
+      it "should register for 'updated' updates", ->
+        expect($.connection.personHub.updated).not.toBeUndefined()
+
+    describe "twice", ->
+      beforeEach ->      
+        @store = {}
+        spyOn(serializer, "serializeTypeName").andReturn("person")
+        @adapter = Emu.SignalrPushDataAdapter.create(serializer: Serializer)
+        @adapter.registerForUpdates(@store, App.Person)
+        @updatedFunc = $.connection.personHub.updated
+        @adapter.registerForUpdates(@store, App.Person)
+      it "should not re-register the updated function", ->
+        expect(@updatedFunc).toBe($.connection.personHub.updated)
 
   describe "updated", ->
     beforeEach ->
+      $.connection =
+        personHub: {}
       @json = {name: "bob"}
       @store = {}
       spyOn(serializer, "serializeTypeName").andReturn("person")
