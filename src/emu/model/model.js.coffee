@@ -4,9 +4,11 @@ Emu.Model = Ember.Object.extend
       @set("store", Ember.get(Emu, "defaultStore"))  
     @_primaryKey = Emu.Model.primaryKey(@constructor)
   
-  save: -> @get("store").save(this)
+  save: -> 
+    @get("store").save(this)
 
-  startListening: -> @get("store").startListening(this)
+  subscribeToUpdates: -> 
+    @get("store").subscribeToUpdates(this)
 
   primaryKey: -> @_primaryKey
 
@@ -43,10 +45,6 @@ Emu.Model.reopenClass
       if meta.isField
         callback(property, meta)
 
-  eachUpdatableModel: (callback) ->
-    for property, value of Emu
-      callback(value) if value?.isUpdatableModel
-
   getAttr: (record, key) ->
     meta = record.constructor.metaForProperty(key)
     record._attributes ?= {}   
@@ -54,6 +52,7 @@ Emu.Model.reopenClass
       if meta.options.collection
         record._attributes[key] = Emu.ModelCollection.create(parent: record, type: meta.type())
         record._attributes[key].addObserver "isDirty", -> record.set("isDirty", true)
+        record._attributes[key].subscribeToUpdates() if meta.options.updatable
       else if meta.isModel()
         record._attributes[key] = meta.type().create()
     record._attributes[key] 

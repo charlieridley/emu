@@ -21,21 +21,37 @@ describe "Emu.ModelCollection", ->
       expect(@modelCollection.get("isDirty")).toBeTruthy()
   
   describe "createRecord", ->
-    beforeEach ->   
-      @store = Ember.Object.create()
-      @modelCollection = Emu.ModelCollection.create
-        type: App.Person
-        store: @store
-      @result = @modelCollection.createRecord(id: 1, name: "larry")
-    it "should return a model of type Person", ->
-      expect(@result.constructor.toString()).toBe("App.Person")
-    it "should add the item to the collection", ->
-      expect(@modelCollection.get("length")).toEqual(1)
-      expect(@modelCollection.get("firstObject")).toBe(@result)
-    it "should set the properties on the new object", ->
-      expect(@result.get("id")).toEqual(1)
-      expect(@result.get("name")).toEqual("larry")
-    it "should pass the store to the child model", ->
-      expect(@result.get("store")).toBe(@store)
-    it "should have hasValue true", ->
-      expect(@modelCollection.get("hasValue")).toBeTruthy()
+    describe "without subscribeToUpdates", ->
+      beforeEach ->   
+        @store = Ember.Object.create()
+        @modelCollection = Emu.ModelCollection.create
+          type: App.Person
+          store: @store
+        @result = @modelCollection.createRecord(id: 1, name: "larry")
+      it "should return a model of type Person", ->
+        expect(@result.constructor.toString()).toBe("App.Person")
+      it "should add the item to the collection", ->
+        expect(@modelCollection.get("length")).toEqual(1)
+        expect(@modelCollection.get("firstObject")).toBe(@result)
+      it "should set the properties on the new object", ->
+        expect(@result.get("id")).toEqual(1)
+        expect(@result.get("name")).toEqual("larry")
+      it "should pass the store to the child model", ->
+        expect(@result.get("store")).toBe(@store)
+      it "should have hasValue true", ->
+        expect(@modelCollection.get("hasValue")).toBeTruthy()
+
+    describe "with subscribeToUpdates", ->
+      beforeEach ->
+        @store = Ember.Object.create()
+        @model = App.Person.create()
+        spyOn(App.Person, "create").andReturn(@model)
+        spyOn(@model, "subscribeToUpdates")
+        @modelCollection = Emu.ModelCollection.create
+          type: App.Person
+          store: @store
+        @modelCollection.subscribeToUpdates()
+        @result = @modelCollection.createRecord(id: 1, name: "larry")
+      it "should call subscribeToUpdates on the new model", ->
+        expect(@model.subscribeToUpdates).toHaveBeenCalled()
+

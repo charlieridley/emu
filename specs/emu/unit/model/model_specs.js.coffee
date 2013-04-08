@@ -149,6 +149,18 @@ describe "Emu.Model", ->
             @result2 = Emu.Model.getAttr(@model, "orders")
           it "should return the same collection", ->
             expect(@result1).toBe(@result2)
+
+        describe "updatable collection", ->
+          beforeEach ->
+            Foo = Emu.Model.extend
+              people: Emu.field("App.Person", {collection: true, updatable: true})
+            @collection = Emu.ModelCollection.create()
+            spyOn(Emu.ModelCollection, "create").andReturn(@collection)
+            spyOn(@collection, "subscribeToUpdates")            
+            @model = Foo.create()        
+            Emu.Model.getAttr(@model, "people")
+          it "should create an empty collection", ->
+            expect(@collection.subscribeToUpdates).toHaveBeenCalled()
     
     describe "model", ->
 
@@ -162,13 +174,13 @@ describe "Emu.Model", ->
           it "should create an empty model", ->
             expect(App.Address.create).toHaveBeenCalled()
 
-    describe "save", ->
+    describe "subscribeToUpdates", ->
       beforeEach ->
           Ember.set(Emu, "defaultStore", undefined)
           @store = Emu.Store.create()
-          spyOn(@store, "startListening")
+          spyOn(@store, "subscribeToUpdates")
           @model = Person.createRecord()
-          @model.startListening()
+          @model.subscribeToUpdates()
         it "should proxy the call to the store", ->
-          expect(@store.startListening).toHaveBeenCalledWith(@model)
+          expect(@store.subscribeToUpdates).toHaveBeenCalledWith(@model)
         

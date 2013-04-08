@@ -5,7 +5,7 @@ describe "Receving an update", ->
       SignalrTestSetup.setup()
       spyOn($, "ajax")
       @person = App.UpdatablePerson.find(5)
-      @person.startListening()
+      @person.subscribeToUpdates()
       $.ajax.mostRecentCall.args[0].success(id:5, name:"Bond James Bond")
       $.connection.updatablePersonHub.updated({id: 5, name: "Bond.....James Bond"})
     it "should have updated the model", ->

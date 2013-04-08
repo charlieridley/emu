@@ -426,7 +426,7 @@ describe "Emu.Store", ->
       it "should forward the call to findPredicate", ->
         expect(@store.findPredicate).toHaveBeenCalledWith(Person, @predicate) 
 
-  describe "startListening", ->
+  describe "subscribeToUpdates", ->
     
     describe "when there is a push data adapter", ->
       describe "registering once", ->
@@ -436,7 +436,7 @@ describe "Emu.Store", ->
             create: -> this
             listenForUpdates: jasmine.createSpy()
           @store = Emu.Store.create(pushAdapter: @pushAdapter)
-          @store.startListening(@model)        
+          @store.subscribeToUpdates(@model)        
         it "should have the model registered as updatable", ->
           expect(@store.findUpdatable(Person, 9)).toBe(@model)
         it "should call listenForUpdates on the pushAdapter", ->
@@ -449,8 +449,8 @@ describe "Emu.Store", ->
             create: -> this
             listenForUpdates: jasmine.createSpy()
           @store = Emu.Store.create(pushAdapter: @pushAdapter)
-          @store.startListening(@model)
-          @store.startListening(@model)
+          @store.subscribeToUpdates(@model)
+          @store.subscribeToUpdates(@model)
         it "should only have 1 registration in the internal collection", ->
           expect(@store.get("updatableModels")[@model.constructor.toString()]?.length).toEqual(1)
 
@@ -459,7 +459,7 @@ describe "Emu.Store", ->
         @model = Person.create(id:9)
         @store = Emu.Store.create()
         try
-          @store.startListening(@model)
+          @store.subscribeToUpdates(@model)
         catch exception
           @exception = exception
       it "should throw an exception", ->

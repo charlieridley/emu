@@ -7,7 +7,8 @@ Emu.ModelCollection = Ember.ArrayProxy.extend
         store: @get("store")
       paramHash[primaryKey] = hash?.id
       model = @get("type").create(paramHash)     
-      model.setProperties(hash)            
+      model.setProperties(hash)    
+      model.subscribeToUpdates() if @_subscribeToUpdates
       @pushObject(model)
     @addObserver "content.@each", =>
       @set("hasValue", true)
@@ -15,3 +16,6 @@ Emu.ModelCollection = Ember.ArrayProxy.extend
     
     @find = (predicate) -> 
       @get("content").find(predicate)
+
+  subscribeToUpdates: ->
+    @_subscribeToUpdates = true

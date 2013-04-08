@@ -92,7 +92,7 @@ Emu.Store = Ember.Object.extend
       @_adapter.findById(model.constructor, this, model, model.primaryKeyValue())
     model
 
-  startListening: (model) ->
+  subscribeToUpdates: (model) ->
     unless @_pushAdapter
       throw new Error("You need to register a Emu.PushDataAdapter on your store: Emu.Store.create({pushAdapter: App.MyPushAdapter.create()});")
     unless @findUpdatable(model.constructor, model.primaryKeyValue())
