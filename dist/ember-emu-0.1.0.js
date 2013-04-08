@@ -237,8 +237,8 @@
     save: function() {
       return this.get("store").save(this);
     },
-    startListening: function() {
-      return this.get("store").startListening(this);
+    subscribeToUpdates: function() {
+      return this.get("store").subscribeToUpdates(this);
     },
     primaryKey: function() {
       return this._primaryKey;
@@ -293,20 +293,6 @@
         }
       });
     },
-    eachUpdatableModel: function(callback) {
-      var property, value, _results;
-
-      _results = [];
-      for (property in Emu) {
-        value = Emu[property];
-        if (value != null ? value.isUpdatableModel : void 0) {
-          _results.push(callback(value));
-        } else {
-          _results.push(void 0);
-        }
-      }
-      return _results;
-    },
     getAttr: function(record, key) {
       var meta, _ref;
 
@@ -323,6 +309,9 @@
           record._attributes[key].addObserver("isDirty", function() {
             return record.set("isDirty", true);
           });
+          if (meta.options.updatable) {
+            record._attributes[key].subscribeToUpdates();
+          }
         } else if (meta.isModel()) {
           record._attributes[key] = meta.type().create();
         }
@@ -356,6 +345,9 @@
         paramHash[primaryKey] = hash != null ? hash.id : void 0;
         model = this.get("type").create(paramHash);
         model.setProperties(hash);
+        if (this._subscribeToUpdates) {
+          model.subscribeToUpdates();
+        }
         return this.pushObject(model);
       };
       this.addObserver("content.@each", function() {
@@ -365,15 +357,10 @@
       return this.find = function(predicate) {
         return this.get("content").find(predicate);
       };
+    },
+    subscribeToUpdates: function() {
+      return this._subscribeToUpdates = true;
     }
-  });
-
-}).call(this);
-(function() {
-  Emu.UpdatableModel = Emu.Model.extend();
-
-  Emu.UpdatableModel.reopenClass({
-    isUpdatableModel: true
   });
 
 }).call(this);
@@ -697,7 +684,7 @@
       }
       return model;
     },
-    startListening: function(model) {
+    subscribeToUpdates: function(model) {
       var _base, _name, _ref;
 
       if (!this._pushAdapter) {
