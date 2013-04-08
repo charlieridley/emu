@@ -6,14 +6,14 @@ Ember.onLoad "Ember.Application", (Application) ->
       name: "store"
       before: "controllers"
       injection: (app, stateManager, property) ->
-        return  unless stateManager
-        set stateManager, "store", app[property].create()  if property is "Store"
+        return unless stateManager
+        set stateManager, "store", app[property].create() if property is "Store"
 
     Application.registerInjection
       name: "giveStoreToControllers"
       after: ["store", "controllers"]
       injection: (app, stateManager, property) ->
-        return  unless stateManager
+        return unless stateManager
         if /^[A-Z].*Controller$/.test(property)
           controllerName = property.charAt(0).toLowerCase() + property.substr(1)
           store = stateManager.get("store")

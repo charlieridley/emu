@@ -64,7 +64,7 @@ App.store.save(company);
 	//PUT request to:	http://www.mysite.com/company/1
 
 //Save a new model
-var company = App.Company.createRecord()
+var company = App.Company.createRecord();
 App.store.save(company);
 	//POST request to:	http://www.mysite.com/company/1
 ```
@@ -76,8 +76,8 @@ App.Foo = Emu.Model.extend({
 	bar: Emu.field("string", {defaultValue: "moo"})
 });
 
-var foo = App.Foo.createRecord()
-foo.get("bar") // -> moo
+var foo = App.Foo.createRecord();
+foo.get("bar"); // -> moo
 ```
 
 Serialization

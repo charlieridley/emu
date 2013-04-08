@@ -1,12 +1,18 @@
 describe "Emu.Model", ->  
   Person = Emu.Model.extend
     name: Emu.field("string")
+    address: Emu.field("App.Address")
     orders: Emu.field("App.Order", {collection:true})
   it "should have a flag to indicate the type is an Emu model", ->
     expect(Person.isEmuModel).toBeTruthy()
 
   describe "create", ->
-
+    describe "no values", ->
+      beforeEach ->
+        @person = Person.create()
+      it "should have hasValue false", ->
+        expect(@person.get("hasValue")).toBeFalsy()
+    
     describe "multiple primary keys specified", ->
       beforeEach ->
         @Foo = Emu.Model.extend
@@ -106,6 +112,8 @@ describe "Emu.Model", ->
       @model.set("name", "Harold")
     it "should be in a dirty state", ->
       expect(@model.get("isDirty")).toBeTruthy()
+    it "should have hasValue set to true", ->
+      expect(@model.get("hasValue")).toBeTruthy()
       
   describe "When modifying a collection property on a model", ->
     beforeEach ->
@@ -141,4 +149,15 @@ describe "Emu.Model", ->
             @result2 = Emu.Model.getAttr(@model, "orders")
           it "should return the same collection", ->
             expect(@result1).toBe(@result2)
-  
+    
+    describe "model", ->
+
+      describe "not set", ->
+
+        describe "get once", ->
+          beforeEach ->
+            spyOn(App.Address, "create").andCallThrough()
+            @model = Person.create()
+            @result = Emu.Model.getAttr(@model, "address")
+          it "should create an empty model", ->
+            expect(App.Address.create).toHaveBeenCalled()

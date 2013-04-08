@@ -11,6 +11,7 @@ Emu.field = (type, options) ->
     if arguments.length > 1
       Emu.Model.setAttr(this, key, value)
       @set("isDirty", true)
+      @set("hasValue", true)
     else
       if meta.options.lazy        
         @get("store")?.loadAll(Emu.Model.getAttr(this, key))

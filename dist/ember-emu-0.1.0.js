@@ -61,6 +61,26 @@
 
 }).call(this);
 (function() {
+  Emu.PushDataAdapter = Ember.Object.extend({
+    init: function() {
+      var _ref;
+
+      return this._serializer = ((_ref = this.get("serializer")) != null ? _ref.create() : void 0) || Emu.Serializer.create();
+    },
+    listenForUpdates: function(store, type) {
+      return this.registerForUpdates(store, type);
+    },
+    didUpdate: function(type, store, json) {
+      var model, primaryKey;
+
+      primaryKey = Emu.Model.primaryKey(type);
+      model = store.findUpdatable(type, json[primaryKey]);
+      return this._serializer.deserializeModel(model, json);
+    }
+  });
+
+}).call(this);
+(function() {
   Emu.RestAdapter = Ember.Object.extend({
     init: function() {
       var _ref;
@@ -158,6 +178,14 @@
 
 }).call(this);
 (function() {
+  Emu.Updatable = Ember.Mixin.create({
+    init: function() {
+      return this.get("store").registerUpdatable(this);
+    }
+  });
+
+}).call(this);
+(function() {
   Emu.field = function(type, options) {
     var meta;
 
@@ -183,6 +211,7 @@
       if (arguments.length > 1) {
         Emu.Model.setAttr(this, key, value);
         this.set("isDirty", true);
+        this.set("hasValue", true);
       } else {
         if (meta.options.lazy) {
           if ((_ref = this.get("store")) != null) {
@@ -204,27 +233,10 @@
 (function() {
   Emu.Model = Ember.Object.extend({
     init: function() {
-      var primaryKeyCount, _ref,
-        _this = this;
-
       if (!this.get("store")) {
         this.set("store", Ember.get(Emu, "defaultStore"));
       }
-      primaryKeyCount = 0;
-      this.constructor.eachComputedProperty(function(property, meta) {
-        var _ref;
-
-        if ((_ref = meta.options) != null ? _ref.primaryKey : void 0) {
-          _this._primaryKey = property;
-          return primaryKeyCount++;
-        }
-      });
-      if ((_ref = this._primaryKey) == null) {
-        this._primaryKey = "id";
-      }
-      if (primaryKeyCount > 1) {
-        throw new Error("Error with " + this + ": You can only mark one field as a primary key");
-      }
+      return this._primaryKey = Emu.Model.primaryKey(this.constructor);
     },
     save: function() {
       return this.get("store").save(this);
@@ -256,6 +268,25 @@
     isEmuModel: true,
     createRecord: Emu.proxyToStore("createRecord"),
     find: Emu.proxyToStore("find"),
+    primaryKey: function(type) {
+      var primaryKey, primaryKeyCount,
+        _this = this;
+
+      primaryKey = "id";
+      primaryKeyCount = 0;
+      type.eachComputedProperty(function(property, meta) {
+        var _ref;
+
+        if ((_ref = meta.options) != null ? _ref.primaryKey : void 0) {
+          primaryKey = property;
+          return primaryKeyCount++;
+        }
+      });
+      if (primaryKeyCount > 1) {
+        throw new Error("Error with " + this + ": You can only mark one field as a primary key");
+      }
+      return primaryKey;
+    },
     eachEmuField: function(callback) {
       return this.eachComputedProperty(function(property, meta) {
         if (meta.isField) {
@@ -270,14 +301,18 @@
       if ((_ref = record._attributes) == null) {
         record._attributes = {};
       }
-      if (meta.options.collection && !record._attributes[key]) {
-        record._attributes[key] = Emu.ModelCollection.create({
-          parent: record,
-          type: meta.type()
-        });
-        record._attributes[key].addObserver("content.@each", function() {
-          return record.set("isDirty", true);
-        });
+      if (!record._attributes[key]) {
+        if (meta.options.collection) {
+          record._attributes[key] = Emu.ModelCollection.create({
+            parent: record,
+            type: meta.type()
+          });
+          record._attributes[key].addObserver("isDirty", function() {
+            return record.set("isDirty", true);
+          });
+        } else if (meta.isModel()) {
+          record._attributes[key] = meta.type().create();
+        }
       }
       return record._attributes[key];
     },
@@ -295,6 +330,8 @@
 (function() {
   Emu.ModelCollection = Ember.ArrayProxy.extend({
     init: function() {
+      var _this = this;
+
       this.set("content", Ember.A([]));
       this.createRecord = function(hash) {
         var model;
@@ -303,6 +340,10 @@
         model.set("store", this.get("store"));
         return this.pushObject(model);
       };
+      this.addObserver("content.@each", function() {
+        _this.set("hasValue", true);
+        return _this.set("isDirty", true);
+      });
       return this.find = function(predicate) {
         return this.get("content").find(predicate);
       };
@@ -403,7 +444,7 @@
         var existingModel, model;
 
         existingModel = oldModels.find(function(x) {
-          return x.get("id") === item.id;
+          return x.primaryKeyValue() === item[x.primaryKey()];
         });
         model = existingModel ? collection.pushObject(existingModel) : collection.createRecord();
         return _this.deserializeModel(model, item);
@@ -428,9 +469,8 @@
         }
       } else if (meta.isModel()) {
         if (value) {
-          modelProperty = meta.type().create();
-          this.deserializeModel(modelProperty, value);
-          return model.set(property, modelProperty);
+          modelProperty = Emu.Model.getAttr(model, property);
+          return this.deserializeModel(modelProperty, value);
         }
       } else {
         attributeSerializer = Emu.AttributeSerializers[meta.type()];
@@ -447,13 +487,13 @@
       serializedKey = this.serializeKey(property);
       if (meta.options.collection) {
         if (collection = Emu.Model.getAttr(model, property)) {
-          return jsonData[serializedKey] = collection.get("length") > 0 ? collection.map(function(item) {
+          return jsonData[serializedKey] = collection.get("hasValue") ? collection.map(function(item) {
             return _this.serializeModel(item);
           }) : void 0;
         }
       } else if (meta.isModel()) {
         propertyValue = Emu.Model.getAttr(model, property);
-        if (propertyValue) {
+        if (propertyValue.get("hasValue")) {
           return jsonData[serializedKey] = this.serializeModel(propertyValue);
         }
       } else {
@@ -495,6 +535,9 @@
       }
       if (!this.get("deferredQueries")) {
         this.set("deferredQueries", {});
+      }
+      if (!this.get("updatableModels")) {
+        this.set("updatableModels", {});
       }
       return this._adapter = ((_ref = this.get("adapter")) != null ? _ref.create() : void 0) || Emu.RestAdapter.create();
     },
@@ -627,6 +670,27 @@
         this._adapter.findById(model.constructor, this, model, model.primaryKeyValue());
       }
       return model;
+    },
+    registerUpdatable: function(model) {
+      var _base, _name, _ref;
+
+      if (!this.get("pushAdapter")) {
+        throw new Error("You need to register a Emu.PushDataAdapter on your store: Emu.Store.create({pushAdapter: App.MyPushAdapter.create()});");
+      }
+      if (!this.findUpdatable(model.constructor, model.primaryKeyValue())) {
+        if ((_ref = (_base = this.get("updatableModels"))[_name = model.constructor]) == null) {
+          _base[_name] = [];
+        }
+        this.get("updatableModels")[model.constructor].pushObject(model);
+        return this.get("pushAdapter").listenForUpdates(this, model.constructor);
+      }
+    },
+    findUpdatable: function(type, id) {
+      var _ref;
+
+      return (_ref = this.get("updatableModels")[type]) != null ? _ref.find(function(model) {
+        return model.primaryKeyValue() === id;
+      }) : void 0;
     },
     _didCollectionLoad: function(collection) {
       collection.set("isLoaded", true);

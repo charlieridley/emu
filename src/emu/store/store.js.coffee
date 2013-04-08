@@ -34,8 +34,7 @@ Emu.Store = Ember.Object.extend
     if deferredQueries
       deferredQueries.forEach (deferredQuery) ->
         queryResult = collection.filter(deferredQuery.predicate)
-        queryResult.forEach (item) ->
-          deferredQuery.results.pushObject(item)
+        deferredQuery.results.pushObjects(queryResult)
   
   findById: (type, id) ->
     collection = @_getCollectionForType(type)
@@ -68,9 +67,8 @@ Emu.Store = Ember.Object.extend
     allModels = @findAll(type)    
     results = Emu.ModelCollection.create(type: type, store: this)    
     if allModels.get("isLoaded")
-      allModels.forEach (model) -> 
-        if predicate(model)
-          results.pushObject(model)
+      filtered = allModels.filter (m) -> predicate(m)
+      results.pushObjects filtered
     else
       queries = @get("deferredQueries")[type] or @get("deferredQueries")[type] = []
       queries.pushObject(predicate: predicate, results: results)
