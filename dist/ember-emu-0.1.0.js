@@ -1,5 +1,5 @@
 // Version: 0.1.0
-// Last commit: e509f4a (2013-04-08 17:06:13 -0400)
+// Last commit: d875b01 (2013-04-09 10:43:02 -0400)
 
 
 (function() {
@@ -73,8 +73,16 @@
 
       return this._serializer = ((_ref = this.get("serializer")) != null ? _ref.create() : void 0) || Emu.Serializer.create();
     },
+    start: function(store) {
+      var _ref,
+        _this = this;
+
+      return (_ref = this.updatableTypes) != null ? _ref.forEach(function(type) {
+        return _this.listenForUpdates(store, Ember.get(type));
+      }) : void 0;
+    },
     listenForUpdates: function(store, type) {
-      return this.registerForUpdates(store, type);
+      return typeof this.registerForUpdates === "function" ? this.registerForUpdates(store, type) : void 0;
     },
     didUpdate: function(type, store, json) {
       var model, primaryKey;
@@ -540,7 +548,7 @@
 (function() {
   Emu.Store = Ember.Object.extend({
     init: function() {
-      var _ref, _ref1;
+      var _ref, _ref1, _ref2;
 
       if (!Ember.get(Emu, "defaultStore")) {
         Ember.set(Emu, "defaultStore", this);
@@ -558,7 +566,8 @@
         this.set("updatableModels", {});
       }
       this._adapter = ((_ref = this.get("adapter")) != null ? _ref.create() : void 0) || Emu.RestAdapter.create();
-      return this._pushAdapter = (_ref1 = this.get("pushAdapter")) != null ? _ref1.create() : void 0;
+      this._pushAdapter = (_ref1 = this.get("pushAdapter")) != null ? _ref1.create() : void 0;
+      return (_ref2 = this._pushAdapter) != null ? _ref2.start(this) : void 0;
     },
     createRecord: function(type, hash) {
       var collection, model;
@@ -699,8 +708,7 @@
         if ((_ref = (_base = this.get("updatableModels"))[_name = model.constructor]) == null) {
           _base[_name] = [];
         }
-        this.get("updatableModels")[model.constructor].pushObject(model);
-        return this._pushAdapter.listenForUpdates(this, model.constructor);
+        return this.get("updatableModels")[model.constructor].pushObject(model);
       }
     },
     findUpdatable: function(type, id) {
