@@ -1,23 +1,28 @@
-// Version: 0.1.0
-// Last commit: d875b01 (2013-04-09 10:43:02 -0400)
+// Version: 0.1.0-3-gf7c83c3
+// Last commit: f7c83c3 (2013-04-09 11:45:37 -0400)
 
 
 (function() {
   Emu.SignalrPushDataAdapter = Emu.PushDataAdapter.extend({
     registerForUpdates: function(store, type) {
-      var hub, modelKey, _ref, _ref1,
+      var hub, modelKey, _base, _ref, _ref1,
         _this = this;
 
       modelKey = this._serializer.serializeTypeName(type);
       if (hub = (_ref = $.connection) != null ? _ref[modelKey + "Hub"] : void 0) {
-        return (_ref1 = hub.updated) != null ? _ref1 : hub.updated = function(json) {
+        return (_ref1 = (_base = hub.client).updated) != null ? _ref1 : _base.updated = function(json) {
           return _this.didUpdate(type, store, json);
         };
       }
     },
     start: function(store) {
       this._super(store);
-      return $.connection.start();
+      $.connection.hub.logging = true;
+      return $.connection.hub.start().done(function() {
+        return console.debug("Connected to SignalR hub");
+      }).fail(function() {
+        return console.debug("Failed to connect to SignalR hub");
+      });
     }
   });
 
