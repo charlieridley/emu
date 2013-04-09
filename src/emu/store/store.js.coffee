@@ -8,6 +8,7 @@ Emu.Store = Ember.Object.extend
     @set("updatableModels", {})  unless @get("updatableModels")
     @_adapter = @get("adapter")?.create() || Emu.RestAdapter.create()
     @_pushAdapter = @get("pushAdapter")?.create()
+    @_pushAdapter?.start(this)
 
   createRecord: (type, hash) ->
     collection = @_getCollectionForType(type)
@@ -100,7 +101,6 @@ Emu.Store = Ember.Object.extend
     unless @findUpdatable(model.constructor, model.primaryKeyValue())
       @get("updatableModels")[model.constructor] ?= []
       @get("updatableModels")[model.constructor].pushObject(model)
-      @_pushAdapter.listenForUpdates(this, model.constructor)  
 
   findUpdatable: (type, id) ->
     @get("updatableModels")[type]?.find (model) -> 

@@ -4,5 +4,6 @@ Emu.SignalrPushDataAdapter = Emu.PushDataAdapter.extend
     if hub = $.connection?[modelKey + "Hub"]
       hub.updated ?= (json) => @didUpdate(type, store, json)
 
-  start: ->
+  start: (store) ->
+    @_super(store)
     $.connection.start()

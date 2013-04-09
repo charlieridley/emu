@@ -10,6 +10,7 @@ describe "Emu.SignalrPushDataAdapter", ->
       beforeEach ->      
         @store = {}
         spyOn(serializer, "serializeTypeName").andReturn("person")
+        Adapter = Emu.SignalrPushDataAdapter.extend()
         @adapter = Emu.SignalrPushDataAdapter.create(serializer: Serializer)
         @adapter.registerForUpdates(@store, App.Person)
       it "should serialize the type name", ->
@@ -46,8 +47,14 @@ describe "Emu.SignalrPushDataAdapter", ->
     beforeEach ->
       $.connection =
         start: jasmine.createSpy()
+      MyPushAdapter = Emu.SignalrPushDataAdapter.extend(updatableTypes: ["App.Person", "App.Customer"])
+      @adapter = MyPushAdapter.create()
       @store = jasmine.createSpy()
-      @adapter = Emu.SignalrPushDataAdapter.create(serializer: Serializer)
+      spyOn(@adapter, "listenForUpdates")
       @adapter.start(@store)
+    it "should listen for updates for App.Person", ->
+      expect(@adapter.listenForUpdates).toHaveBeenCalledWith(@store, App.Person)
+    it "should listen for updates for App.Customer", ->
+      expect(@adapter.listenForUpdates).toHaveBeenCalledWith(@store, App.Customer)
     it "should start the signalr connection", ->
       expect($.connection.start).toHaveBeenCalled()
