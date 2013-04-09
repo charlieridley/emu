@@ -1,3 +1,7 @@
+// Version: 0.1.0
+// Last commit: e509f4a (2013-04-08 17:06:13 -0400)
+
+
 (function() {
   window.Emu = Ember.Namespace.create({
     VERSION: "0.1.0"

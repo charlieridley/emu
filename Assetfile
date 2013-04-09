@@ -1,22 +1,51 @@
 require "rake-pipeline-web-filters"
 EMU_VERSION = File.read("VERSION").strip
+class VersionInfo < Rake::Pipeline::Filter
+  def version_info
+    @version_info ||= begin
+      latest_tag = `git describe --tags`
+      last_commit = `git log -n 1 --format="%h (%ci)"`
+
+      out = "// Version: #{latest_tag}"
+      out << "// Last commit: #{last_commit}"
+      out
+    end
+  end
+
+  def generate_output(inputs, output)
+    inputs.each do |input|
+      file = File.read(input.fullpath)
+      output.write "#{version_info}\n\n#{file}"
+    end
+  end
+end
 output "dist"
 input "src/emu" do
-	match "**/*.coffee" do
-		coffee_script
-		concat [
-			"core.js.js",
-			"application_ext.js.js"
-		], "ember-emu-#{EMU_VERSION}.js"
-	end	
+  match "**/*.coffee" do
+    coffee_script
+    concat [
+      "core.js.js",
+      "application_ext.js.js"
+    ], "ember-emu-#{EMU_VERSION}.js"
+  end 
+
+  match "ember-emu-#{EMU_VERSION}.js" do
+    filter VersionInfo
+    concat "ember-emu-#{EMU_VERSION}.js"
+  end
 end
 
 output "dist"
 input "src/emu-signalr" do
-	match "**/*.coffee" do
-		coffee_script
-		concat [
-			"signalr_pus_data_adapter.js.js"
-		], "ember-emu-signalr-#{EMU_VERSION}.js"
-	end	
+  match "**/*.coffee" do
+    coffee_script
+    concat [
+      "signalr_pus_data_adapter.js.js"
+    ], "ember-emu-signalr-#{EMU_VERSION}.js"
+  end 
+
+  match "ember-emu-signalr-#{EMU_VERSION}.js" do
+    filter VersionInfo
+    concat "ember-emu-signalr-#{EMU_VERSION}.js"
+  end
 end
