@@ -129,7 +129,7 @@ App.Store = Emu.Store.extend({
   })
 });
 ```
-The signalr adapter looks for a hub named '<type name>Hub' with an 'update' method.
+For this example the signalr adapter would look for a hub named 'runningJobHub' with an 'update' method.
 
 You can then subcribe to updates for an object like this:
 
