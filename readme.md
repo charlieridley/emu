@@ -113,3 +113,58 @@ This will also serialize the URLs with underscores
 ```
 /funny_person?search_term=chuckle
 ```
+Receving updates from server
+----------------------------
+
+This is a bit of an experiment, I think there's a lot of scope for improving this API so it's likely to change.
+
+You can receive updates from your server using the Emu.PushDataAdapter. There is currently a signalr implementation of this. In order to use this you need to specify your adapter on the store. 
+
+Use signalr adapter like this:
+
+```javascript
+App.Store = Emu.Store.extend({
+  pushAdapter: Emu.SignalrPushDataAdapter.extend({
+    updatableTypes: ["App.RunningJob"]
+  })
+});
+```
+The signalr adapter looks for a hub named '<type name>Hub' with an 'update' method.
+
+You can then subcribe to updates for an object like this:
+
+```javascript
+var runningJob = App.RunningJob.find(5);
+runningJob.subscribeToUpdates();
+runningJob.get("logMessages.firstObject.message"); // -> undefined
+//updated received: {id: 5, logMessaages: {id: 1, message: "something amazing happened"}}
+runningJob.get("logMessages.firstObject.message"); // -> "something amazing happened"
+```
+You can also specify that you would like all children of a collection to receive updates when defining your model, like this:
+
+```javascript
+App.Job = Emu.Model({
+  title: Emu.field("string"),
+  runningJobs: Emu.field("App.RunningJob", {collection: true, updatable: true})
+});
+```
+
+You can also make your own PushDataAdapter like this:
+
+```javascript
+App.MySpecialPushAdapter = Emu.PushDataAdapter.extend({
+  //implement this function to receive updates for a type
+  registerForUpdates: function(store, type){
+    var _this = thisl
+    someCallbackThatReceivesAnUpdateForType(type, function(json){
+      _this.didUpdate(type, store, json);
+    });    
+  },
+  
+  //implement this function for any start code required
+  start: function(store){
+    this._super(store);
+    //Initialization code here	
+  }
+});
+
