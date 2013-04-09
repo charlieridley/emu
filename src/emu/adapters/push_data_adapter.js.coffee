@@ -12,4 +12,4 @@ Emu.PushDataAdapter = Ember.Object.extend
   didUpdate: (type, store, json) ->
     primaryKey = Emu.Model.primaryKey(type)
     model = store.findUpdatable(type, json[primaryKey])
-    @_serializer.deserializeModel(model, json) if model
+    @_serializer.deserializeModel(model, json, true) if model

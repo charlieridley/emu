@@ -54,8 +54,8 @@ describe "Emu.PushDataAdapter", ->
         expect(Emu.Model.primaryKey).toHaveBeenCalledWith(App.Person)
       it "should find from the store", ->
         expect(@store.findUpdatable).toHaveBeenCalledWith(App.Person, 6)
-      it "should deserialize the json payload to the model", ->
-        expect(serializer.deserializeModel).toHaveBeenCalledWith(@model, @json)
+      it "should deserialize the json payload to the model with the addative flag", ->
+        expect(serializer.deserializeModel).toHaveBeenCalledWith(@model, @json, true)
 
     describe "not registered as updatable in store", ->
       beforeEach ->
