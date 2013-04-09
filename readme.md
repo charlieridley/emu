@@ -118,9 +118,9 @@ Receiving updates from server
 
 This is a bit of an experiment, I think there's a lot of scope for improving this API so it's likely to change.
 
-You can receive updates from your server using the Emu.PushDataAdapter. There is currently a signalr implementation of this. In order to use this you need to specify your adapter on the store. 
+You can receive updates from your server using the Emu.PushDataAdapter. There is currently a [SignalR](https://github.com/SignalR/SignalR) implementation of this. In order to use this you need to specify your adapter on the store. 
 
-Use signalr adapter like this:
+Use SignalR adapter like this:
 
 ```javascript
 App.Store = Emu.Store.extend({
