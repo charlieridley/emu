@@ -29,7 +29,7 @@ Emu.Model.reopenClass
   createRecord: Emu.proxyToStore("createRecord")
   find: Emu.proxyToStore("find")  
 
-  primaryKey: (type) ->
+  primaryKey: (type = this) ->
     primaryKey = "id"  
     primaryKeyCount = 0
     type.eachComputedProperty (property, meta) =>

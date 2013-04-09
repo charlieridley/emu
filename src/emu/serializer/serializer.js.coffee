@@ -14,21 +14,27 @@ Emu.Serializer = Ember.Object.extend
       @_serializeProperty(model, jsonData, property, meta)      
     jsonData
   
-  deserializeModel: (model, jsonData) ->
+  deserializeModel: (model, jsonData, addative) ->
     primaryKeyValue = jsonData[model.primaryKey()]
     model.primaryKeyValue(primaryKeyValue) if primaryKeyValue
     model.constructor.eachEmuField (property, meta) =>
       serializedProperty = @serializeKey(property)
-      @_deserializeProperty(model, property, jsonData[serializedProperty], meta)  
+      @_deserializeProperty(model, property, jsonData[serializedProperty], meta, addative)  
     model
   
-  deserializeCollection: (collection, jsonData) ->
-    oldModels = collection.toArray()
+  deserializeCollection: (collection, jsonData, addative) ->
+    existingItems = collection.toArray()
     collection.clear()
+    if addative
+      ids = jsonData.map (item) -> item[collection.get("type").primaryKey()]
+      missingItems = existingItems.filter (item) -> 
+        not ids.contains(item.primaryKeyValue())
+      collection.pushObjects(missingItems)
+    
     jsonData.forEach (item) =>      
-      existingModel = oldModels.find (x) -> x.primaryKeyValue() == item[x.primaryKey()]
+      existingModel = existingItems.find (x) -> x.primaryKeyValue() == item[x.primaryKey()]
       model = if existingModel then collection.pushObject(existingModel) else collection.createRecord()
-      @deserializeModel(model, item)      
+      @deserializeModel(model, item, addative)     
   
   serializeQueryHash: (queryHash) ->
     queryString = "?"
@@ -36,9 +42,9 @@ Emu.Serializer = Ember.Object.extend
       queryString += @serializeKey(key) + "=" + value + "&"
     queryString.slice(0, queryString.length - 1)
   
-  _deserializeProperty: (model, property, value, meta) ->   
+  _deserializeProperty: (model, property, value, meta, addative) ->   
     if meta.options.collection      
-      if value then @deserializeCollection(Emu.Model.getAttr(model, property), value) 
+      if value then @deserializeCollection(Emu.Model.getAttr(model, property), value, addative) 
     else if meta.isModel()
       if value
         modelProperty = Emu.Model.getAttr(model, property)
