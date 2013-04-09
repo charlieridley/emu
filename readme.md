@@ -155,7 +155,7 @@ You can also make your own PushDataAdapter like this:
 App.MySpecialPushAdapter = Emu.PushDataAdapter.extend({
   //implement this function to receive updates for a type
   registerForUpdates: function(store, type){
-    var _this = thisl
+    var _this = this;
     someCallbackThatReceivesAnUpdateForType(type, function(json){
       _this.didUpdate(type, store, json);
     });    
