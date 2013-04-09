@@ -26,6 +26,7 @@ files = [
   'specs/emu/unit/**/*.js.coffee',  
   'specs/emu/integration/test_setup.js.coffee',
   'specs/emu/integration/*.js.coffee',
+  'specs/emu-signalr/models.js.coffee',
   'src/**/signalr_push_data_adapter.js.coffee',
   'specs/emu-signalr/unit/*.js.coffee',
   'specs/emu-signalr/integration/*.js.coffee'
