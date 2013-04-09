@@ -113,7 +113,7 @@ This will also serialize the URLs with underscores
 ```
 /funny_person?search_term=chuckle
 ```
-Receving updates from server
+Receiving updates from server
 ----------------------------
 
 This is a bit of an experiment, I think there's a lot of scope for improving this API so it's likely to change.
