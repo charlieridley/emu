@@ -69,3 +69,15 @@ describe "Emu.PushDataAdapter", ->
         @adapter.didUpdate(App.Person, @store, @json)
       it "should not deserialize the json payload to the model", ->
         expect(serializer.deserializeModel).not.toHaveBeenCalled()
+
+    describe "start", ->
+      beforeEach ->
+        MyPushAdapter = Emu.PushDataAdapter.extend(updatableTypes: ["App.Person", "App.Customer"])
+        @adapter = MyPushAdapter.create()
+        @store = {}
+        spyOn(@adapter, "listenForUpdates")
+        @adapter.start(@store)
+      it "should listen for updates for App.Person", ->
+        expect(@adapter.listenForUpdates).toHaveBeenCalledWith(@store, App.Person)
+      it "should listen for updates for App.Customer", ->
+        expect(@adapter.listenForUpdates).toHaveBeenCalledWith(@store, App.Customer)

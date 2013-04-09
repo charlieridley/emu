@@ -28,10 +28,14 @@ describe "Emu.Store", ->
       beforeEach ->
         @pushAdapter =
           create: -> this
-        spyOn(@pushAdapter, "create")
+          start: ->
+        spyOn(@pushAdapter, "create").andCallThrough()
+        spyOn(@pushAdapter, "start")
         @store = Emu.Store.create(pushAdapter: @pushAdapter)
       it "should create a push adapter", ->
         expect(@pushAdapter.create).toHaveBeenCalled()
+      it "should start the push adapter", ->
+        expect(@pushAdapter.start).toHaveBeenCalledWith(@store)
 
   describe "findAll", ->   
 
@@ -437,19 +441,19 @@ describe "Emu.Store", ->
           @model = Person.create(id:9)
           @pushAdapter = 
             create: -> this
+            start: ->
             listenForUpdates: jasmine.createSpy()
           @store = Emu.Store.create(pushAdapter: @pushAdapter)
           @store.subscribeToUpdates(@model)        
         it "should have the model registered as updatable", ->
           expect(@store.findUpdatable(Person, 9)).toBe(@model)
-        it "should call listenForUpdates on the pushAdapter", ->
-          expect(@pushAdapter.listenForUpdates).toHaveBeenCalledWith(@store, Person)
       
       describe "registering twice", ->
         beforeEach ->
           @model = Person.create(id:9)
           @pushAdapter = 
             create: -> this
+            start: ->
             listenForUpdates: jasmine.createSpy()
           @store = Emu.Store.create(pushAdapter: @pushAdapter)
           @store.subscribeToUpdates(@model)

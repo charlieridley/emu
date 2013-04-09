@@ -3,5 +3,8 @@ window.SignalrTestSetup =
     Emu.updatableModels = undefined
     $.connection = 
       updatablePersonHub: {}
+      start: ->
     Ember.set(Emu, "defaultStore", undefined);  
-    App.Store.create(pushAdapter: Emu.SignalrPushDataAdapter)    
+    App.Store.create
+      pushAdapter: Emu.SignalrPushDataAdapter.extend
+        updatableTypes: ["App.UpdatablePerson"]
