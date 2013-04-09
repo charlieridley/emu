@@ -46,7 +46,10 @@ describe "Emu.SignalrPushDataAdapter", ->
   describe "start", ->
     beforeEach ->
       $.connection =
-        start: jasmine.createSpy()
+        hub:
+          start: jasmine.createSpy().andReturn
+            done: -> this
+            fail: -> this
       MyPushAdapter = Emu.SignalrPushDataAdapter.extend(updatableTypes: ["App.Person", "App.Customer"])
       @adapter = MyPushAdapter.create()
       @store = jasmine.createSpy()
@@ -57,4 +60,4 @@ describe "Emu.SignalrPushDataAdapter", ->
     it "should listen for updates for App.Customer", ->
       expect(@adapter.listenForUpdates).toHaveBeenCalledWith(@store, App.Customer)
     it "should start the signalr connection", ->
-      expect($.connection.start).toHaveBeenCalled()
+      expect($.connection.hub.start).toHaveBeenCalled()

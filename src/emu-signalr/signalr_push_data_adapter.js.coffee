@@ -6,4 +6,7 @@ Emu.SignalrPushDataAdapter = Emu.PushDataAdapter.extend
 
   start: (store) ->
     @_super(store)
-    $.connection.start()
+    $.connection.hub.logging = true;
+    $.connection.hub.start()
+            .done(-> console.debug("Connected to SignalR hub"))
+            .fail(-> console.debug("Failed to connect to SignalR hub"))

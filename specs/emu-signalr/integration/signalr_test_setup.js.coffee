@@ -3,7 +3,10 @@ window.SignalrTestSetup =
     Emu.updatableModels = undefined
     $.connection = 
       updatablePersonHub: {}
-      start: ->
+      hub:
+        start: jasmine.createSpy().andReturn
+          done: -> this
+          fail: -> this
     Ember.set(Emu, "defaultStore", undefined);  
     App.Store.create
       pushAdapter: Emu.SignalrPushDataAdapter.extend
