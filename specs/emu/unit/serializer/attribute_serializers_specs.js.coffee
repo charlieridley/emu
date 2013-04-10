@@ -52,22 +52,52 @@ describe "Emu.AttributeSerializers", ->
         it "should be null", ->
           expect(@result).toBeNull()
   
-  describe "deserializing", ->
+    describe "deserializing", ->
+      
+      describe "has value", ->
+        beforeEach ->
+          @result = Emu.AttributeSerializers["array"].deserialize([1,2,3,4])
+        it "should be the same as the input", ->
+          expect(@result).toEqual([1,2,3,4])
     
-    describe "has value", ->
-      beforeEach ->
-        @result = Emu.AttributeSerializers["array"].deserialize([1,2,3,4])
-      it "should be the same as the input", ->
-        expect(@result).toEqual([1,2,3,4])
-  
-    describe "string input", ->
-      beforeEach ->
-        @result = Emu.AttributeSerializers["array"].deserialize("1,2,3,4")
-      it "should be a deserialized array", ->
-        expect(@result).toEqual(["1","2","3","4"])
-  
-    describe "different type", ->
-      beforeEach ->
-        @result = Emu.AttributeSerializers["array"].deserialize(46)
-      it "should be null", ->
-        expect(@result).toBeNull()
+      describe "string input", ->
+        beforeEach ->
+          @result = Emu.AttributeSerializers["array"].deserialize("1,2,3,4")
+        it "should be a deserialized array", ->
+          expect(@result).toEqual(["1","2","3","4"])
+    
+      describe "different type", ->
+        beforeEach ->
+          @result = Emu.AttributeSerializers["array"].deserialize(46)
+        it "should be null", ->
+          expect(@result).toBeNull()
+
+  describe "boolean", ->
+
+    describe "serialize", ->
+      
+      describe "has value", ->
+        beforeEach ->
+          @result = Emu.AttributeSerializers["boolean"].serialize(true)
+        it "should be the same as the input", ->
+          expect(@result).toEqual(true)
+
+      describe "empty value", ->
+        beforeEach ->
+          @result = Emu.AttributeSerializers["boolean"].serialize(undefined)
+        it "should be null", ->
+          expect(@result).toBeNull()
+
+    describe "deserialize", ->
+
+      describe "has value", ->
+        beforeEach ->
+          @result = Emu.AttributeSerializers["boolean"].deserialize(true)
+        it "should be the same as the input", ->
+          expect(@result).toEqual(true)
+    
+      describe "empty value", ->
+        beforeEach ->
+          @result = Emu.AttributeSerializers["boolean"].deserialize(undefined)
+        it "should be null", ->
+          expect(@result).toBeNull()
