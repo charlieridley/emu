@@ -60,12 +60,13 @@ Persistence
 -----------
 ```javascript
 //Save an existing model
-App.store.save(company);
+var company = App.Company.find(5);
+company.save();
 	//PUT request to:	http://www.mysite.com/company/1
 
 //Save a new model
 var company = App.Company.createRecord();
-App.store.save(company);
+company.save();
 	//POST request to:	http://www.mysite.com/company/1
 ```
 
@@ -113,3 +114,58 @@ This will also serialize the URLs with underscores
 ```
 /funny_person?search_term=chuckle
 ```
+Receiving updates from server
+----------------------------
+
+This is a bit of an experiment, I think there's a lot of scope for improving this API so it's likely to change.
+
+You can receive updates from your server using the Emu.PushDataAdapter. There is currently a [SignalR](https://github.com/SignalR/SignalR) implementation of this. In order to use this you need to specify your adapter on the store. 
+
+Use SignalR adapter like this:
+
+```javascript
+App.Store = Emu.Store.extend({
+  pushAdapter: Emu.SignalrPushDataAdapter.extend({
+    updatableTypes: ["App.RunningJob"]
+  })
+});
+```
+For this example the signalr adapter would look for a hub named 'runningJobHub' with an 'update' method.
+
+You can then subcribe to updates for an object like this:
+
+```javascript
+var runningJob = App.RunningJob.find(5);
+runningJob.subscribeToUpdates();
+runningJob.get("logMessages.firstObject.message"); // -> undefined
+//updated received: {id: 5, logMessages: {id: 1, message: "something amazing happened"}}
+runningJob.get("logMessages.firstObject.message"); // -> "something amazing happened"
+```
+You can also specify that you would like all children of a collection to receive updates when defining your model, like this:
+
+```javascript
+App.Job = Emu.Model({
+  title: Emu.field("string"),
+  runningJobs: Emu.field("App.RunningJob", {collection: true, updatable: true})
+});
+```
+
+You can also make your own PushDataAdapter like this:
+
+```javascript
+App.MySpecialPushAdapter = Emu.PushDataAdapter.extend({
+  //implement this function to receive updates for a type
+  registerForUpdates: function(store, type){
+    var _this = this;
+    someCallbackThatReceivesAnUpdateForType(type, function(json){
+      _this.didUpdate(type, store, json);
+    });    
+  },
+  
+  //implement this function for any start code required
+  start: function(store){
+    this._super(store);
+    //Initialization code here	
+  }
+});
+
