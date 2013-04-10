@@ -1,14 +1,25 @@
 describe "Emu.ModelCollection", ->
   Person = Emu.Model.extend() 
   describe "create", ->
-    beforeEach ->
-      @modelCollection = Emu.ModelCollection.create
-        type: Person
-        store: @store
-    it "should have hasValue false", ->
-      expect(@modelCollection.get("hasValue")).toBeFalsy()
-    it "should have isDirty false", ->
-      expect(@modelCollection.get("isDirty")).toBeFalsy()
+
+    describe "not setting content", ->
+      beforeEach ->
+        @modelCollection = Emu.ModelCollection.create
+          type: Person
+      it "should have hasValue false", ->
+        expect(@modelCollection.get("hasValue")).toBeFalsy()
+      it "should have isDirty false", ->
+        expect(@modelCollection.get("isDirty")).toBeFalsy()
+      it "should set an empty array as content", ->
+        expect(@modelCollection.get("content")).toEqual([])
+
+    describe "setting content", ->
+      beforeEach ->
+        @content = [Ember.Object.create()]
+        @modelCollection = Emu.ModelCollection.create
+          content: @content
+      it "should have the given collection as content", ->
+        expect(@modelCollection.get("content")).toBe(@content)
 
   describe "isDirty", ->
     beforeEach ->

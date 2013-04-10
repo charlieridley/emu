@@ -1,6 +1,6 @@
 Emu.ModelCollection = Ember.ArrayProxy.extend
   init: ->
-    @set("content", Ember.A([]))
+    @set("content", Ember.A([])) unless @get("content")
     @createRecord = (hash) ->      
       primaryKey = Emu.Model.primaryKey(@get("type"))
       paramHash = 
