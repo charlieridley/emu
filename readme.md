@@ -60,12 +60,13 @@ Persistence
 -----------
 ```javascript
 //Save an existing model
-App.store.save(company);
+var company = App.Company.find(5);
+company.save();
 	//PUT request to:	http://www.mysite.com/company/1
 
 //Save a new model
 var company = App.Company.createRecord();
-App.store.save(company);
+company.save();
 	//POST request to:	http://www.mysite.com/company/1
 ```
 
