@@ -354,7 +354,7 @@ describe "Emu.Store", ->
       it "should find all the records", ->
         expect(@store.findAll).toHaveBeenCalledWith(Person)
       it "should create a new collection to contain the results", ->
-        expect(Emu.ModelCollection.create).toHaveBeenCalledWith(type: Person, store: @store)
+        expect(Emu.ModelCollection.create).toHaveBeenCalledWith(type: Person, store: @store, isLoading: false, isLoaded: true)
       it "should run the predicate on each item", ->
         expect(@predicate).toHaveBeenCalledWith(@collection.get("firstObject"))
         expect(@predicate).toHaveBeenCalledWith(@collection.get("lastObject"))
@@ -362,6 +362,10 @@ describe "Emu.Store", ->
         expect(@result.get("length")).toEqual(1)
       it "should return the result which passes the predicate function", ->
         expect(@result.get("firstObject")).toEqual(@collection.get("lastObject"))
+      it "should be in a loaded state", ->
+        expect(@result.get("isLoaded")).toBeTruthy()
+      it "should not be in a loading state", ->
+        expect(@result.get("isLoading")).toBeFalsy()
 
     describe "when all of that type are not loaded", ->
       beforeEach ->
@@ -373,6 +377,10 @@ describe "Emu.Store", ->
         expect(@store.findAll).toHaveBeenCalledWith(Person)
       it "should not return an empty collection", ->
         expect(@result.get("length")).toEqual(0)
+      it "should not be in a loaded state", ->
+        expect(@result.get("isLoaded")).toBeFalsy()
+      it "should be in a loading state", ->
+        expect(@result.get("isLoading")).toBeTruthy()
 
     describe "finishes loading", ->
       beforeEach ->
@@ -389,6 +397,10 @@ describe "Emu.Store", ->
         expect(@store.findAll).toHaveBeenCalledWith(Person)
       it "should not return an empty collection", ->
         expect(@result.get("length")).toEqual(1)
+      it "should be in a loaded state", ->
+        expect(@result.get("isLoaded")).toBeTruthy()
+      it "should not be in a loading state", ->
+        expect(@result.get("isLoading")).toBeFalsy()
 
   describe "find", ->
 
