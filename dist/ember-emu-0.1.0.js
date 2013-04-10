@@ -1,5 +1,5 @@
-// Version: 0.1.0-3-gf7c83c3
-// Last commit: f7c83c3 (2013-04-09 11:45:37 -0400)
+// Version: 0.1.0-15-gbdb3bff
+// Last commit: bdb3bff (2013-04-10 10:17:51 -0400)
 
 
 (function() {
@@ -90,7 +90,7 @@
       primaryKey = Emu.Model.primaryKey(type);
       model = store.findUpdatable(type, json[primaryKey]);
       if (model) {
-        return this._serializer.deserializeModel(model, json);
+        return this._serializer.deserializeModel(model, json, true);
       }
     }
   });
@@ -283,6 +283,9 @@
       var primaryKey, primaryKeyCount,
         _this = this;
 
+      if (type == null) {
+        type = this;
+      }
       primaryKey = "id";
       primaryKeyCount = 0;
       type.eachComputedProperty(function(property, meta) {
@@ -444,7 +447,7 @@
       });
       return jsonData;
     },
-    deserializeModel: function(model, jsonData) {
+    deserializeModel: function(model, jsonData, addative) {
       var primaryKeyValue,
         _this = this;
 
@@ -456,24 +459,33 @@
         var serializedProperty;
 
         serializedProperty = _this.serializeKey(property);
-        return _this._deserializeProperty(model, property, jsonData[serializedProperty], meta);
+        return _this._deserializeProperty(model, property, jsonData[serializedProperty], meta, addative);
       });
       return model;
     },
-    deserializeCollection: function(collection, jsonData) {
-      var oldModels,
+    deserializeCollection: function(collection, jsonData, addative) {
+      var existingItems, ids, missingItems,
         _this = this;
 
-      oldModels = collection.toArray();
+      existingItems = collection.toArray();
       collection.clear();
+      if (addative) {
+        ids = jsonData.map(function(item) {
+          return item[collection.get("type").primaryKey()];
+        });
+        missingItems = existingItems.filter(function(item) {
+          return !ids.contains(item.primaryKeyValue());
+        });
+        collection.pushObjects(missingItems);
+      }
       return jsonData.forEach(function(item) {
         var existingModel, model;
 
-        existingModel = oldModels.find(function(x) {
+        existingModel = existingItems.find(function(x) {
           return x.primaryKeyValue() === item[x.primaryKey()];
         });
         model = existingModel ? collection.pushObject(existingModel) : collection.createRecord();
-        return _this.deserializeModel(model, item);
+        return _this.deserializeModel(model, item, addative);
       });
     },
     serializeQueryHash: function(queryHash) {
@@ -486,12 +498,12 @@
       }
       return queryString.slice(0, queryString.length - 1);
     },
-    _deserializeProperty: function(model, property, value, meta) {
+    _deserializeProperty: function(model, property, value, meta, addative) {
       var attributeSerializer, modelProperty;
 
       if (meta.options.collection) {
         if (value) {
-          return this.deserializeCollection(Emu.Model.getAttr(model, property), value);
+          return this.deserializeCollection(Emu.Model.getAttr(model, property), value, addative);
         }
       } else if (meta.isModel()) {
         if (value) {
@@ -608,7 +620,9 @@
           var queryResult;
 
           queryResult = collection.filter(deferredQuery.predicate);
-          return deferredQuery.results.pushObjects(queryResult);
+          deferredQuery.results.pushObjects(queryResult);
+          deferredQuery.results.set("isLoaded", true);
+          return deferredQuery.results.set("isLoading", false);
         });
       }
     },
@@ -655,7 +669,9 @@
       allModels = this.findAll(type);
       results = Emu.ModelCollection.create({
         type: type,
-        store: this
+        store: this,
+        isLoaded: true,
+        isLoading: false
       });
       if (allModels.get("isLoaded")) {
         filtered = allModels.filter(function(m) {
@@ -663,6 +679,8 @@
         });
         results.pushObjects(filtered);
       } else {
+        results.set("isLoading", true);
+        results.set("isLoaded", false);
         queries = this.get("deferredQueries")[type] || (this.get("deferredQueries")[type] = []);
         queries.pushObject({
           predicate: predicate,
