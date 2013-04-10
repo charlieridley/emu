@@ -137,7 +137,7 @@ You can then subcribe to updates for an object like this:
 var runningJob = App.RunningJob.find(5);
 runningJob.subscribeToUpdates();
 runningJob.get("logMessages.firstObject.message"); // -> undefined
-//updated received: {id: 5, logMessaages: {id: 1, message: "something amazing happened"}}
+//updated received: {id: 5, logMessages: {id: 1, message: "something amazing happened"}}
 runningJob.get("logMessages.firstObject.message"); // -> "something amazing happened"
 ```
 You can also specify that you would like all children of a collection to receive updates when defining your model, like this:
