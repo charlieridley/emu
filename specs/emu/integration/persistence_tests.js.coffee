@@ -16,7 +16,7 @@ describe "Saving a new model", ->
       it "should have the serialized model as the payload", ->
         expect($.ajax.mostRecentCall.args[0].data).toEqual({name: "dave"})
 
-    describe "with collection property", ->
+    describe "with lazy collection property", ->
       beforeEach ->
         TestSetup.setup()
         spyOn($, "ajax")
@@ -25,12 +25,25 @@ describe "Saving a new model", ->
         @customer.get("orders").pushObject(App.Order.create(orderCode: "1234"))
         @customer.get("orders").pushObject(App.Order.create(orderCode: "5678"))
         @customer.save()
-      it "should have the serialized model as the payload", ->
+      it "should have the serialized model as the payload, without the lazy collection", ->
         expect($.ajax.mostRecentCall.args[0].data).toEqual
           name: "dave"
-          orders: [
-            {orderCode: "1234"}
-            {orderCode: "5678"}
+
+    describe "with collection property", ->
+      beforeEach ->
+        TestSetup.setup()
+        spyOn($, "ajax")
+        @customer = App.Customer.createRecord()
+        @customer.set("name", "dave")
+        @customer.get("addresses").pushObject(App.Address.create(town: "London"))
+        @customer.get("addresses").pushObject(App.Address.create(town: "New York"))
+        @customer.save()
+      it "should have the serialized model as the payload, with the collection", ->
+        expect($.ajax.mostRecentCall.args[0].data).toEqual
+          name: "dave"
+          addresses: [
+            {town: "London"}
+            {town: "New York"}
           ]
 
 describe "Saving a existing model", ->

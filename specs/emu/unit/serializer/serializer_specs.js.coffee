@@ -299,7 +299,25 @@ describe "Emu.Serializer", ->
         it "should deserialize the object to json without the collection value", ->
           expect(@jsonResult).toEqual
             id: 6
-            name: "Terry the customer"            
+            name: "Terry the customer"       
+
+      describe "lazy collection", ->
+        Customer = Emu.Model.extend
+          name: Emu.field("string")
+          orders:  Emu.field("App.Order", {collection: true, lazy: true})
+        beforeEach ->
+          @customer = Customer.create
+            id: 6
+            name: "Terry the customer"
+          @customer.get("orders").pushObject(App.Order.create(orderCode: "123"))
+          @customer.get("orders").pushObject(App.Order.create(orderCode: "456"))
+          spyOn(Emu.Model, "getAttr").andCallThrough()
+          @serializer = Emu.Serializer.create()
+          @jsonResult = @serializer.serializeModel(@customer)
+        it "should not deserialize the lazy property", ->
+          expect(@jsonResult).toEqual
+            id: 6
+            name: "Terry the customer"
 
     describe "computed property", ->
       Customer = Emu.Model.extend

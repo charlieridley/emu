@@ -14,6 +14,7 @@ App.Order = Emu.Model.extend
 App.Customer = Emu.Model.extend
   name: Emu.field("string")
   orders: Emu.field("App.Order", {collection: true, lazy: true})
+  addresses: Emu.field("App.Address", {collection: true})
   town: Emu.field("string", {partial: true})  
 
 App.ClubTropicana = Emu.Model.extend
