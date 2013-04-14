@@ -22,4 +22,5 @@ Emu.ModelCollection = Ember.ArrayProxy.extend
   subscribeToUpdates: ->
     @_subscribeToUpdates = true
 
-  deleteRecord: ->
+  deleteRecord: (model) ->
+    @removeObject(model)

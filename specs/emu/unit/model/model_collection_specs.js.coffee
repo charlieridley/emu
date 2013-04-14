@@ -32,6 +32,7 @@ describe "Emu.ModelCollection", ->
       expect(@modelCollection.get("isDirty")).toBeTruthy()
   
   describe "createRecord", ->
+    
     describe "without subscribeToUpdates", ->
       beforeEach ->   
         @store = Ember.Object.create()
@@ -65,4 +66,15 @@ describe "Emu.ModelCollection", ->
         @result = @modelCollection.createRecord(id: 1, name: "larry")
       it "should call subscribeToUpdates on the new model", ->
         expect(@model.subscribeToUpdates).toHaveBeenCalled()
+
+  describe "deleteRecord", ->
+    beforeEach ->
+      @modelCollection = Emu.ModelCollection.create
+        type: App.Person
+        store: @store
+      @model = @modelCollection.createRecord(id: 1, name: "larry")
+      @modelCollection.deleteRecord(@model)
+    it "should have no items left in the collection", ->
+      expect(@modelCollection.get("length")).toEqual(0)
+
 
