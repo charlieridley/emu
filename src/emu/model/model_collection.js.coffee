@@ -1,6 +1,7 @@
 Emu.ModelCollection = Ember.ArrayProxy.extend
   init: ->
     @set("content", Ember.A([])) unless @get("content")
+    
     @createRecord = (hash) ->      
       primaryKey = Emu.Model.primaryKey(@get("type"))
       paramHash = 
@@ -10,6 +11,7 @@ Emu.ModelCollection = Ember.ArrayProxy.extend
       model.setProperties(hash)    
       model.subscribeToUpdates() if @_subscribeToUpdates
       @pushObject(model)
+    
     @addObserver "content.@each", =>
       @set("hasValue", true)
       @set("isDirty", true)
@@ -19,3 +21,5 @@ Emu.ModelCollection = Ember.ArrayProxy.extend
 
   subscribeToUpdates: ->
     @_subscribeToUpdates = true
+
+  deleteRecord: ->

@@ -79,7 +79,10 @@ Emu.Store = Ember.Object.extend
     results
 
   save: (model) ->
-    if model.primaryKeyValue() then @_adapter.update(this, model) else @_adapter.insert(this, model)
+    if model.primaryKeyValue()
+      @_adapter.update(this, model) 
+    else 
+      @_adapter.insert(this, model)
 
   didSave: (model) ->
     model.set("isDirty", false)
@@ -109,6 +112,15 @@ Emu.Store = Ember.Object.extend
   findUpdatable: (type, id) ->
     @get("updatableModels")[type]?.find (model) -> 
       model.primaryKeyValue() == id
+
+  deleteRecord: (model) ->
+    if model.primaryKeyValue()
+      @_adapter.delete(this, model)
+    else
+      @didDeleteRecord(model)
+
+  didDeleteRecord: (model) ->
+    @_getCollectionForType(model.constructor).deleteRecord(model)
     
   _didCollectionLoad: (collection) ->
     collection.set("isLoaded", true)

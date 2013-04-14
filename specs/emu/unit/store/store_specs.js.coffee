@@ -5,6 +5,7 @@ describe "Emu.Store", ->
     findQuery: ->
     insert: ->
     update: ->
+    delete: ->
   Adapter = 
     create: -> adapter
   Person = Emu.Model.extend
@@ -448,6 +449,7 @@ describe "Emu.Store", ->
   describe "subscribeToUpdates", ->
     
     describe "when there is a push data adapter", ->
+      
       describe "registering once", ->
         beforeEach ->
           @model = Person.create(id:9)
@@ -483,4 +485,48 @@ describe "Emu.Store", ->
           @exception = exception
       it "should throw an exception", ->
         expect(@exception.message).toEqual("You need to register a Emu.PushDataAdapter on your store: Emu.Store.create({pushAdapter: App.MyPushAdapter.create()});")
+
+  describe "deleteRecord", ->
+
+    describe "record is persisted", ->
+
+      describe "starts", ->
+        beforeEach ->
+          @store = Emu.Store.create   
+            adapter: Adapter
+          @model = @store.createRecord(Person, {id: 6, name: "harry"})
+          spyOn(adapter, "delete")
+          @store.deleteRecord(@model)
+        
+        it "should call delete on the adapter", ->
+          expect(adapter.delete).toHaveBeenCalledWith(@store, @model)
+
+      describe "finishes", ->
+        beforeEach ->
+          @modelCollections = {}
+          @modelCollections[Person] = Emu.ModelCollection.create(type: Person)
+          @store = Emu.Store.create
+            modelCollections: @modelCollections
+          @model = @modelCollections[Person].createRecord()
+          spyOn(@modelCollections[Person], "deleteRecord")
+          @store.didDeleteRecord(@model)
+
+        it "should delete the record from the modelCollection", ->
+          expect(@modelCollections[Person].deleteRecord).toHaveBeenCalledWith(@model)
+
+    describe "record is not persisted", ->
+      beforeEach ->
+        @modelCollections = {}
+        @modelCollections[Person] = Emu.ModelCollection.create(type: Person)
+        @store = Emu.Store.create   
+          adapter: Adapter
+          modelCollections: @modelCollections
+        @model = @store.createRecord(Person, {name: "harry"})
+        spyOn(adapter, "delete")
+        spyOn(@modelCollections[Person], "deleteRecord")
+        @store.deleteRecord(@model)
+      it "should not call delete on the adapter", ->
+        expect(adapter.delete).not.toHaveBeenCalled()
+      it "should delete the record from the modelCollection", ->
+        expect(@modelCollections[Person].deleteRecord).toHaveBeenCalledWith(@model)
 
