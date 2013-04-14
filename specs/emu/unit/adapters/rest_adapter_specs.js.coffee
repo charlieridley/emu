@@ -15,6 +15,7 @@ describe "Emu.RestAdapter", ->
       beforeEach ->
         spyOn(Emu.Serializer, "create")
         @adapter = Emu.RestAdapter.create()
+      
       it "should create the default serializer", ->
         expect(Emu.Serializer.create).toHaveBeenCalled()
 
@@ -23,6 +24,7 @@ describe "Emu.RestAdapter", ->
       beforeEach ->        
         spyOn(MySerializer, "create")
         @adapter = Emu.RestAdapter.create(serializer: MySerializer)
+      
       it "should create the default serializer", ->
         expect(MySerializer.create).toHaveBeenCalled()
   
@@ -38,6 +40,7 @@ describe "Emu.RestAdapter", ->
           namespace: "api"
           serializer: Serializer
         @adapter.findAll(Person, store, models)
+      
       it "should make a GET request to the endpoint for the entity", ->
         expect($.ajax.mostRecentCall.args[0].url).toEqual("api/person")
         expect($.ajax.mostRecentCall.args[0].type).toEqual("GET")
@@ -51,6 +54,7 @@ describe "Emu.RestAdapter", ->
         @adapter = Emu.RestAdapter.create
           serializer: Serializer
         @adapter.findAll(Person, store, models)
+      
       it "should make a GET request to the endpoint for the entity", ->
         expect($.ajax.mostRecentCall.args[0].url).toEqual("person")
     
@@ -72,8 +76,10 @@ describe "Emu.RestAdapter", ->
           serializer: Serializer
         @adapter.findAll(Person, @store, @models)
         $.ajax.mostRecentCall.args[0].success(@jsonData)
+      
       it "should deserialize the result", ->
         expect(serializer.deserializeCollection).toHaveBeenCalledWith(@models, @jsonData)
+      
       it "should notify the store", ->
         expect(@store.didFindAll).toHaveBeenCalledWith(@models)
     
@@ -93,6 +99,7 @@ describe "Emu.RestAdapter", ->
           namespace: "api"
           serializer: Serializer
         @adapter.findAll(Person, store, models)
+      
       it "should make a GET request to the endpoint for the entity", ->
         expect($.ajax.mostRecentCall.args[0].url).toEqual("api/parentperson/5/person")
         expect($.ajax.mostRecentCall.args[0].type).toEqual("GET")
@@ -109,6 +116,7 @@ describe "Emu.RestAdapter", ->
           namespace: "api"
           serializer: Serializer
         @adapter.findById(Person, store, model, 5)
+      
       it "should make a GET request to the endpoint for the entity", ->
         expect($.ajax.mostRecentCall.args[0].url).toEqual("api/person/5")
         expect($.ajax.mostRecentCall.args[0].type).toEqual("GET")
@@ -129,8 +137,10 @@ describe "Emu.RestAdapter", ->
           serializer: Serializer
         @adapter.findById(Person, @store, @model, 5)
         $.ajax.mostRecentCall.args[0].success(@jsonData)
+      
       it "should deserialize the model", ->
         expect(serializer.deserializeModel).toHaveBeenCalledWith(@model, @jsonData)
+      
       it "should notify the store", ->
         expect(@store.didFindById).toHaveBeenCalledWith(@model)  
   
@@ -146,11 +156,13 @@ describe "Emu.RestAdapter", ->
             namespace: "api"
             serializer: Serializer
         @adapter.findQuery(Person, @store, @model, {age: "40", hairColour: "brown"})
+      
       it "should serialize the query hash", ->
         expect(serializer.serializeQueryHash).toHaveBeenCalledWith({age: "40", hairColour: "brown"})
+      
       it "should make a GET request with the serialized query parameters", ->
-          expect($.ajax.mostRecentCall.args[0].url).toEqual("api/person?age=40&hairColour=brown")
-          expect($.ajax.mostRecentCall.args[0].type).toEqual("GET")
+        expect($.ajax.mostRecentCall.args[0].url).toEqual("api/person?age=40&hairColour=brown")
+        expect($.ajax.mostRecentCall.args[0].type).toEqual("GET")
     
     describe "finishes loading", ->
       beforeEach ->
@@ -171,8 +183,10 @@ describe "Emu.RestAdapter", ->
             serializer: Serializer        
         @adapter.findQuery(Person, @store, @models, {age: "40", hairColour: "brown"})
         $.ajax.mostRecentCall.args[0].success(@jsonData)
+      
       it "should deserialize the result", ->
         expect(serializer.deserializeCollection).toHaveBeenCalledWith(@models, @jsonData)
+      
       it "should notify the store", ->
         expect(@store.didFindQuery).toHaveBeenCalledWith(@models)
   
@@ -190,14 +204,19 @@ describe "Emu.RestAdapter", ->
         spyOn(serializer, "serializeModel").andReturn(@jsonData)
         spyOn(serializer, "serializeTypeName").andReturn("person")
         @adapter.insert(@store, @model)
+      
       it "should deserialize the model", ->
         expect(serializer.serializeModel).toHaveBeenCalledWith(@model)
+      
       it "should send a POST request", ->
         expect($.ajax.mostRecentCall.args[0].type).toEqual("POST")
+      
       it "should send the deserialized model in the request", ->
         expect($.ajax.mostRecentCall.args[0].data).toEqual(@jsonData)
+      
       it "should serialize the type name", ->
         expect(serializer.serializeTypeName).toHaveBeenCalledWith(@model.constructor)
+      
       it "should send the request to the correct URL for the model", ->
         expect($.ajax.mostRecentCall.args[0].url).toEqual("api/person")
     
@@ -220,8 +239,10 @@ describe "Emu.RestAdapter", ->
           id: 5
           name: "Henry"
         $.ajax.mostRecentCall.args[0].success(@response)        
+      
       it "should deserialize the model", ->
         expect(serializer.deserializeModel).toHaveBeenCalledWith(@model, @response)
+      
       it "should notify the store", ->
         expect(@store.didSave).toHaveBeenCalledWith(@model)
   
@@ -239,14 +260,19 @@ describe "Emu.RestAdapter", ->
         spyOn(serializer, "serializeModel").andReturn(@jsonData)
         spyOn(serializer, "serializeTypeName").andReturn("person")
         @adapter.update(@store, @model)
+      
       it "should deserialize the model", ->
         expect(serializer.serializeModel).toHaveBeenCalledWith(@model)
+      
       it "should send a PUT request", ->
         expect($.ajax.mostRecentCall.args[0].type).toEqual("PUT")
+      
       it "should send the deserialized model in the request", ->
         expect($.ajax.mostRecentCall.args[0].data).toEqual(@jsonData)
+      
       it "should serialize the type name", ->
         expect(serializer.serializeTypeName).toHaveBeenCalledWith(@model.constructor)
+      
       it "should send the request to the correct URL for the model", ->
         expect($.ajax.mostRecentCall.args[0].url).toEqual("api/person")
 
@@ -261,10 +287,13 @@ describe "Emu.RestAdapter", ->
           serializer: Serializer
         spyOn(serializer, "serializeTypeName").andReturn("person")
         @adapter.delete({}, @model)
+      
       it "should send a DELETE request", ->
         expect($.ajax.mostRecentCall.args[0].type).toEqual("DELETE")
+      
       it "should serialize the type name", ->
         expect(serializer.serializeTypeName).toHaveBeenCalledWith(@model.constructor)
+      
       it "should send the request to the correct URL for the model", ->
         expect($.ajax.mostRecentCall.args[0].url).toEqual("api/person/6")
 

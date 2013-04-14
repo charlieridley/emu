@@ -8,6 +8,7 @@ describe "Emu.field", ->
       beforeEach ->
         @Person = Emu.Model.extend
           name: Emu.field("string")     
+      
       it "should have a type of 'string'", ->
         expect(@Person.metaForProperty("name").type()).toEqual("string")
     
@@ -15,6 +16,7 @@ describe "Emu.field", ->
       beforeEach ->
         @Person = Emu.Model.extend
           age: Emu.field("number")
+      
       it "should have a type of 'number'", ->
         expect(@Person.metaForProperty("age").type()).toEqual("number")
     
@@ -22,8 +24,10 @@ describe "Emu.field", ->
       beforeEach ->
         @Person = Emu.Model.extend
           order: Emu.field("App.Order")
+      
       it "should mark the field as a model lazy", ->
         expect(@Person.metaForProperty("order").isModel()).toBeTruthy()
+      
       it "should have the type which was specified", ->
         expect(@Person.metaForProperty("order").type()).toBe(App.Order)
     
@@ -31,6 +35,7 @@ describe "Emu.field", ->
       beforeEach ->
         @Person = Emu.Model.extend
           name: Emu.field("App.Order", {lazy: true, partial: false})  
+      
       it "should mark the field as lazy", ->
         expect(@Person.metaForProperty("name").options).toEqual({lazy: true, partial: false}) 
   
@@ -44,6 +49,7 @@ describe "Emu.field", ->
             name: Emu.field("string")
           @model = Person.create(name: "henry")
           @result = @model.get("name")
+        
         it "should get the value", ->
           expect(@result).toEqual("henry")
 
@@ -55,6 +61,7 @@ describe "Emu.field", ->
               name: Emu.field("string")
             @model = Person.create()
             @result = @model.get("name")
+          
           it "should get the value", ->
             expect(@result).toBeUndefined()
 
@@ -64,6 +71,7 @@ describe "Emu.field", ->
               name: Emu.field("string", defaultValue: "barry")
             @model = Person.create()
             @result = @model.get("name")
+          
           it "should get the value", ->
             expect(@result).toEqual("barry")
 
@@ -76,6 +84,7 @@ describe "Emu.field", ->
             name: Emu.field("App.Order", {collection: true})      
           @model = Person.create(orders: @orders)
           @result = @model.get("orders")
+        
         it "should return the collection", ->
           expect(@result).toBe(@orders)
   
@@ -91,8 +100,10 @@ describe "Emu.field", ->
             orders: Emu.field("App.Order", {collection: true})
           @model = Person.create()
           @result = @model.get("orders")
+        
         it "should return an empty collection", ->
           expect(@result.get("length")).toEqual(0)
+        
         it "should not query the store", ->
           expect(@store.loadAll).not.toHaveBeenCalled()
   
@@ -110,8 +121,10 @@ describe "Emu.field", ->
             orders: Emu.field("App.Order", {collection: true, lazy: true})
           @model = Person.create()
           @result = @model.get("orders")    
+        
         it "should get all the models for the collection from the store", ->
           expect(@store.loadAll).toHaveBeenCalledWith(@orders)
+        
         it "should return the collection", ->
           expect(@result).toBe(@orders)
   
@@ -128,6 +141,7 @@ describe "Emu.field", ->
           @model = Person.create()
           @model.get("orders")
           @model.get("orders")
+        
         it "should get the models from the store only once", ->
           expect(@store.loadAll.calls.length).toEqual(1)
           @result = @model.get("orders")
@@ -142,6 +156,7 @@ describe "Emu.field", ->
           @person = Person.create(id: 5, store: @store)     
           spyOn(@store, "loadModel")
           @person.get("name")
+        
         it "should load the parent object", ->
           expect(@store.loadModel).toHaveBeenCalledWith(@person)  
 
@@ -156,6 +171,7 @@ describe "Emu.field", ->
               name: Emu.field("string", {partial: true})
             @person = Person.create(id: 5)               
             @person.get("name")
+          
           it "should load the parent object", ->
             expect(@defaultStore.loadModel).toHaveBeenCalledWith(@person)  
         
@@ -166,6 +182,7 @@ describe "Emu.field", ->
               name: Emu.field("string", {partial: true})
             person = Person.create(id: 5)               
             @result = person.get("name")
+          
           it "should return undefined", ->
             expect(@result).toBeUndefined()  
 
@@ -176,8 +193,10 @@ describe "Emu.field", ->
           Person = Emu.Model.extend
             order: Emu.field("App.Order")
           @model = Person.create()
+        
         it "should return App.Order", ->
           expect(@model.get("order").constructor.toString()).toEqual("App.Order")
+        
         it "should have hasValue false on the return object", ->
           expect(@model.get("hasValue")).toBeFalsy()
 

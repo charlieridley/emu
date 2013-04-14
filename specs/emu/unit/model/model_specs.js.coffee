@@ -3,6 +3,7 @@ describe "Emu.Model", ->
     name: Emu.field("string")
     address: Emu.field("App.Address")
     orders: Emu.field("App.Order", {collection:true})
+  
   it "should have a flag to indicate the type is an Emu model", ->
     expect(Person.isEmuModel).toBeTruthy()
 
@@ -10,6 +11,7 @@ describe "Emu.Model", ->
     describe "no values", ->
       beforeEach ->
         @person = Person.create()
+      
       it "should have hasValue false", ->
         expect(@person.get("hasValue")).toBeFalsy()
     
@@ -22,6 +24,7 @@ describe "Emu.Model", ->
           @foo = @Foo.create()
         catch exception
           @exception = exception
+      
       it "should throw an exception", ->
         expect(@exception.message).toContain("You can only mark one field as a primary key")
   
@@ -31,6 +34,7 @@ describe "Emu.Model", ->
       beforeEach ->
         Foo = Emu.Model.extend()
         @foo = Foo.create(id:"10")
+      
       it "should have primaryKey as 'id'", ->
         expect(@foo.primaryKey()).toEqual("id")
 
@@ -39,6 +43,7 @@ describe "Emu.Model", ->
         Foo = Emu.Model.extend
           fooId: Emu.field("string", {primaryKey: true})
         @foo = Foo.create()
+      
       it "should have primaryKey as 'fooId'", ->
         expect(@foo.primaryKey()).toEqual("fooId")
 
@@ -49,6 +54,7 @@ describe "Emu.Model", ->
         Foo = Emu.Model.extend
           fooId: Emu.field("string", {primaryKey: true})
         @foo = Foo.create(fooId:"10")
+      
       it "should have primaryKeyValue as '10'", ->
         expect(@foo.primaryKeyValue()).toEqual("10")
 
@@ -58,6 +64,7 @@ describe "Emu.Model", ->
           fooId: Emu.field("string", {primaryKey: true})
         @foo = Foo.create(fooId:"10")
         @foo.primaryKeyValue("20")
+      
       it "should have primaryKeyValue as '20'", ->
         expect(@foo.primaryKeyValue()).toEqual("20")
 
@@ -68,6 +75,7 @@ describe "Emu.Model", ->
         @store = Emu.Store.create()
         spyOn(@store, "createRecord")
         @model = Person.createRecord()
+      
       it "should proxy the call to the default store", ->
         expect(@store.createRecord).toHaveBeenCalledWith(Person)
 
@@ -77,6 +85,7 @@ describe "Emu.Model", ->
       @store = Emu.Store.create()
       spyOn(@store, "find")
       @model = Person.find(5)
+    
     it "should proxy the call to the default store", ->
       expect(@store.find).toHaveBeenCalledWith(Person, 5)
 
@@ -89,6 +98,7 @@ describe "Emu.Model", ->
         spyOn(@store, "save")
         @model = Person.createRecord()
         @model.save()
+      
       it "should proxy the call to the store", ->
         expect(@store.save).toHaveBeenCalledWith(@model)
     
@@ -101,8 +111,10 @@ describe "Emu.Model", ->
         spyOn(@newStore, "save")
         @model = Person.create(store: @newStore)
         @model.save()
+      
       it "should proxy the call to the specified store", ->
         expect(@newStore.save).toHaveBeenCalledWith(@model)
+      
       it "should not proxy the call to the default store", ->
         expect(@defaultStore.save).not.toHaveBeenCalled()
 
@@ -110,8 +122,10 @@ describe "Emu.Model", ->
     beforeEach ->
       @model = Person.create(isDirty:false)
       @model.set("name", "Harold")
+    
     it "should be in a dirty state", ->
       expect(@model.get("isDirty")).toBeTruthy()
+    
     it "should have hasValue set to true", ->
       expect(@model.get("hasValue")).toBeTruthy()
       
@@ -120,6 +134,7 @@ describe "Emu.Model", ->
       @model = Person.create
         isDirty:false             
       @model.get("orders").pushObject(App.Order.create())
+    
     it "should be in a dirty state", ->
       expect(@model.get("isDirty")).toBeTruthy()  
 
@@ -135,12 +150,16 @@ describe "Emu.Model", ->
             @store = {}
             @model = Person.create(store: @store)           
             @result = Emu.Model.getAttr(@model, "orders")
+          
           it "should create an empty collection", ->
             expect(Emu.ModelCollection.create).toHaveBeenCalled()
+          
           it "should have the model as the parent", ->
             expect(@result.get("parent")).toBe(@model)
+          
           it "should be of the type specified in the meta data for the field", ->
             expect(@result.get("type")).toBe(App.Order)
+          
           it "should pass the store refernece", ->
             expect(@result.get("store")).toBe(@store)
 
@@ -150,6 +169,7 @@ describe "Emu.Model", ->
             @model = Person.create()           
             @result1 = Emu.Model.getAttr(@model, "orders")
             @result2 = Emu.Model.getAttr(@model, "orders")
+          
           it "should return the same collection", ->
             expect(@result1).toBe(@result2)
 
@@ -162,6 +182,7 @@ describe "Emu.Model", ->
             spyOn(@collection, "subscribeToUpdates")            
             @model = Foo.create()        
             Emu.Model.getAttr(@model, "people")
+          
           it "should create an empty collection", ->
             expect(@collection.subscribeToUpdates).toHaveBeenCalled()
     
@@ -174,6 +195,7 @@ describe "Emu.Model", ->
             spyOn(App.Address, "create").andCallThrough()
             @model = Person.create()
             @result = Emu.Model.getAttr(@model, "address")
+          
           it "should create an empty model", ->
             expect(App.Address.create).toHaveBeenCalled()
 
@@ -184,6 +206,7 @@ describe "Emu.Model", ->
           spyOn(@store, "subscribeToUpdates")
           @model = Person.createRecord()
           @model.subscribeToUpdates()
+        
         it "should proxy the call to the store", ->
           expect(@store.subscribeToUpdates).toHaveBeenCalledWith(@model)
         

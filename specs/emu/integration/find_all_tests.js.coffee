@@ -5,6 +5,7 @@ describe "Find all tests", ->
       TestSetup.setup() 
       spyOn($, "ajax")
       App.Person.find()
+    
     it "should make a web request to get all the models", ->
       expect($.ajax.mostRecentCall.args[0].url).toEqual("api/person")
   
@@ -16,5 +17,6 @@ describe "Find all tests", ->
       $.ajax.mostRecentCall.args[0].success [       
         {id: 1, name: "Harry"}
       ]
+    
     it "should have populated the model with the json data", ->
       expect(@result.get("firstObject.name")).toEqual("Harry")

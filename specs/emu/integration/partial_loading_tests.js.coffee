@@ -11,6 +11,7 @@ describe "Partial loading property tests", ->
       ]
       Ember.run =>
         @models.get("firstObject.town")
+    
     it "should make an ajax request to load the parent model", ->
       expect($.ajax.mostRecentCall.args[0].url).toEqual("api/customer/43")
   
@@ -22,5 +23,6 @@ describe "Partial loading property tests", ->
       $.ajax.mostRecentCall.args[0].success
         name: "Harry"
       @model.get("town")
+    
     it "should not make an ajax request to load the parent model", ->
       expect($.ajax.calls.length).toEqual(1)

@@ -6,6 +6,7 @@ describe "Emu.Serializer", ->
     beforeEach ->     
       @serializer = Emu.Serializer.create()
       @result = @serializer.serializeTypeName(App.Person)
+    
     it "should serialize the name to lower case", ->
       expect(@result).toEqual("person")
 
@@ -23,12 +24,16 @@ describe "Emu.Serializer", ->
           @serializer = Emu.Serializer.create()
           @model = Person.create()
           @serializer.deserializeModel(@model, @jsonData)
+        
         it "should get the deserialized value from the attribute serializer for type string", ->
           expect(Emu.AttributeSerializers.string.deserialize).toHaveBeenCalledWith("Winston Churchill")
+        
         it "should always deserialize the id", ->
           expect(@model.get("id")).toEqual("78")
+        
         it "should set the deserialized value on the name field", ->
           expect(@model.get("name")).toEqual("WINSTON CHURCHILL")
+        
         it "should not deserialize the field which isn't defined in the model", ->
           expect(@model.get("age")).toBeUndefined()
 
@@ -42,8 +47,10 @@ describe "Emu.Serializer", ->
           @serializer = Emu.Serializer.create()
           @model = Customer.create()
           @serializer.deserializeModel(@model, @jsonData)
+        
         it "should have deserialized the id", ->
           expect(@model.get("customerId")).toEqual("78")
+        
         it "should not have deserialized the default id", ->
           expect(@model.get("id")).toBeUndefined()
 
@@ -53,6 +60,7 @@ describe "Emu.Serializer", ->
         orders: Emu.field("App.Order", {collection: true})    
       
       describe "has value", ->    
+        
         describe "not addative", ->
           beforeEach ->     
             @jsonData = 
@@ -66,6 +74,7 @@ describe "Emu.Serializer", ->
             spyOn(@serializer, "deserializeCollection")      
             @model = Customer.create()
             @serializer.deserializeModel(@model, @jsonData)      
+          
           it "should call deserializeCollection", ->
             expect(@serializer.deserializeCollection).toHaveBeenCalledWith(@model.get("orders"), @jsonData.orders, undefined)      
 
@@ -82,8 +91,10 @@ describe "Emu.Serializer", ->
             spyOn(@serializer, "deserializeCollection")      
             @model = Customer.create()
             @serializer.deserializeModel(@model, @jsonData, true)      
+          
           it "should call deserializeCollection", ->
             expect(@serializer.deserializeCollection).toHaveBeenCalledWith(@model.get("orders"), @jsonData.orders, true)      
+      
       describe "has no value", ->
         beforeEach ->     
           @jsonData = 
@@ -93,6 +104,7 @@ describe "Emu.Serializer", ->
           spyOn(@serializer, "deserializeCollection")      
           @model = Customer.create()
           @serializer.deserializeModel(@model, @jsonData)
+        
         it "should not call deserializeCollection", ->
           expect(@serializer.deserializeCollection).not.toHaveBeenCalled()     
 
@@ -111,8 +123,10 @@ describe "Emu.Serializer", ->
           serializer = Emu.Serializer.create()
           @model = Customer.create()
           serializer.deserializeModel(@model, @jsonData)
+        
         it "should deserialize the nested object property", ->
           expect(@model.get("order.id")).toEqual(1)
+        
         it "should have deserialized the correct type for that property", ->
           expect(@model.get("order").constructor).toBe(App.Order)
 
@@ -127,8 +141,10 @@ describe "Emu.Serializer", ->
           serializer = Emu.Serializer.create()
           @model = Customer.create()
           serializer.deserializeModel(@model, @jsonData)
+        
         it "should return App.Order", ->
           expect(@model.get("order").constructor.toString()).toEqual("App.Order")
+        
         it "should have hasValue false on the return object", ->
           expect(@model.get("order.hasValue")).toBeFalsy()
 
@@ -145,10 +161,13 @@ describe "Emu.Serializer", ->
         spyOn(@serializer, "deserializeModel").andCallThrough()
         spyOn(@modelCollection, "createRecord").andCallThrough()
         @serializer.deserializeCollection(@modelCollection, jsonData)
+      
       it "should populate the model collection with 2 items", ->
         expect(@modelCollection.get("length")).toEqual(2)
+      
       it "should create 2 models", ->
         expect(@modelCollection.createRecord.calls.length).toEqual(2)
+      
       it "should deserialize 2 items", ->
         expect(@serializer.deserializeModel.calls.length).toEqual(2)  
     
@@ -173,17 +192,23 @@ describe "Emu.Serializer", ->
           @serializer = Emu.Serializer.create()
           spyOn(@modelCollection, "createRecord").andCallThrough()
           @serializer.deserializeCollection(@modelCollection, jsonData)
+        
         it "should have used the model.primaryKey", ->
           expect(@person1.primaryKey).toHaveBeenCalled()
+        
         it "should have used the model.primaryKeyValue", ->
           expect(@person1.primaryKeyValue).toHaveBeenCalled()
+        
         it "should populate the model collection with 3 items", ->
           expect(@modelCollection.get("length")).toEqual(3)
+        
         it "should have updated the names of the existing models", ->
           expect(@person1.get("name")).toEqual("Donald Duck")
           expect(@person2.get("name")).toEqual("Sonic")
+        
         it "should have maintained the reference to the existing models", ->
           expect(@modelCollection.find((x) -> x.get("id") == 4)).toBe(@person2)
+        
         it "should have maintained the collection order", ->
           expect(@modelCollection.get("firstObject.id")).toEqual(1)
           expect(@modelCollection.get("lastObject.id")).toEqual(4)
@@ -200,8 +225,10 @@ describe "Emu.Serializer", ->
         spyOn(@serializer, "deserializeModel").andCallThrough()
         spyOn(@modelCollection, "createRecord").andCallThrough()
         @serializer.deserializeCollection(@modelCollection, jsonData, true)
+      
       it "should populate the model collection with 3 items", ->
         expect(@modelCollection.get("length")).toEqual(3)
+      
       it "should pass the addative flag to deserializeModel", ->
         expect(@serializer.deserializeModel.mostRecentCall.args[2]).toBeTruthy()
 
@@ -221,6 +248,7 @@ describe "Emu.Serializer", ->
             age: "47"
           @serializer = Emu.Serializer.create()
           @jsonResult = @serializer.serializeModel(customer)
+        
         it "should deserialize the object to json", ->
           expect(@jsonResult).toEqual
             id: "55"
@@ -240,6 +268,7 @@ describe "Emu.Serializer", ->
             age: "47"
           @serializer = Emu.Serializer.create()
           @jsonResult = @serializer.serializeModel(customer)
+        
         it "should deserialize the object to json", ->
           expect(@jsonResult).toEqual
             customerId: "55"
@@ -258,6 +287,7 @@ describe "Emu.Serializer", ->
             name: "Terry the customer"
           @serializer = Emu.Serializer.create()
           @jsonResult = @serializer.serializeModel(customer)
+        
         it "should not include the null value in the serialized object", ->
           expect(@jsonResult).toEqual
             customerId: "55"
@@ -276,6 +306,7 @@ describe "Emu.Serializer", ->
           spyOn(Emu.Model, "getAttr").andCallThrough()
           @serializer = Emu.Serializer.create()
           @jsonResult = @serializer.serializeModel(@customer)
+        
         it "should deserialize the object to json", ->
           expect(@jsonResult).toEqual
             name: "Terry the customer"        
@@ -283,6 +314,7 @@ describe "Emu.Serializer", ->
               {orderCode: "123"}
               {orderCode: "456"}
             ] 
+        
         it "should have called the Emu.Model.getAttr for the property, to stop it lazy loading", ->
           expect(Emu.Model.getAttr).toHaveBeenCalledWith(@customer, "orders")
       
@@ -296,6 +328,7 @@ describe "Emu.Serializer", ->
             name: "Terry the customer"                    
           @serializer = Emu.Serializer.create()
           @jsonResult = @serializer.serializeModel(@customer)
+        
         it "should deserialize the object to json without the collection value", ->
           expect(@jsonResult).toEqual
             id: 6
@@ -314,6 +347,7 @@ describe "Emu.Serializer", ->
           spyOn(Emu.Model, "getAttr").andCallThrough()
           @serializer = Emu.Serializer.create()
           @jsonResult = @serializer.serializeModel(@customer)
+        
         it "should not deserialize the lazy property", ->
           expect(@jsonResult).toEqual
             id: 6
@@ -332,6 +366,7 @@ describe "Emu.Serializer", ->
           town: "Swindon"
         @serializer = Emu.Serializer.create()
         @jsonResult = @serializer.serializeModel(@customer)
+      
       it "should not deserialize the computed property", ->
         expect(@jsonResult).toEqual
           name: "Terry the customer"        
@@ -347,6 +382,7 @@ describe "Emu.Serializer", ->
         @customer.set("order", App.Order.create(orderCode: "1234"))
         @serializer = Emu.Serializer.create()
         @jsonResult = @serializer.serializeModel(@customer)
+      
       it "should deserialize the object to json", ->
         expect(@jsonResult).toEqual
           name: "Gladys the difficult customer"       
@@ -361,6 +397,7 @@ describe "Emu.Serializer", ->
           name: "Gladys the difficult customer"
         @serializer = Emu.Serializer.create()
         @jsonResult = @serializer.serializeModel(@customer)   
+      
       it "should deserialize the object to json", ->
         expect(@jsonResult).toEqual
           name: "Gladys the difficult customer" 
@@ -369,6 +406,7 @@ describe "Emu.Serializer", ->
     beforeEach ->
       serializer = Emu.Serializer.create()
       @result = serializer.serializeQueryHash(foo: "bar", bar: "foo", colour: "green", code: 10)
+    
     it "should serialize the query object to querystring parameters", ->
       expect(@result).toEqual("?foo=bar&bar=foo&colour=green&code=10")
 
@@ -377,6 +415,7 @@ describe "Emu.Serializer", ->
       beforeEach ->
         @serializer = Emu.Serializer.create()
         @result = @serializer.serializeKey("daddyFellIntoThePond")
+      
       it "have the same result", ->
         expect(@result).toEqual "daddyFellIntoThePond"
     
@@ -384,6 +423,7 @@ describe "Emu.Serializer", ->
       beforeEach -> 
         @serializer = Emu.Serializer.create()
         @result = @serializer.serializeKey("DaddyFellIntoThePond")
+      
       it "have lowercase the first letter", ->
         expect(@result).toEqual "daddyFellIntoThePond"
   
@@ -391,5 +431,6 @@ describe "Emu.Serializer", ->
     beforeEach ->
       @serializer = Emu.Serializer.create()
       @result = @serializer.deserializeKey("daddyFellIntoThePond")
+    
     it "have the same result", ->
       expect(@result).toEqual "daddyFellIntoThePond"
