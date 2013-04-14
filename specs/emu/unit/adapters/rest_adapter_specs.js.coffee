@@ -249,4 +249,39 @@ describe "Emu.RestAdapter", ->
         expect(serializer.serializeTypeName).toHaveBeenCalledWith(@model.constructor)
       it "should send the request to the correct URL for the model", ->
         expect($.ajax.mostRecentCall.args[0].url).toEqual("api/person")
+
+  describe "delete", ->
+
+    describe "start request", ->
+      beforeEach ->
+        spyOn($, "ajax")
+        @model = Person.create(id: 6)
+        @adapter = Emu.RestAdapter.create
+          namespace: "api"
+          serializer: Serializer
+        spyOn(serializer, "serializeTypeName").andReturn("person")
+        @adapter.delete({}, @model)
+      it "should send a DELETE request", ->
+        expect($.ajax.mostRecentCall.args[0].type).toEqual("DELETE")
+      it "should serialize the type name", ->
+        expect(serializer.serializeTypeName).toHaveBeenCalledWith(@model.constructor)
+      it "should send the request to the correct URL for the model", ->
+        expect($.ajax.mostRecentCall.args[0].url).toEqual("api/person/6")
+
+    describe "finishes successfully" , ->
+      beforeEach ->
+        spyOn($, "ajax")
+        @store = 
+          didDeleteRecord: jasmine.createSpy()
+        @model = Person.create(id: 6)
+        @adapter = Emu.RestAdapter.create
+          namespace: "api"
+          serializer: Serializer
+        spyOn(serializer, "serializeTypeName").andReturn("person")
+        @adapter.delete(@store, @model)
+        $.ajax.mostRecentCall.args[0].success()
+
+      it "should notify the store", ->
+        expect(@store.didDeleteRecord).toHaveBeenCalledWith(@model)
+
    

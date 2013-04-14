@@ -32,6 +32,13 @@ Emu.RestAdapter = Ember.Object.extend
     
   update: (store, model) ->   
     @_save(store, model, "PUT") 
+
+  delete: (store, model) ->
+    $.ajax
+      url: @_getEndpointForModel(model.constructor) + "/" + model.primaryKeyValue()
+      type: "DELETE"
+      success: ->
+        store.didDeleteRecord(model)
   
   _save: (store, model, requestType) ->
     jsonData = @_serializer.serializeModel(model)
