@@ -253,7 +253,7 @@ describe "Emu.RestAdapter", ->
         @store = Ember.Object.create()
         spyOn($, "ajax")
         @jsonData = {name: "Henry"}
-        @model = Person.create()
+        @model = Person.create(id: 80)
         @adapter = Emu.RestAdapter.create
           namespace: "api"
           serializer: Serializer
@@ -274,7 +274,7 @@ describe "Emu.RestAdapter", ->
         expect(serializer.serializeTypeName).toHaveBeenCalledWith(@model.constructor)
       
       it "should send the request to the correct URL for the model", ->
-        expect($.ajax.mostRecentCall.args[0].url).toEqual("api/person")
+        expect($.ajax.mostRecentCall.args[0].url).toEqual("api/person/80")
 
   describe "delete", ->
 

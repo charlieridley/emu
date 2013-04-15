@@ -60,7 +60,7 @@ describe "Saving a existing model", ->
     @person.save()
   
   it "should save to the correct URL", ->
-    expect($.ajax.mostRecentCall.args[0].url).toEqual("api/person")
+    expect($.ajax.mostRecentCall.args[0].url).toEqual("api/person/5")
   
   it "should send a PUT request", ->
     expect($.ajax.mostRecentCall.args[0].type).toEqual("PUT")
