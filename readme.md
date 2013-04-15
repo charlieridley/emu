@@ -67,7 +67,7 @@ company.save();
 //Save a new model
 var company = App.Company.createRecord();
 company.save();
-	//POST request to:	http://www.mysite.com/company/1
+	//POST request to:	http://www.mysite.com/company
 ```
 
 Default values
