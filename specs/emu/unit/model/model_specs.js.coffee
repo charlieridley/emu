@@ -138,6 +138,9 @@ describe "Emu.Model", ->
     it "should be in a dirty state", ->
       expect(@model.get("isDirty")).toBeTruthy()  
 
+    it "should have hasValue set to true", ->
+      expect(@model.get("hasValue")).toBeTruthy()
+
   describe "getAttr", ->    
     
     describe "collection", ->      
