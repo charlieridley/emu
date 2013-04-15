@@ -1,5 +1,5 @@
-// Version: 0.1.0-15-gbdb3bff
-// Last commit: bdb3bff (2013-04-10 10:17:51 -0400)
+// Version: 0.1.0-34-gf70209f
+// Last commit: f70209f (2013-04-14 22:08:07 -0400)
 
 
 (function() {
@@ -146,15 +146,24 @@
       return this._save(store, model, "POST");
     },
     update: function(store, model) {
-      return this._save(store, model, "PUT");
+      return this._save(store, model, "PUT", model.primaryKeyValue());
     },
-    _save: function(store, model, requestType) {
+    "delete": function(store, model) {
+      return $.ajax({
+        url: this._getEndpointForModel(model.constructor) + "/" + model.primaryKeyValue(),
+        type: "DELETE",
+        success: function() {
+          return store.didDeleteRecord(model);
+        }
+      });
+    },
+    _save: function(store, model, requestType, id) {
       var jsonData,
         _this = this;
 
       jsonData = this._serializer.serializeModel(model);
       return $.ajax({
-        url: this._getEndpointForModel(model.constructor),
+        url: this._getEndpointForModel(model.constructor) + (id ? "/" + id : ""),
         data: jsonData,
         type: requestType,
         success: function(jsonData) {
@@ -178,7 +187,7 @@
       return store.didSave(model);
     },
     _getEndpointNestedSubCollection: function(collection) {
-      return this._getBaseUrl() + this._serializer.serializeTypeName(collection.get("parent").constructor) + "/" + collection.get("parent.id") + "/" + this._serializer.serializeTypeName(collection.get("type"));
+      return this._getBaseUrl() + this._serializer.serializeTypeName(collection.get("parent").constructor) + "/" + collection.get("parent").primaryKeyValue() + "/" + this._serializer.serializeTypeName(collection.get("type"));
     },
     _getEndpointForModel: function(type) {
       return this._getBaseUrl() + this._serializer.serializeTypeName(type);
@@ -350,7 +359,9 @@
     init: function() {
       var _this = this;
 
-      this.set("content", Ember.A([]));
+      if (!this.get("content")) {
+        this.set("content", Ember.A([]));
+      }
       this.createRecord = function(hash) {
         var model, paramHash, primaryKey;
 
@@ -376,6 +387,9 @@
     },
     subscribeToUpdates: function() {
       return this._subscribeToUpdates = true;
+    },
+    deleteRecord: function(model) {
+      return this.removeObject(model);
     }
   });
 
@@ -416,6 +430,22 @@
             });
           default:
             return null;
+        }
+      }
+    },
+    boolean: {
+      serialize: function(value) {
+        if (Ember.isEmpty(value)) {
+          return null;
+        } else {
+          return value;
+        }
+      },
+      deserialize: function(value) {
+        if (Ember.isEmpty(value)) {
+          return null;
+        } else {
+          return value;
         }
       }
     }
@@ -525,9 +555,11 @@
       value = Emu.Model.getAttr(model, property);
       serializedKey = this.serializeKey(property);
       if (meta.options.collection) {
-        return jsonData[serializedKey] = (value != null ? value.get("hasValue") : void 0) ? value.map(function(item) {
-          return _this.serializeModel(item);
-        }) : void 0;
+        if (!meta.options.lazy) {
+          return jsonData[serializedKey] = (value != null ? value.get("hasValue") : void 0) ? value.map(function(item) {
+            return _this.serializeModel(item);
+          }) : void 0;
+        }
       } else if (meta.isModel()) {
         if (value.get("hasValue")) {
           return jsonData[serializedKey] = this.serializeModel(value);
@@ -735,6 +767,16 @@
       return (_ref = this.get("updatableModels")[type]) != null ? _ref.find(function(model) {
         return model.primaryKeyValue() === id;
       }) : void 0;
+    },
+    deleteRecord: function(model) {
+      if (model.primaryKeyValue()) {
+        return this._adapter["delete"](this, model);
+      } else {
+        return this.didDeleteRecord(model);
+      }
+    },
+    didDeleteRecord: function(model) {
+      return this._getCollectionForType(model.constructor).deleteRecord(model);
     },
     _didCollectionLoad: function(collection) {
       collection.set("isLoaded", true);
