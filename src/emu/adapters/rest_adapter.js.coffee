@@ -65,7 +65,7 @@ Emu.RestAdapter = Ember.Object.extend
     store.didSave(model)
   
   _getEndpointNestedSubCollection: (collection) ->
-    @_getBaseUrl() + @_serializer.serializeTypeName(collection.get("parent").constructor) + "/" + collection.get("parent.id") + "/" + @_serializer.serializeTypeName(collection.get("type"))
+    @_getBaseUrl() + @_serializer.serializeTypeName(collection.get("parent").constructor) + "/" + collection.get("parent").primaryKeyValue() + "/" + @_serializer.serializeTypeName(collection.get("type"))
   
   _getEndpointForModel: (type) ->
     @_getBaseUrl() + @_serializer.serializeTypeName(type)

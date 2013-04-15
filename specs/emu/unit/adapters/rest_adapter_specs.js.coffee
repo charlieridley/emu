@@ -87,7 +87,8 @@ describe "Emu.RestAdapter", ->
       beforeEach ->
         spyOn($, "ajax")      
         ParentPerson = Emu.Model.extend()
-        parent = ParentPerson.create(id: 5)
+        parent = ParentPerson.create()
+        spyOn(parent, "primaryKeyValue").andReturn(5)
         models = Emu.ModelCollection.create(parent: parent, type: Person)
         store = Ember.Object.create()
         spyOn(serializer, "serializeTypeName").andCallFake (type) ->
@@ -99,8 +100,8 @@ describe "Emu.RestAdapter", ->
           namespace: "api"
           serializer: Serializer
         @adapter.findAll(Person, store, models)
-      
-      it "should make a GET request to the endpoint for the entity", ->
+
+      it "should make a GET request to the URL for the entity", ->
         expect($.ajax.mostRecentCall.args[0].url).toEqual("api/parentperson/5/person")
         expect($.ajax.mostRecentCall.args[0].type).toEqual("GET")
   
