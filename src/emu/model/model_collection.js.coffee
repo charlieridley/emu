@@ -24,3 +24,7 @@ Emu.ModelCollection = Ember.ArrayProxy.extend
 
   deleteRecord: (model) ->
     @removeObject(model)
+
+  length: (->
+    @get("content.length")
+  ).property("content.length").volatile()

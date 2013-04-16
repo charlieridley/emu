@@ -88,5 +88,3 @@ describe "Emu.ModelCollection", ->
     
     it "should have no items left in the collection", ->
       expect(@modelCollection.get("length")).toEqual(0)
-
-
