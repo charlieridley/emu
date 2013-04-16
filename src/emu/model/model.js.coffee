@@ -13,8 +13,18 @@ Emu.Model = Ember.Object.extend
   primaryKey: -> @_primaryKey or @_primaryKey = Emu.Model.primaryKey(@constructor)
 
   primaryKeyValue: (value) -> 
-    @set(@primaryKey(), value) if value
+    if value
+      @set(@primaryKey(), value) 
+      @set("hasValue", true)
     @get(@primaryKey())
+
+  clear: ->
+    @constructor.eachEmuField (property, meta) =>
+      if meta.isModel() or meta.options.collection
+        @get(property).clear()
+      else
+        @set(property, undefined)
+    @set("hasValue", false)
 
 Emu.proxyToStore = (methodName) ->
   ->
@@ -61,3 +71,4 @@ Emu.Model.reopenClass
   setAttr: (record, key, value) ->
     record._attributes ?= {}
     record._attributes[key] = value
+    record.set("hasValue", true)

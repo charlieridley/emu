@@ -59,14 +59,34 @@ describe "Emu.Model", ->
         expect(@foo.primaryKeyValue()).toEqual("10")
 
     describe "set", ->
-      beforeEach ->
-        Foo = Emu.Model.extend
-          fooId: Emu.field("string", {primaryKey: true})
-        @foo = Foo.create(fooId:"10")
-        @foo.primaryKeyValue("20")
-      
-      it "should have primaryKeyValue as '20'", ->
-        expect(@foo.primaryKeyValue()).toEqual("20")
+
+      describe "with existing value", ->
+        
+        beforeEach ->
+          Foo = Emu.Model.extend
+            fooId: Emu.field("string", {primaryKey: true})
+          @foo = Foo.create(fooId:"10")
+          @foo.primaryKeyValue("20")
+        
+        it "should have primaryKeyValue as '20'", ->
+          expect(@foo.primaryKeyValue()).toEqual("20")
+
+        it "should have hasValue true", ->
+          expect(@foo.get("hasValue")).toBeTruthy()
+
+      describe "without existing value", ->
+        
+        beforeEach ->
+          Foo = Emu.Model.extend
+            fooId: Emu.field("string", {primaryKey: true})
+          @foo = Foo.create()
+          @foo.primaryKeyValue("20")
+        
+        it "should have primaryKeyValue as '20'", ->
+          expect(@foo.primaryKeyValue()).toEqual("20")
+
+        it "should have hasValue true", ->
+          expect(@foo.get("hasValue")).toBeTruthy()
 
   
   describe "createRecord", ->
@@ -204,12 +224,41 @@ describe "Emu.Model", ->
 
     describe "subscribeToUpdates", ->
       beforeEach ->
-          Ember.set(Emu, "defaultStore", undefined)
-          @store = Emu.Store.create()
-          spyOn(@store, "subscribeToUpdates")
-          @model = Person.createRecord()
-          @model.subscribeToUpdates()
-        
-        it "should proxy the call to the store", ->
-          expect(@store.subscribeToUpdates).toHaveBeenCalledWith(@model)
-        
+        Ember.set(Emu, "defaultStore", undefined)
+        @store = Emu.Store.create()
+        spyOn(@store, "subscribeToUpdates")
+        @model = Person.createRecord()
+        @model.subscribeToUpdates()
+      
+      it "should proxy the call to the store", ->
+        expect(@store.subscribeToUpdates).toHaveBeenCalledWith(@model)
+
+    describe "clear", ->
+      beforeEach ->
+        @model = Person.create()
+        @model.set("name", "Bertie")
+        @model.set("address.town", "Dartmouth")
+        @model.get("orders").pushObject(App.Order.create(orderCode: "1234"))
+        spyOn(@model.get("address"), "clear")
+        spyOn(@model.get("orders"), "clear")
+        @model.clear()
+
+      it "should clear the simple field", ->
+        expect(@model.get("name")).toBeUndefined()
+
+      it "should call clear on the model field", ->
+        expect(@model.get("address").clear).toHaveBeenCalled()
+
+      it "should call clear on the collection field", ->
+        expect(@model.get("orders").clear).toHaveBeenCalled()
+
+      it "should have hasValue false", ->
+        expect(@model.get("hasValue")).toBeFalsy()
+
+  describe "setAttr", ->
+    beforeEach ->
+      @model = Person.create()
+      Emu.Model.setAttr @model, "name", "charlie"
+    
+    it "should have hasValue true", ->
+      expect(@model.get("hasValue")).toBeTruthy()

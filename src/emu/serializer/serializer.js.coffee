@@ -46,9 +46,11 @@ Emu.Serializer = Ember.Object.extend
     if meta.options.collection      
       if value then @deserializeCollection(Emu.Model.getAttr(model, property), value, addative) 
     else if meta.isModel()
+      modelProperty = Emu.Model.getAttr(model, property)
+      unless addative
+        modelProperty.clear()
       if value
-        modelProperty = Emu.Model.getAttr(model, property)
-        @deserializeModel(modelProperty, value) 
+        @deserializeModel(modelProperty, value, addative) 
     else
       attributeSerializer = Emu.AttributeSerializers[meta.type()]
       value = attributeSerializer.deserialize(value)

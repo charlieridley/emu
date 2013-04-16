@@ -68,8 +68,7 @@ describe "Emu.Serializer", ->
               orders: [
                 {id: 1}
                 {id: 2}
-              ]     
-            @store = Ember.Object.create()
+              ]                
             @serializer = Emu.Serializer.create()
             spyOn(@serializer, "deserializeCollection")      
             @model = Customer.create()
@@ -86,7 +85,6 @@ describe "Emu.Serializer", ->
                 {id: 1}
                 {id: 2}
               ]     
-            @store = Ember.Object.create()
             @serializer = Emu.Serializer.create()
             spyOn(@serializer, "deserializeCollection")      
             @model = Customer.create()
@@ -99,7 +97,6 @@ describe "Emu.Serializer", ->
         beforeEach ->     
           @jsonData = 
             name: "Donald Duck"    
-          @store = Ember.Object.create()
           @serializer = Emu.Serializer.create()
           spyOn(@serializer, "deserializeCollection")      
           @model = Customer.create()
@@ -110,43 +107,70 @@ describe "Emu.Serializer", ->
 
     describe "model field", ->
 
-      describe "with value", ->
-        Customer = Emu.Model.extend
-          name: Emu.field("string")
-          order: Emu.field("App.Order") 
-        beforeEach ->
-          @jsonData = 
-            name: "Donald Duck"
-            order: 
-              id: 1
-          @store = Ember.Object.create()
-          serializer = Emu.Serializer.create()
-          @model = Customer.create()
-          serializer.deserializeModel(@model, @jsonData)
+      describe "not addative", ->
         
-        it "should deserialize the nested object property", ->
-          expect(@model.get("order.id")).toEqual(1)
-        
-        it "should have deserialized the correct type for that property", ->
-          expect(@model.get("order").constructor).toBe(App.Order)
+        describe "with value", ->
+          Customer = Emu.Model.extend
+            name: Emu.field("string")
+            order: Emu.field("App.Order") 
+          beforeEach ->
+            @jsonData = 
+              name: "Donald Duck"
+              order: 
+                id: 1
+            serializer = Emu.Serializer.create()
+            @model = Customer.create()
+            serializer.deserializeModel(@model, @jsonData)
+          
+          it "should deserialize the nested object property", ->
+            expect(@model.get("order.id")).toEqual(1)
+          
+          it "should have deserialized the correct type for that property", ->
+            expect(@model.get("order").constructor).toBe(App.Order)
 
-      describe "with no value", ->
-        Customer = Emu.Model.extend
-          name: Emu.field("string")
-          order: Emu.field("App.Order") 
-        beforeEach ->
-          @jsonData = 
-            name: "Donald Duck"
-          @store = Ember.Object.create()
-          serializer = Emu.Serializer.create()
-          @model = Customer.create()
-          serializer.deserializeModel(@model, @jsonData)
-        
-        it "should return App.Order", ->
-          expect(@model.get("order").constructor.toString()).toEqual("App.Order")
-        
-        it "should have hasValue false on the return object", ->
-          expect(@model.get("order.hasValue")).toBeFalsy()
+          it "should have hasValue true on the model field", ->
+            expect(@model.get("order.hasValue")).toBeTruthy()
+
+        describe "with no value", ->
+          Customer = Emu.Model.extend
+            name: Emu.field("string")
+            order: Emu.field("App.Order") 
+          beforeEach ->
+            @jsonData = 
+              name: "Donald Duck"
+            serializer = Emu.Serializer.create()
+            @model = Customer.create()
+            @model.set("order.orderCode", "1234")
+            spyOn(@model.get("order"), "clear").andCallThrough()
+            serializer.deserializeModel(@model, @jsonData)
+          
+          it "should have cleared the model field", ->
+            expect(@model.get("order").clear).toHaveBeenCalled()
+          
+          it "should have hasValue false on the return object", ->
+            expect(@model.get("order.hasValue")).toBeFalsy()
+
+      describe "addative", ->
+
+        describe "with model field", ->
+          Customer = Emu.Model.extend
+            name: Emu.field("string")
+            order: Emu.field("App.Order")
+          beforeEach ->
+            @jsonData = 
+              name: "Donald Duck"
+            serializer = Emu.Serializer.create()
+            @model = Customer.create()
+            @model.set("name", "don duck")
+            @model.set("order.orderCode", "1234")
+            spyOn(@model.get("order"), "clear").andCallThrough()
+            serializer.deserializeModel(@model, @jsonData, true)
+
+          it "should not have cleared the model field", ->
+            expect(@model.get("order").clear).not.toHaveBeenCalled()
+
+          it "should not overwrite the model field", ->
+            expect(@model.get("order.orderCode")).toEqual("1234")
 
   describe "deserializeCollection", ->
     
@@ -294,6 +318,7 @@ describe "Emu.Serializer", ->
             name: "Terry the customer"
 
     describe "nested collection", ->
+      
       describe "not null value", ->
         Customer = Emu.Model.extend
           name: Emu.field("string")
