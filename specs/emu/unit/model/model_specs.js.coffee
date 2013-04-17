@@ -154,7 +154,7 @@ describe "Emu.Model", ->
     describe "collection field", ->
       beforeEach ->
         @model = Person.create
-          isDirty:false             
+          isDirty:false                     
         @model.get("orders").pushObject(App.Order.create())
       
       it "should be in a dirty state", ->

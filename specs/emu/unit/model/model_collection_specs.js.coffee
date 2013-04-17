@@ -102,3 +102,18 @@ describe "pushObject", ->
 
     it "should have hasValue true", ->
       expect(@modelCollection.get("hasValue")).toBeTruthy()
+
+describe "clear", ->
+  beforeEach ->
+    @store = Ember.Object.create()
+    @modelCollection = Emu.ModelCollection.create
+      type: App.Person
+      store: @store
+    @modelCollection.pushObject(App.Person.create())
+    @modelCollection.clear()
+
+  it "should have no items", ->
+    expect(@modelCollection.get("length")).toEqual(0)
+
+  it "should have hasValue false", ->
+    expect(@modelCollection.get("hasValue")).toBeFalsy()

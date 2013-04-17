@@ -28,3 +28,7 @@ Emu.ModelCollection = Ember.ArrayProxy.extend
   length: (->
     @get("content.length")
   ).property("content.length").volatile()
+
+  clear: ->
+    @_super()
+    @set("hasValue", false)
