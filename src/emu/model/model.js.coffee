@@ -66,6 +66,7 @@ Emu.Model.reopenClass
         record._attributes[key].subscribeToUpdates() if meta.options.updatable
       else if meta.isModel()
         record._attributes[key] = meta.type().create()
+        record._attributes[key].addObserver "isDirty", -> record.set("isDirty", true)
     record._attributes[key] 
   
   setAttr: (record, key, value) ->

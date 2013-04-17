@@ -163,6 +163,14 @@ describe "Emu.Model", ->
       it "should have hasValue set to true", ->
         expect(@model.get("hasValue")).toBeTruthy()
 
+    describe "model field", ->
+      beforeEach ->
+        @model = App.Person.create()
+        @model.set("address.town", "Bath")
+
+      it "should have isDirty true", ->
+        expect(@model.get("isDirty")).toBeTruthy()
+
   describe "getAttr", ->    
     
     describe "collection", ->      
