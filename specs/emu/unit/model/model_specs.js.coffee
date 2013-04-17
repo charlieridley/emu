@@ -138,28 +138,30 @@ describe "Emu.Model", ->
       it "should not proxy the call to the default store", ->
         expect(@defaultStore.save).not.toHaveBeenCalled()
 
-  describe "When modifying a property on a model", ->
-    beforeEach ->
-      @model = Person.create(isDirty:false)
-      @model.set("name", "Harold")
-    
-    it "should be in a dirty state", ->
-      expect(@model.get("isDirty")).toBeTruthy()
-    
-    it "should have hasValue set to true", ->
-      expect(@model.get("hasValue")).toBeTruthy()
-      
-  describe "When modifying a collection property on a model", ->
-    beforeEach ->
-      @model = Person.create
-        isDirty:false             
-      @model.get("orders").pushObject(App.Order.create())
-    
-    it "should be in a dirty state", ->
-      expect(@model.get("isDirty")).toBeTruthy()  
+  describe "modifying a property", ->
 
-    it "should have hasValue set to true", ->
-      expect(@model.get("hasValue")).toBeTruthy()
+    describe "simple field", ->
+      beforeEach ->
+        @model = Person.create(isDirty:false)
+        @model.set("name", "Harold")
+      
+      it "should be in a dirty state", ->
+        expect(@model.get("isDirty")).toBeTruthy()
+      
+      it "should have hasValue set to true", ->
+        expect(@model.get("hasValue")).toBeTruthy()
+      
+    describe "collection field", ->
+      beforeEach ->
+        @model = Person.create
+          isDirty:false             
+        @model.get("orders").pushObject(App.Order.create())
+      
+      it "should be in a dirty state", ->
+        expect(@model.get("isDirty")).toBeTruthy()  
+
+      it "should have hasValue set to true", ->
+        expect(@model.get("hasValue")).toBeTruthy()
 
   describe "getAttr", ->    
     

@@ -80,6 +80,7 @@ describe "Emu.ModelCollection", ->
 
   describe "deleteRecord", ->
     beforeEach ->
+      @store = Ember.Object.create()
       @modelCollection = Emu.ModelCollection.create
         type: App.Person
         store: @store
@@ -88,3 +89,16 @@ describe "Emu.ModelCollection", ->
     
     it "should have no items left in the collection", ->
       expect(@modelCollection.get("length")).toEqual(0)
+
+describe "pushObject", ->
+  
+  describe "without parent", ->
+    beforeEach ->
+      @store = Ember.Object.create()
+      @modelCollection = Emu.ModelCollection.create
+        type: App.Person
+        store: @store
+      @modelCollection.pushObject(App.Person.create())
+
+    it "should have hasValue true", ->
+      expect(@modelCollection.get("hasValue")).toBeTruthy()
