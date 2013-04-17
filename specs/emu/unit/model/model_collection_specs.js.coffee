@@ -14,7 +14,7 @@ describe "Emu.ModelCollection", ->
         expect(@modelCollection.get("isDirty")).toBeFalsy()
       
       it "should set an empty array as content", ->
-        expect(@modelCollection.get("content")).toEqual([])
+        expect(@modelCollection.get("content.length")).toEqual(0)
 
     describe "setting content", ->
       beforeEach ->
@@ -117,3 +117,16 @@ describe "clear", ->
 
   it "should have hasValue false", ->
     expect(@modelCollection.get("hasValue")).toBeFalsy()
+
+describe "modify child in collection non dirty collection", ->
+  beforeEach ->
+    @store = Ember.Object.create()
+    @modelCollection = Emu.ModelCollection.create
+      type: App.Person
+      store: @store
+    @modelCollection.pushObject(App.Person.create())
+    @modelCollection.set("isDirty", false)
+    @modelCollection.set("firstObject.name", "Paddington Bear")
+
+  it "should have isDirty true", ->
+    expect(@modelCollection.get("isDirty")).toBeTruthy()

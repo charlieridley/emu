@@ -12,7 +12,7 @@ Emu.ModelCollection = Ember.ArrayProxy.extend
       model.subscribeToUpdates() if @_subscribeToUpdates
       @pushObject(model)
     
-    @addObserver "content.@each", =>
+    @addObserver "content.@each.isDirty", =>
       @set("hasValue", true)
       @set("isDirty", true)
     
