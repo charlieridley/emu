@@ -62,7 +62,7 @@ Persistence
 //Save an existing model
 var company = App.Company.find(5);
 company.save();
-	//PUT request to:	http://www.mysite.com/company/1
+	//PUT request to:	http://www.mysite.com/company/5
 
 //Save a new model
 var company = App.Company.createRecord();
