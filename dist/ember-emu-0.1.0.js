@@ -1,5 +1,5 @@
-// Version: 0.1.0-34-gf70209f
-// Last commit: f70209f (2013-04-14 22:08:07 -0400)
+// Version: 0.1.0-40-g81681ee
+// Last commit: 81681ee (2013-04-21 18:33:49 -0400)
 
 
 (function() {
@@ -104,12 +104,10 @@
       return this._serializer = ((_ref = this.get("serializer")) != null ? _ref.create() : void 0) || Emu.Serializer.create();
     },
     findAll: function(type, store, collection) {
-      var url,
-        _this = this;
+      var _this = this;
 
-      url = collection.get("parent") ? this._getEndpointNestedSubCollection(collection) : this._getEndpointForModel(type);
       return $.ajax({
-        url: url,
+        url: this._getUrlForModel(collection),
         type: "GET",
         success: function(jsonData) {
           return _this._didFindAll(store, collection, jsonData);
@@ -120,7 +118,7 @@
       var _this = this;
 
       return $.ajax({
-        url: this._getEndpointForModel(type) + "/" + id,
+        url: this._getUrlForModel(model) + "/" + id,
         type: "GET",
         success: function(jsonData) {
           return _this._didFindById(store, model, jsonData);
@@ -134,7 +132,7 @@
       var _this = this;
 
       return $.ajax({
-        url: this._getEndpointForModel(type) + this._serializer.serializeQueryHash(queryHash),
+        url: this._getUrlForType(type) + this._serializer.serializeQueryHash(queryHash),
         type: "GET",
         success: function(jsonData) {
           _this._serializer.deserializeCollection(collection, jsonData);
@@ -150,7 +148,7 @@
     },
     "delete": function(store, model) {
       return $.ajax({
-        url: this._getEndpointForModel(model.constructor) + "/" + model.primaryKeyValue(),
+        url: this._getUrlForModel(model) + "/" + model.primaryKeyValue(),
         type: "DELETE",
         success: function() {
           return store.didDeleteRecord(model);
@@ -163,7 +161,7 @@
 
       jsonData = this._serializer.serializeModel(model);
       return $.ajax({
-        url: this._getEndpointForModel(model.constructor) + (id ? "/" + id : ""),
+        url: this._getUrlForModel(model) + (id ? "/" + id : ""),
         data: jsonData,
         type: requestType,
         success: function(jsonData) {
@@ -186,10 +184,26 @@
       this._serializer.deserializeModel(model, jsonData);
       return store.didSave(model);
     },
-    _getEndpointNestedSubCollection: function(collection) {
-      return this._getBaseUrl() + this._serializer.serializeTypeName(collection.get("parent").constructor) + "/" + collection.get("parent").primaryKeyValue() + "/" + this._serializer.serializeTypeName(collection.get("type"));
+    _getUrlForModel: function(model) {
+      var buildUrl, currentModel, url,
+        _this = this;
+
+      url = model.constructor === Emu.ModelCollection ? this._serializer.serializeTypeName(model.get("type")) : "";
+      currentModel = model;
+      buildUrl = function() {
+        currentModel = currentModel.get("parent");
+        if (currentModel.constructor === Emu.ModelCollection) {
+          return url = _this._serializer.serializeTypeName(currentModel.get("type")) + (url ? "/" + url : "");
+        } else {
+          return url = currentModel.primaryKeyValue() + "/" + url;
+        }
+      };
+      while (currentModel.get("parent")) {
+        buildUrl();
+      }
+      return this._getBaseUrl() + url;
     },
-    _getEndpointForModel: function(type) {
+    _getUrlForType: function(type) {
       return this._getBaseUrl() + this._serializer.serializeTypeName(type);
     },
     _getBaseUrl: function() {
@@ -267,8 +281,21 @@
     primaryKeyValue: function(value) {
       if (value) {
         this.set(this.primaryKey(), value);
+        this.set("hasValue", true);
       }
       return this.get(this.primaryKey());
+    },
+    clear: function() {
+      var _this = this;
+
+      this.constructor.eachEmuField(function(property, meta) {
+        if (meta.isModel() || meta.options.collection) {
+          return _this.get(property).clear();
+        } else {
+          return _this.set(property, void 0);
+        }
+      });
+      return this.set("hasValue", false);
     }
   });
 
@@ -334,11 +361,17 @@
           record._attributes[key].addObserver("isDirty", function() {
             return record.set("isDirty", true);
           });
+          record._attributes[key].addObserver("hasValue", function() {
+            return record.set("hasValue", true);
+          });
           if (meta.options.updatable) {
             record._attributes[key].subscribeToUpdates();
           }
         } else if (meta.isModel()) {
           record._attributes[key] = meta.type().create();
+          record._attributes[key].addObserver("isDirty", function() {
+            return record.set("isDirty", true);
+          });
         }
       }
       return record._attributes[key];
@@ -349,7 +382,8 @@
       if ((_ref = record._attributes) == null) {
         record._attributes = {};
       }
-      return record._attributes[key] = value;
+      record._attributes[key] = value;
+      return record.set("hasValue", true);
     }
   });
 
@@ -371,13 +405,14 @@
         };
         paramHash[primaryKey] = hash != null ? hash.id : void 0;
         model = this.get("type").create(paramHash);
+        model.set("parent", this);
         model.setProperties(hash);
         if (this._subscribeToUpdates) {
           model.subscribeToUpdates();
         }
         return this.pushObject(model);
       };
-      this.addObserver("content.@each", function() {
+      this.addObserver("content.@each.isDirty", function() {
         _this.set("hasValue", true);
         return _this.set("isDirty", true);
       });
@@ -390,6 +425,13 @@
     },
     deleteRecord: function(model) {
       return this.removeObject(model);
+    },
+    length: (function() {
+      return this.get("content.length");
+    }).property("content.length").volatile(),
+    clear: function() {
+      this._super();
+      return this.set("hasValue", false);
     }
   });
 
@@ -536,9 +578,12 @@
           return this.deserializeCollection(Emu.Model.getAttr(model, property), value, addative);
         }
       } else if (meta.isModel()) {
+        modelProperty = Emu.Model.getAttr(model, property);
+        if (!addative) {
+          modelProperty.clear();
+        }
         if (value) {
-          modelProperty = Emu.Model.getAttr(model, property);
-          return this.deserializeModel(modelProperty, value);
+          return this.deserializeModel(modelProperty, value, addative);
         }
       } else {
         attributeSerializer = Emu.AttributeSerializers[meta.type()];
