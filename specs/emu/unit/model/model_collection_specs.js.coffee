@@ -63,6 +63,9 @@ describe "Emu.ModelCollection", ->
       it "should have hasValue true", ->
         expect(@modelCollection.get("hasValue")).toBeTruthy()
 
+      it "should have the collection as the parent for the model", ->
+        expect(@result.get("parent")).toBe(@modelCollection)
+
     describe "with subscribeToUpdates", ->
       beforeEach ->
         @store = Ember.Object.create()

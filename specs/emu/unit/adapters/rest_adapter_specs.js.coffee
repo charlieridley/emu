@@ -33,7 +33,7 @@ describe "Emu.RestAdapter", ->
     describe "with namespace", ->
       beforeEach ->
         spyOn($, "ajax")      
-        models = Emu.ModelCollection.create()
+        models = Emu.ModelCollection.create(type: Person)
         store = Ember.Object.create()
         spyOn(serializer, "serializeTypeName").andReturn("person")
         @adapter = Emu.RestAdapter.create
@@ -87,7 +87,9 @@ describe "Emu.RestAdapter", ->
       beforeEach ->
         spyOn($, "ajax")      
         ParentPerson = Emu.Model.extend()
-        parent = ParentPerson.create()
+        parent = ParentPerson.create 
+          parent: Emu.ModelCollection.create
+            type: ParentPerson
         spyOn(parent, "primaryKeyValue").andReturn(5)
         models = Emu.ModelCollection.create(parent: parent, type: Person)
         store = Ember.Object.create()
@@ -110,7 +112,9 @@ describe "Emu.RestAdapter", ->
     describe "starts loading", ->
       beforeEach ->
         spyOn($, "ajax")      
-        model = Person.create()
+        model = Person.create    
+          parent: Emu.ModelCollection.create
+            type: Person
         store = Ember.Object.create()
         spyOn(serializer, "serializeTypeName").andReturn("person")
         @adapter = Emu.RestAdapter.create
@@ -198,7 +202,9 @@ describe "Emu.RestAdapter", ->
         @store = Ember.Object.create()
         spyOn($, "ajax")
         @jsonData = {name: "Henry"}
-        @model = Person.create()
+        @model = Person.create
+          parent: Emu.ModelCollection.create
+            type: Person
         @adapter = Emu.RestAdapter.create
           namespace: "api"
           serializer: Serializer
@@ -246,6 +252,27 @@ describe "Emu.RestAdapter", ->
       
       it "should notify the store", ->
         expect(@store.didSave).toHaveBeenCalledWith(@model)
+
+    describe "has parent", ->
+      beforeEach ->
+        spyOn($, "ajax")
+        customer = App.Customer.create
+          id: 10
+          parent: Emu.ModelCollection.create
+            type: App.Customer
+        @order = App.Order.create
+          parent: Emu.ModelCollection.create
+            parent: customer
+            type: App.Order
+        @adapter = Emu.RestAdapter.create
+          namespace: "api"
+          serializer: Serializer
+        spyOn(serializer, "serializeTypeName").andCallFake (type) ->
+          if type == App.Customer then "customer" else "order"
+        @adapter.insert(Ember.Object.create(), @order)
+
+      it "should send the request to the correct URL for the model", ->
+        expect($.ajax.mostRecentCall.args[0].url).toEqual("api/customer/10/order")
   
   describe "update", ->
     
@@ -254,7 +281,10 @@ describe "Emu.RestAdapter", ->
         @store = Ember.Object.create()
         spyOn($, "ajax")
         @jsonData = {name: "Henry"}
-        @model = Person.create(id: 80)
+        @model = Person.create
+          id: 80
+          parent: Emu.ModelCollection.create
+            type: Person
         @adapter = Emu.RestAdapter.create
           namespace: "api"
           serializer: Serializer
@@ -282,7 +312,10 @@ describe "Emu.RestAdapter", ->
     describe "start request", ->
       beforeEach ->
         spyOn($, "ajax")
-        @model = Person.create(id: 6)
+        @model = Person.create
+          id: 6
+          parent: Emu.ModelCollection.create
+            type: Person
         @adapter = Emu.RestAdapter.create
           namespace: "api"
           serializer: Serializer

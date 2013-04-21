@@ -64,3 +64,16 @@ describe "Saving a existing model", ->
   
   it "should send a PUT request", ->
     expect($.ajax.mostRecentCall.args[0].type).toEqual("PUT")
+
+describe "Saving a model which is in a lazy collection field", ->
+  beforeEach ->
+    TestSetup.setup()
+    spyOn($, "ajax")
+    @order = App.Customer.find(5).get("orders").createRecord()
+    @order.save()
+
+  it "should save to the correct URL", ->
+    expect($.ajax.mostRecentCall.args[0].url).toEqual("api/customer/5/order")
+
+  it "should send a POST request", ->
+    expect($.ajax.mostRecentCall.args[0].type).toEqual("POST")

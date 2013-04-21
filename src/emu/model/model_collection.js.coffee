@@ -7,7 +7,8 @@ Emu.ModelCollection = Ember.ArrayProxy.extend
       paramHash = 
         store: @get("store")
       paramHash[primaryKey] = hash?.id
-      model = @get("type").create(paramHash)     
+      model = @get("type").create(paramHash)   
+      model.set("parent", this)  
       model.setProperties(hash)    
       model.subscribeToUpdates() if @_subscribeToUpdates
       @pushObject(model)

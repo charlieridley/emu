@@ -364,11 +364,14 @@ describe "Emu.Serializer", ->
           name: Emu.field("string")
           orders:  Emu.field("App.Order", {collection: true, lazy: true})
         beforeEach ->
+          orders = Emu.ModelCollection.create
+            type: App.Order
           @customer = Customer.create
             id: 6
             name: "Terry the customer"
-          @customer.get("orders").pushObject(App.Order.create(orderCode: "123"))
-          @customer.get("orders").pushObject(App.Order.create(orderCode: "456"))
+            orders: orders      
+          orders.pushObject(App.Order.create(orderCode: "123"))
+          orders.pushObject(App.Order.create(orderCode: "456"))
           spyOn(Emu.Model, "getAttr").andCallThrough()
           @serializer = Emu.Serializer.create()
           @jsonResult = @serializer.serializeModel(@customer)

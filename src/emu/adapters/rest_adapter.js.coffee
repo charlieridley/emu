@@ -3,16 +3,15 @@ Emu.RestAdapter = Ember.Object.extend
     @_serializer = @get("serializer")?.create() or Emu.Serializer.create()
 
   findAll: (type, store, collection) -> 
-    url = if collection.get("parent") then @_getEndpointNestedSubCollection(collection) else @_getEndpointForModel(type)
     $.ajax
-      url: url
+      url: @_getUrlForModel(collection)
       type: "GET"
       success: (jsonData) =>
         @_didFindAll(store, collection, jsonData)
 
   findById: (type, store, model, id) ->
     $.ajax
-      url: @_getEndpointForModel(type) + "/" + id
+      url: @_getUrlForModel(model) + "/" + id
       type: "GET"
       success: (jsonData) =>
         @_didFindById(store, model, jsonData)
@@ -21,7 +20,7 @@ Emu.RestAdapter = Ember.Object.extend
 
   findQuery: (type, store, collection, queryHash) ->
     $.ajax
-      url: @_getEndpointForModel(type) + @_serializer.serializeQueryHash(queryHash)
+      url: @_getUrlForType(type) + @_serializer.serializeQueryHash(queryHash)
       type: "GET"
       success: (jsonData) =>
         @_serializer.deserializeCollection(collection, jsonData)
@@ -35,7 +34,7 @@ Emu.RestAdapter = Ember.Object.extend
 
   delete: (store, model) ->
     $.ajax
-      url: @_getEndpointForModel(model.constructor) + "/" + model.primaryKeyValue()
+      url: @_getUrlForModel(model) + "/" + model.primaryKeyValue()
       type: "DELETE"
       success: ->
         store.didDeleteRecord(model)
@@ -43,7 +42,7 @@ Emu.RestAdapter = Ember.Object.extend
   _save: (store, model, requestType, id) ->
     jsonData = @_serializer.serializeModel(model)
     $.ajax
-      url: @_getEndpointForModel(model.constructor) + if id then ("/" + id) else ""
+      url: @_getUrlForModel(model) + if id then ("/" + id) else ""
       data: jsonData
       type: requestType
       success: (jsonData) =>
@@ -63,11 +62,20 @@ Emu.RestAdapter = Ember.Object.extend
   _didSave: (store, model, jsonData) ->
     @_serializer.deserializeModel(model, jsonData)
     store.didSave(model)
-  
-  _getEndpointNestedSubCollection: (collection) ->
-    @_getBaseUrl() + @_serializer.serializeTypeName(collection.get("parent").constructor) + "/" + collection.get("parent").primaryKeyValue() + "/" + @_serializer.serializeTypeName(collection.get("type"))
-  
-  _getEndpointForModel: (type) ->
+    
+  _getUrlForModel: (model) ->
+    url = if model.constructor == Emu.ModelCollection then @_serializer.serializeTypeName(model.get("type")) else ""
+    currentModel = model
+    buildUrl = =>
+      currentModel = currentModel.get("parent")
+      if currentModel.constructor == Emu.ModelCollection
+        url = @_serializer.serializeTypeName(currentModel.get("type")) + (if url then "/" + url else "")
+      else
+        url = currentModel.primaryKeyValue() + "/" + url 
+    buildUrl() while currentModel.get("parent")
+    @_getBaseUrl() + url
+
+  _getUrlForType: (type) ->
     @_getBaseUrl() + @_serializer.serializeTypeName(type)
   
   _getBaseUrl: ->
