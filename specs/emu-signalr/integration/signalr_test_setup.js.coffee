@@ -12,3 +12,4 @@ window.SignalrTestSetup =
     App.Store.create
       pushAdapter: Emu.SignalrPushDataAdapter.extend
         updatableTypes: ["App.UpdatablePerson"]
+    App.reset()

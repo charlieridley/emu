@@ -19,3 +19,11 @@ App.Customer = Emu.Model.extend
 
 App.ClubTropicana = Emu.Model.extend
   drinksAreFree: Emu.field("string")
+
+App.Organization = Emu.Model.extend
+  name: Emu.field('string')
+  projects: Emu.field('App.Project', {collection: true, lazy: true})
+
+App.Project = Emu.Model.extend
+  name: Emu.field('string')
+  organization: Emu.field('App.Organization')

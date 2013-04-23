@@ -35,3 +35,16 @@ describe "Lazy loading collection", ->
     
     it "should have maintained the same collection reference as returned", ->
       expect(@customer.get("orders")).toEqual(@orders)
+
+  describe "loading object and then lazy collection, lazy collection finishes first", ->
+    beforeEach ->
+      TestSetup.setup()
+      spyOn($, "ajax")
+      App.Organization.find(1).get("projects")
+      $.ajax.mostRecentCall.args[0].success [
+        {name: "123"}
+        {name: "456"}
+      ]
+
+    it "should have made 2 ajax calls", ->
+      expect($.ajax.calls.length).toEqual(2)

@@ -21,7 +21,7 @@ Emu.Model = Ember.Object.extend
   clear: ->
     @constructor.eachEmuField (property, meta) =>
       if meta.isModel() or meta.options.collection
-        @get(property).clear()
+        Emu.Model.getAttr(this, property).clear()
       else
         @set(property, undefined)
     @set("hasValue", false)
