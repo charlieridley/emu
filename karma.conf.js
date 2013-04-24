@@ -20,6 +20,7 @@ files = [
   'ember.js',   
   'src/emu/core.js.coffee',
   'src/emu/model/field.js.coffee',
+  'src/emu/model/model_evented.js.coffee',
   'src/emu/**/*.js.coffee',  
   'specs/emu/application.js.coffee',
   'specs/emu/models.js.coffee',
