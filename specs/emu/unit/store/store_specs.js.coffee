@@ -53,7 +53,11 @@ describe "Emu.Store", ->
         spyOn(adapter, "findAll")
         @store = Emu.Store.create
           adapter: Adapter
+        @models.on "didStartLoading", => @didStartLoading = true
         @result = @store.findAll(Person)
+
+      it "should fire didStartLoading", ->
+        expect(@didStartLoading).toBeTruthy()
       
       it "should have created an internal collection for the records, with a reference to the store and the model type", ->     
         expect(Emu.ModelCollection.create).toHaveBeenCalledWith(type: Person, store: @store)
@@ -75,7 +79,11 @@ describe "Emu.Store", ->
         @store = Emu.Store.create
           adapter: Adapter
         @store.findAll(Person)
+        @models.on "didStartLoading", => @didStartLoading = true
         @result = @store.findAll(Person)
+
+      it "should not fire didStartLoading", ->
+        expect(@didStartLoading).toBeFalsy()
       
       it "should create a new ModelCollection only once", ->
         expect(Emu.ModelCollection.create.calls.length).toEqual(1)
@@ -90,7 +98,11 @@ describe "Emu.Store", ->
         spyOn(adapter, "findAll")
         @store = Emu.Store.create
           adapter: Adapter
+        @models.on "didStartLoading", => @didStartLoading = true
         @result = @store.findAll(Person)
+
+      it "should not fire didStartLoading", ->
+        expect(@didStartLoading).toBeFalsy()
       
       it "should not call the findAll method on the adapter", ->
         expect(adapter.findAll).not.toHaveBeenCalled()
@@ -103,7 +115,11 @@ describe "Emu.Store", ->
       @models = Emu.ModelCollection.create(isLoading: true)     
       @store = Emu.Store.create
         adapter: Adapter
-      @store.didFindAll(@models)      
+      @models.on "didFinishLoading", => @didFinishLoading = true
+      @store.didFindAll(@models)
+
+    it "should fire didFinishLoading", ->
+        expect(@didFinishLoading).toBeTruthy()
     
     it "should set isLoading true on the model collection", ->
       expect(@models.get("isLoading")).toBeFalsy()
@@ -124,7 +140,11 @@ describe "Emu.Store", ->
           spyOn(adapter, "findById")
           @store = Emu.Store.create
             adapter: Adapter
+          @model.on "didStartLoading", => @didStartLoading = true
           @result = @store.findById(Person, 5)
+
+        it "should fire didStartLoading", ->
+          expect(@didStartLoading).toBeTruthy()
         
         it "should set the id on the model with the ID", ->
           expect(@modelCollection.createRecord).toHaveBeenCalled()
@@ -158,13 +178,18 @@ describe "Emu.Store", ->
           expect(adapter.findById).toHaveBeenCalledWith(Foo, @store, @model, 10)
 
     describe "query already pending", ->
+      
       describe "default primaryKey", ->
         beforeEach ->
           spyOn(adapter, "findById")      
           @store = Emu.Store.create
             adapter: Adapter      
           @firstResult = @store.findById(Person, 5)   
+          @firstResult.on "didStartLoading", => @didStartLoading = true
           @secondResult = @store.findById(Person, 5)
+
+        it "should not fire didStartLoading the second time", ->
+          expect(@didStartLoading).toBeFalsy()
         
         it "should return the same model for both calls", ->
           expect(@firstResult).toBe(@secondResult)
@@ -197,9 +222,13 @@ describe "Emu.Store", ->
         modelCollections[Person].pushObject(@loadedModel)
         @store = Emu.Store.create
           adapter: Adapter
-          modelCollections: modelCollections        
+          modelCollections: modelCollections
+        @loadedModel.on "didStartLoading", => @didStartLoading = true  
         @result = @store.findById(Person, 5)    
       
+      it "should not fire didStartLoading", ->
+        expect(@didStartLoading).to
+
       it "should return the existing model", ->
         expect(@result).toBe(@loadedModel)
       
@@ -212,8 +241,12 @@ describe "Emu.Store", ->
       spyOn(Person, "create").andReturn(@model)
       @store = Emu.Store.create
         adapter: Adapter
+      @model.on "didFinishLoading", => @didFinishLoading = true
       @store.didFindById(@model)
     
+    it "should fire didFinishLoading", ->
+      expect(@didFinishLoading).toBeTruthy()
+
     it "should set isLoading to false", ->
       expect(@model.get("isLoading")).toBeFalsy()
     
@@ -251,7 +284,11 @@ describe "Emu.Store", ->
           adapter: Adapter
         spyOn(adapter, "insert")
         @model = @store.createRecord(Person)
+        @model.on "didStartSaving", => @didStartSaving = true 
         @store.save(@model)
+
+      it "should fire didStartSaving", ->
+        expect(@didStartSaving).toBeTruthy()
       
       it "should call insert on the adapter", ->
         expect(adapter.insert).toHaveBeenCalledWith(@store, @model)
@@ -263,7 +300,11 @@ describe "Emu.Store", ->
         spyOn(adapter, "update")
         @model = @store.createRecord(Person)
         spyOn(@model, "primaryKeyValue").andReturn(10)
+        @model.on "didStartSaving", => @didStartSaving = true 
         @store.save(@model)
+
+      it "should fire didStartSaving", ->
+        expect(@didStartSaving).toBeTruthy()
       
       it "should call update on the adapter", ->
         expect(adapter.update).toHaveBeenCalledWith(@store, @model)
@@ -274,7 +315,11 @@ describe "Emu.Store", ->
         adapter: Adapter
       @model = @store.createRecord(Person)
       @model.set("isLoading", true)
+      @model.on "didFinishSaving", => @didFinishSaving = true 
       @store.didSave(@model)
+
+    it "should fire didFinishSaving", ->
+      expect(@didFinishSaving).toBeTruthy()
     
     it "should not be dirty", ->
       expect(@model.get("isDirty")).toBeFalsy()
@@ -307,7 +352,11 @@ describe "Emu.Store", ->
         spyOn(adapter, "findById")
         @store = Emu.Store.create   
           adapter: Adapter
+        @model.on "didStartLoading", => @didStartLoading = true
         @store.loadModel(@model)
+
+      it "should fire didStartLoading", ->
+        expect(@didStartLoading).toBeTruthy()
       
       it "should set isLoading on the model to true", ->
         expect(@model.get("isLoading")).toBeTruthy()
@@ -336,8 +385,12 @@ describe "Emu.Store", ->
         @store = Emu.Store.create
           adapter: Adapter
         @query = {name: "Mr Bean"}
+        @models.on "didStartLoading", => @didStartLoading = true
         @result = @store.findQuery(Person, {name: "Mr Bean"})
       
+      it "should fire didStartLoading", ->
+        expect(@didStartLoading).toBeTruthy()
+
       it "should have created an internal collection for the records, with a reference to the store and the model type", ->     
         expect(Emu.ModelCollection.create).toHaveBeenCalledWith(type: Person, store: @store)
       
@@ -355,7 +408,11 @@ describe "Emu.Store", ->
         @models = Emu.ModelCollection.create(isLoading: true)     
         @store = Emu.Store.create
           adapter: Adapter
-        @store.didFindQuery(@models)      
+        @models.on "didFinishLoading", => @didFinishLoading = true
+        @store.didFindQuery(@models)   
+
+      it "should fire didFinishLoading", ->
+        expect(@didFinishLoading).toBeTruthy()   
       
       it "should set isLoading true on the model collection", ->
         expect(@models.get("isLoading")).toBeFalsy()
@@ -370,7 +427,11 @@ describe "Emu.Store", ->
           adapter: Adapter
         @query = {name: "Mr Bean"}
         @result1 = @store.findQuery(Person, {age: "40", weight: "160lb"})
+        @result1.on "didStartLoading", => @didStartLoading = true
         @result2 = @store.findQuery(Person, {age: "40", weight: "160lb"})
+
+      it "should not fire didStartLoading the second time", ->
+        expect(@didStartLoading).toBeFalsy()
       
       it "should call the findQuery method on the adapter only once", ->
         expect(adapter.findQuery.calls.length).toEqual(1)

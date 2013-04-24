@@ -1,4 +1,4 @@
-Emu.ModelCollection = Ember.ArrayProxy.extend
+Emu.ModelCollection = Ember.ArrayProxy.extend Emu.ModelEvented, Ember.Evented,
   init: ->
     @set("content", Ember.A([])) unless @get("content")
     
