@@ -48,3 +48,9 @@ describe "Lazy loading collection", ->
 
     it "should have made 2 ajax calls", ->
       expect($.ajax.calls.length).toEqual(2)
+
+    it "should have sent a request to get the organization", ->
+      expect($.ajax.calls[0].args[0].url).toEqual("api/organization/1")
+
+    it "should have sent a request to get the organization's projects", ->
+      expect($.ajax.calls[1].args[0].url).toEqual("api/organization/1/project")

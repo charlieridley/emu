@@ -147,6 +147,7 @@ describe "Emu.field", ->
           @result = @model.get("orders")
   
     describe "partial property", ->
+      
       describe "passing a store", ->
         beforeEach ->
           @store = Ember.Object.create
@@ -199,4 +200,35 @@ describe "Emu.field", ->
         
         it "should have hasValue false on the return object", ->
           expect(@model.get("hasValue")).toBeFalsy()
+
+  describe "set", ->
+
+    describe "with existing value", ->
+      
+      beforeEach ->
+        Foo = Emu.Model.extend
+          fooId: Emu.field("string", {primaryKey: true})
+        @foo = Foo.create(fooId:"10")
+        @foo.primaryKeyValue("20")
+      
+      it "should have primaryKeyValue as '20'", ->
+        expect(@foo.primaryKeyValue()).toEqual("20")
+
+      it "should have hasValue true", ->
+        expect(@foo.get("hasValue")).toBeTruthy()
+
+    describe "without existing value", ->
+      
+      beforeEach ->
+        Foo = Emu.Model.extend
+          fooId: Emu.field("string", {primaryKey: true})
+        @foo = Foo.create()
+        @foo.primaryKeyValue("20")
+      
+      it "should have primaryKeyValue as '20'", ->
+        expect(@foo.primaryKeyValue()).toEqual("20")
+
+      it "should have hasValue true", ->
+        expect(@foo.get("hasValue")).toBeTruthy()
+
 

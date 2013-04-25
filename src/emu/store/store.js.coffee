@@ -47,6 +47,7 @@ Emu.Store = Ember.Object.extend
     @loadModel(model)
 
   didFindById: (model) ->
+    model.didFinishLoading()
     model.set "isLoading", false
     model.set "isLoaded", true
     model.set "isDirty", false
@@ -58,6 +59,7 @@ Emu.Store = Ember.Object.extend
   findQuery: (type, queryHash) ->
     collection = @_getCollectionForQuery(type, queryHash)
     unless collection.get("isLoading")
+      collection.didStartLoading()
       collection.set("isLoading", true)
       @_adapter.findQuery(type, this, collection, queryHash)
     collection
@@ -79,12 +81,14 @@ Emu.Store = Ember.Object.extend
     results
 
   save: (model) ->
+    model.didStartSaving()
     if model.primaryKeyValue()
       @_adapter.update(this, model) 
     else 
       @_adapter.insert(this, model)
 
   didSave: (model) ->
+    model.didFinishSaving()
     model.set("isDirty", false)
     model.set("isLoaded", true)
     model.set("isLoading", false)
@@ -92,12 +96,14 @@ Emu.Store = Ember.Object.extend
   loadAll: (collection) ->
     if collection.get("isLoading") or collection.get("isLoaded")
       return collection
+    collection.didStartLoading()
     collection.set("isLoading", true)
     @_adapter.findAll(collection.get("type"), this, collection)
     collection  
   
   loadModel: (model) ->
     if not model.get("isLoading") and not model.get("isLoaded")
+      model.didStartLoading()
       model.set("isLoading", true)
       @_adapter.findById(model.constructor, this, model, model.primaryKeyValue())
     model
@@ -123,6 +129,7 @@ Emu.Store = Ember.Object.extend
     @_getCollectionForType(model.constructor).deleteRecord(model)
     
   _didCollectionLoad: (collection) ->
+    collection.didFinishLoading()
     collection.set("isLoaded", true)
     collection.set("isLoading", false)
   

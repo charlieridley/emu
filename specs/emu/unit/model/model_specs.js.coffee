@@ -8,6 +8,7 @@ describe "Emu.Model", ->
     expect(Person.isEmuModel).toBeTruthy()
 
   describe "create", ->
+    
     describe "no values", ->
       beforeEach ->
         @person = Person.create()
@@ -57,37 +58,6 @@ describe "Emu.Model", ->
       
       it "should have primaryKeyValue as '10'", ->
         expect(@foo.primaryKeyValue()).toEqual("10")
-
-    describe "set", ->
-
-      describe "with existing value", ->
-        
-        beforeEach ->
-          Foo = Emu.Model.extend
-            fooId: Emu.field("string", {primaryKey: true})
-          @foo = Foo.create(fooId:"10")
-          @foo.primaryKeyValue("20")
-        
-        it "should have primaryKeyValue as '20'", ->
-          expect(@foo.primaryKeyValue()).toEqual("20")
-
-        it "should have hasValue true", ->
-          expect(@foo.get("hasValue")).toBeTruthy()
-
-      describe "without existing value", ->
-        
-        beforeEach ->
-          Foo = Emu.Model.extend
-            fooId: Emu.field("string", {primaryKey: true})
-          @foo = Foo.create()
-          @foo.primaryKeyValue("20")
-        
-        it "should have primaryKeyValue as '20'", ->
-          expect(@foo.primaryKeyValue()).toEqual("20")
-
-        it "should have hasValue true", ->
-          expect(@foo.get("hasValue")).toBeTruthy()
-
   
   describe "createRecord", ->
     beforeEach ->

@@ -1,4 +1,4 @@
-Emu.Model = Ember.Object.extend
+Emu.Model = Ember.Object.extend Emu.ModelEvented, Ember.Evented,
   init: ->
     unless @get("store")
       @set("store", Ember.get(Emu, "defaultStore"))  
