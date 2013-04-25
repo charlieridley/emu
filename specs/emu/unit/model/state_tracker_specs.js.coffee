@@ -3,7 +3,7 @@ describe "Emu.StateTracker", ->
   describe "responding to model events", ->
 
     describe "didStartLoading", ->
-      beforeEach ->
+      beforeEach -> 
         stateTracker = Emu.StateTracker.create()
         @model = App.Person.create()
         stateTracker.track(@model)

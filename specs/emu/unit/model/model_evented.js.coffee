@@ -4,7 +4,7 @@ describe "Emu.ModelEvented", ->
   describe "didFinishLoading", ->
     beforeEach ->
       @model = Person.create()
-      @model.on "didFinishLoading", => 
+      @model.on "didFinishLoading", =>
         @didFinishLoading = true
       @model.didFinishLoading()
 

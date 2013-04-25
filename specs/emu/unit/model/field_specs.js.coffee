@@ -1,4 +1,4 @@
-describe "Emu.field", ->  
+describe "Emu.field", ->
   Person = Emu.Model.extend() 
   Order = Emu.Model.extend()
   

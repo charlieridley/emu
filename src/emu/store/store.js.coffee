@@ -50,7 +50,7 @@ Emu.Store = Ember.Object.extend
     model.set 'isError', true
     model.set 'isLoading', false
 
-  findQuery: (type, queryHash) ->
+  findQuery: (type, queryHash) -> 
     collection = @_getCollectionForQuery(type, queryHash)
     unless collection.get("isLoading")
       collection.didStartLoading()

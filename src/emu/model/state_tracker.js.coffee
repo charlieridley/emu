@@ -1,5 +1,5 @@
 Emu.StateTracker = Ember.Object.extend
-  track: (model) ->
+  track: (model) -> 
     model.on "didStartLoading", ->
       model.set("isLoading", true)
       model.set("isLoaded", false)

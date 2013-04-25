@@ -16,7 +16,7 @@ describe "Emu.Model", ->
         spyOn(Emu.StateTracker, "create").andReturn(@stateTracker)
         @person = Person.create()
       
-      it "should have hasValue false", ->
+      it "should have hasValue false", -> 
         expect(@person.get("hasValue")).toBeFalsy()
 
       it "should have isDirty true", ->

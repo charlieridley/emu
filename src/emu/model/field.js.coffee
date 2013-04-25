@@ -8,7 +8,7 @@ Emu.field = (type, options) ->
   
   Ember.computed((key, value, oldValue) ->
     meta = @constructor.metaForProperty(key)    
-    if arguments.length > 1
+    if arguments.length > 1 
       Emu.Model.setAttr(this, key, value)
       @didStateChange()
       @set("hasValue", true)

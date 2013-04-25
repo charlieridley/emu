@@ -1,5 +1,5 @@
 describe "Emu.ModelCollection", ->
-  Person = Emu.Model.extend() 
+  Person = Emu.Model.extend()
   describe "create", ->
 
     describe "not setting content", ->

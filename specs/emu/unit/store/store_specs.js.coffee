@@ -5,7 +5,7 @@ describe "Emu.Store", ->
     findQuery: ->
     insert: ->
     update: ->
-    delete: ->
+    delete: -> 
   Adapter = 
     create: -> adapter
   Person = Emu.Model.extend

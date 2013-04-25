@@ -1,5 +1,5 @@
 Emu.Model = Ember.Object.extend Emu.ModelEvented, Ember.Evented,
-  init: ->
+  init: -> 
     unless @get("store")
       @set("store", Ember.get(Emu, "defaultStore"))  
     @_primaryKey = Emu.Model.primaryKey(@constructor)
