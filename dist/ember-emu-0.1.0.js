@@ -1,5 +1,5 @@
-// Version: 0.1.0-42-g95a992e
-// Last commit: 95a992e (2013-04-22 22:02:05 -0400)
+// Version: 0.1.0-50-gb1706b4
+// Last commit: b1706b4 (2013-04-24 20:09:02 -0700)
 
 
 (function() {
@@ -262,7 +262,7 @@
 
 }).call(this);
 (function() {
-  Emu.Model = Ember.Object.extend({
+  Emu.Model = Ember.Object.extend(Emu.ModelEvented, Ember.Evented, {
     init: function() {
       if (!this.get("store")) {
         this.set("store", Ember.get(Emu, "defaultStore"));
@@ -389,7 +389,7 @@
 
 }).call(this);
 (function() {
-  Emu.ModelCollection = Ember.ArrayProxy.extend({
+  Emu.ModelCollection = Ember.ArrayProxy.extend(Emu.ModelEvented, Ember.Evented, {
     init: function() {
       var _this = this;
 
@@ -432,6 +432,23 @@
     clear: function() {
       this._super();
       return this.set("hasValue", false);
+    }
+  });
+
+}).call(this);
+(function() {
+  Emu.ModelEvented = Ember.Mixin.create({
+    didStartLoading: function() {
+      return this.trigger("didStartLoading");
+    },
+    didFinishLoading: function() {
+      return this.trigger("didFinishLoading");
+    },
+    didStartSaving: function() {
+      return this.trigger("didStartSaving");
+    },
+    didFinishSaving: function() {
+      return this.trigger("didFinishSaving");
     }
   });
 
@@ -630,6 +647,23 @@
       return key.replace(/(\_[a-z])/g, function(x) {
         return x.toUpperCase().replace('_', '');
       });
+    },
+    serializeTypeName: function(type) {
+      var name, parts, typeString;
+
+      if (type.resourceName) {
+        name = type.resourceName;
+        if (typeof name === 'function') {
+          return name();
+        } else {
+          return name;
+        }
+      } else {
+        typeString = type.toString();
+        parts = typeString.split('.');
+        name = parts[parts.length - 1];
+        return name.replace(/([A-Z])/g, '_$1').toLowerCase().slice(1) + 's';
+      }
     }
   });
 
@@ -719,6 +753,7 @@
       return this.loadModel(model);
     },
     didFindById: function(model) {
+      model.didFinishLoading();
       model.set("isLoading", false);
       model.set("isLoaded", true);
       return model.set("isDirty", false);
@@ -732,6 +767,7 @@
 
       collection = this._getCollectionForQuery(type, queryHash);
       if (!collection.get("isLoading")) {
+        collection.didStartLoading();
         collection.set("isLoading", true);
         this._adapter.findQuery(type, this, collection, queryHash);
       }
@@ -767,6 +803,7 @@
       return results;
     },
     save: function(model) {
+      model.didStartSaving();
       if (model.primaryKeyValue()) {
         return this._adapter.update(this, model);
       } else {
@@ -774,6 +811,7 @@
       }
     },
     didSave: function(model) {
+      model.didFinishSaving();
       model.set("isDirty", false);
       model.set("isLoaded", true);
       return model.set("isLoading", false);
@@ -782,12 +820,14 @@
       if (collection.get("isLoading") || collection.get("isLoaded")) {
         return collection;
       }
+      collection.didStartLoading();
       collection.set("isLoading", true);
       this._adapter.findAll(collection.get("type"), this, collection);
       return collection;
     },
     loadModel: function(model) {
       if (!model.get("isLoading") && !model.get("isLoaded")) {
+        model.didStartLoading();
         model.set("isLoading", true);
         this._adapter.findById(model.constructor, this, model, model.primaryKeyValue());
       }
@@ -824,6 +864,7 @@
       return this._getCollectionForType(model.constructor).deleteRecord(model);
     },
     _didCollectionLoad: function(collection) {
+      collection.didFinishLoading();
       collection.set("isLoaded", true);
       return collection.set("isLoading", false);
     },
