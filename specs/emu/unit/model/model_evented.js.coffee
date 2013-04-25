@@ -40,3 +40,13 @@ describe "Emu.ModelEvented", ->
 
     it "should have called didFinishSaving event", ->
       expect(@didFinishSaving).toBeTruthy()
+
+  describe "didStateChange", ->
+    beforeEach ->
+      @model = Person.create()
+      @model.on "didStateChange", => 
+        @didStateChange = true
+      @model.didStateChange()
+
+    it "should have called didStateChange event", ->
+      expect(@didStateChange).toBeTruthy()

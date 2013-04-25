@@ -10,7 +10,7 @@ Emu.field = (type, options) ->
     meta = @constructor.metaForProperty(key)    
     if arguments.length > 1
       Emu.Model.setAttr(this, key, value)
-      @set("isDirty", true)
+      @didStateChange()
       @set("hasValue", true)
     else
       if meta.options.lazy        

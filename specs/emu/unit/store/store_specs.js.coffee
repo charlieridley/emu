@@ -320,15 +320,6 @@ describe "Emu.Store", ->
 
     it "should fire didFinishSaving", ->
       expect(@didFinishSaving).toBeTruthy()
-    
-    it "should not be dirty", ->
-      expect(@model.get("isDirty")).toBeFalsy()
-    
-    it "should be loaded", ->
-      expect(@model.get("isLoaded")).toBeTruthy()
-    
-    it "should not be loading", ->
-      expect(@model.get("isLoading")).toBeFalsy()
 
   describe "loadAll", ->
     beforeEach ->
@@ -462,17 +453,17 @@ describe "Emu.Store", ->
         @collection.pushObject(Person.create(age: 20))
         @collection.pushObject(Person.create(age: 30))
         @store = Emu.Store.create()
-        spyOn(@store, "findAll").andReturn(@collection)
+        spyOn(@store, "findAll").andReturn(@collection)        
         spyOn(Emu.ModelCollection, "create").andCallThrough()
         @predicate = (person) -> person.get("age") > 25
-        spyOn(this, "predicate").andCallThrough()
-        @result = @store.findPredicate(Person, @predicate)
-      
+        spyOn(this, "predicate").andCallThrough()        
+        @result = @store.findPredicate(Person, @predicate)        
+
       it "should find all the records", ->
         expect(@store.findAll).toHaveBeenCalledWith(Person)
       
       it "should create a new collection to contain the results", ->
-        expect(Emu.ModelCollection.create).toHaveBeenCalledWith(type: Person, store: @store, isLoading: false, isLoaded: true)
+        expect(Emu.ModelCollection.create).toHaveBeenCalledWith(type: Person, store: @store)
       
       it "should run the predicate on each item", ->
         expect(@predicate).toHaveBeenCalledWith(@collection.get("firstObject"))

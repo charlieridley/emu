@@ -11,10 +11,19 @@ describe "Emu.Model", ->
     
     describe "no values", ->
       beforeEach ->
+        @stateTracker = Emu.StateTracker.create()
+        spyOn(@stateTracker, "track")
+        spyOn(Emu.StateTracker, "create").andReturn(@stateTracker)
         @person = Person.create()
       
       it "should have hasValue false", ->
         expect(@person.get("hasValue")).toBeFalsy()
+
+      it "should have isDirty true", ->
+        expect(@person.get("isDirty")).toBeTruthy()
+
+      it "should be tracked with a StateTracker", ->
+        expect(@stateTracker.track).toHaveBeenCalledWith(@person)
     
     describe "multiple primary keys specified", ->
       beforeEach ->
@@ -107,31 +116,6 @@ describe "Emu.Model", ->
       
       it "should not proxy the call to the default store", ->
         expect(@defaultStore.save).not.toHaveBeenCalled()
-
-  describe "modifying a property", ->
-
-    describe "simple field", ->
-      beforeEach ->
-        @model = Person.create(isDirty:false)
-        @model.set("name", "Harold")
-      
-      it "should be in a dirty state", ->
-        expect(@model.get("isDirty")).toBeTruthy()
-      
-      it "should have hasValue set to true", ->
-        expect(@model.get("hasValue")).toBeTruthy()
-      
-    describe "collection field", ->
-      beforeEach ->
-        @model = Person.create
-          isDirty:false                     
-        @model.get("orders").pushObject(App.Order.create())
-      
-      it "should be in a dirty state", ->
-        expect(@model.get("isDirty")).toBeTruthy()  
-
-      it "should have hasValue set to true", ->
-        expect(@model.get("hasValue")).toBeTruthy()
 
     describe "model field", ->
       beforeEach ->
@@ -242,3 +226,65 @@ describe "Emu.Model", ->
     
     it "should have hasValue true", ->
       expect(@model.get("hasValue")).toBeTruthy()
+
+  describe "primaryKeyValue", ->
+    
+    describe "with existing value", ->
+      
+      beforeEach ->
+        Foo = Emu.Model.extend
+          fooId: Emu.field("string", {primaryKey: true})
+        @foo = Foo.create(fooId:"10")
+        @foo.primaryKeyValue("20")
+      
+      it "should have primaryKeyValue as '20'", ->
+        expect(@foo.primaryKeyValue()).toEqual("20")
+
+      it "should have hasValue true", ->
+        expect(@foo.get("hasValue")).toBeTruthy()
+
+    describe "without existing value", ->
+      
+      beforeEach ->
+        Foo = Emu.Model.extend
+          fooId: Emu.field("string", {primaryKey: true})
+        @foo = Foo.create()
+        @foo.primaryKeyValue("20")
+      
+      it "should have primaryKeyValue as '20'", ->
+        expect(@foo.primaryKeyValue()).toEqual("20")
+
+      it "should have hasValue true", ->
+        expect(@foo.get("hasValue")).toBeTruthy()
+
+  describe "modifying state", ->
+
+    describe "field in child object", ->
+      beforeEach ->
+        model = App.Person.create()
+        model.on "didStateChange", => @didStateChange = true
+        address = model.set("address.town", "London")        
+
+      it "should have fired the didStateChange event", ->
+        expect(@didStateChange).toBeTruthy()
+
+    describe "adding item to collection field", ->
+      beforeEach ->
+        model = App.Customer.create()
+        model.on "didStateChange", => @didStateChange = true
+        addresses = model.get("addresses")
+        addresses.pushObject(App.Address.create(town: "London"))
+
+      it "should have fired the didStateChange event", ->
+        expect(@didStateChange).toBeTruthy()
+
+    describe "modifying an item in a collection field", ->
+      beforeEach ->
+        model = App.Customer.create()        
+        addresses = model.get("addresses")
+        addresses.pushObject(App.Address.create(town: "London"))
+        model.on "didStateChange", => @didStateChange = true
+        addresses.get("firstObject").set("town", "Winchester")
+
+      it "should have fired the didStateChange event", ->
+        expect(@didStateChange).toBeTruthy()

@@ -11,14 +11,21 @@ Emu.ModelCollection = Ember.ArrayProxy.extend Emu.ModelEvented, Ember.Evented,
       model.set("parent", this)  
       model.setProperties(hash)    
       model.subscribeToUpdates() if @_subscribeToUpdates
-      @pushObject(model)
+      @pushObject(model)    
     
+    @pushObject = (model) =>
+      model.on "didStateChange", => @didStateChange()
+      @get("content").pushObject(model)
+
     @addObserver "content.@each.isDirty", =>
+      @didStateChange()
       @set("hasValue", true)
       @set("isDirty", true)
     
     @find = (predicate) -> 
       @get("content").find(predicate)
+
+    Emu.StateTracker.create().track(this)
 
   subscribeToUpdates: ->
     @_subscribeToUpdates = true

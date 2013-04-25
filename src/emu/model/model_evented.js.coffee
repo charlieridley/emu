@@ -3,3 +3,4 @@ Emu.ModelEvented = Ember.Mixin.create
   didFinishLoading: -> @trigger("didFinishLoading")
   didStartSaving: -> @trigger("didStartSaving")
   didFinishSaving: -> @trigger("didFinishSaving")
+  didStateChange: -> @trigger("didStateChange")

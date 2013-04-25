@@ -12,9 +12,7 @@ Emu.Store = Ember.Object.extend
 
   createRecord: (type, hash) ->
     collection = @_getCollectionForType(type)
-    model = collection.createRecord(hash)
-    model.set("isDirty", true)
-    model
+    collection.createRecord(hash)
   
   find: (type, param) -> 
     return @findAll(type) unless param 
@@ -35,8 +33,7 @@ Emu.Store = Ember.Object.extend
       deferredQueries.forEach (deferredQuery) ->
         queryResult = collection.filter(deferredQuery.predicate)
         deferredQuery.results.pushObjects(queryResult)
-        deferredQuery.results.set("isLoaded", true)
-        deferredQuery.results.set("isLoading", false)
+        deferredQuery.results.didFinishLoading()
   
   findById: (type, id) ->
     collection = @_getCollectionForType(type)
@@ -47,10 +44,7 @@ Emu.Store = Ember.Object.extend
     @loadModel(model)
 
   didFindById: (model) ->
-    model.didFinishLoading()
-    model.set "isLoading", false
-    model.set "isLoaded", true
-    model.set "isDirty", false
+    model.didFinishLoading()  
 
   didError: (model) ->
     model.set 'isError', true
@@ -60,7 +54,6 @@ Emu.Store = Ember.Object.extend
     collection = @_getCollectionForQuery(type, queryHash)
     unless collection.get("isLoading")
       collection.didStartLoading()
-      collection.set("isLoading", true)
       @_adapter.findQuery(type, this, collection, queryHash)
     collection
 
@@ -69,13 +62,13 @@ Emu.Store = Ember.Object.extend
 
   findPredicate: (type, predicate) ->
     allModels = @findAll(type)    
-    results = Emu.ModelCollection.create(type: type, store: this, isLoaded: true, isLoading: false)    
+    results = Emu.ModelCollection.create(type: type, store: this)    
     if allModels.get("isLoaded")
       filtered = allModels.filter (m) -> predicate(m)
       results.pushObjects filtered
+      results.didFinishLoading()    
     else
-      results.set("isLoading", true)      
-      results.set("isLoaded", false)      
+      results.didStartLoading()    
       queries = @get("deferredQueries")[type] or @get("deferredQueries")[type] = []
       queries.pushObject(predicate: predicate, results: results)
     results
@@ -89,22 +82,17 @@ Emu.Store = Ember.Object.extend
 
   didSave: (model) ->
     model.didFinishSaving()
-    model.set("isDirty", false)
-    model.set("isLoaded", true)
-    model.set("isLoading", false)
 
   loadAll: (collection) ->
     if collection.get("isLoading") or collection.get("isLoaded")
       return collection
     collection.didStartLoading()
-    collection.set("isLoading", true)
     @_adapter.findAll(collection.get("type"), this, collection)
     collection  
   
   loadModel: (model) ->
     if not model.get("isLoading") and not model.get("isLoaded")
       model.didStartLoading()
-      model.set("isLoading", true)
       @_adapter.findById(model.constructor, this, model, model.primaryKeyValue())
     model
 
@@ -130,8 +118,6 @@ Emu.Store = Ember.Object.extend
     
   _didCollectionLoad: (collection) ->
     collection.didFinishLoading()
-    collection.set("isLoaded", true)
-    collection.set("isLoading", false)
   
   _getCollectionForType: (type) ->
     @get("modelCollections")[type] || @get("modelCollections")[type] = Emu.ModelCollection.create(type: type, store: this)

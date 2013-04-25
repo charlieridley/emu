@@ -202,33 +202,18 @@ describe "Emu.field", ->
           expect(@model.get("hasValue")).toBeFalsy()
 
   describe "set", ->
-
-    describe "with existing value", ->
-      
+    
+    describe "simple field", ->
       beforeEach ->
-        Foo = Emu.Model.extend
-          fooId: Emu.field("string", {primaryKey: true})
-        @foo = Foo.create(fooId:"10")
-        @foo.primaryKeyValue("20")
+        @model = App.Person.create(isDirty:false)
+        @model.on "didStateChange", => @didStateChange = true
+        @model.set("name", "Harold")
       
-      it "should have primaryKeyValue as '20'", ->
-        expect(@foo.primaryKeyValue()).toEqual("20")
+      it "should have fired a state change event", ->
+        expect(@didStateChange).toBeTruthy()
 
-      it "should have hasValue true", ->
-        expect(@foo.get("hasValue")).toBeTruthy()
-
-    describe "without existing value", ->
+      it "should be in a dirty state", ->
+        expect(@model.get("isDirty")).toBeTruthy()
       
-      beforeEach ->
-        Foo = Emu.Model.extend
-          fooId: Emu.field("string", {primaryKey: true})
-        @foo = Foo.create()
-        @foo.primaryKeyValue("20")
-      
-      it "should have primaryKeyValue as '20'", ->
-        expect(@foo.primaryKeyValue()).toEqual("20")
-
-      it "should have hasValue true", ->
-        expect(@foo.get("hasValue")).toBeTruthy()
-
-
+      it "should have hasValue set to true", ->
+        expect(@model.get("hasValue")).toBeTruthy()    

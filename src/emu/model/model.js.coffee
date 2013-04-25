@@ -3,6 +3,8 @@ Emu.Model = Ember.Object.extend Emu.ModelEvented, Ember.Evented,
     unless @get("store")
       @set("store", Ember.get(Emu, "defaultStore"))  
     @_primaryKey = Emu.Model.primaryKey(@constructor)
+    @set("isDirty", true) if @get("isDirty") == undefined
+    Emu.StateTracker.create().track(this)
   
   save: -> 
     @get("store").save(this)
@@ -60,13 +62,16 @@ Emu.Model.reopenClass
     record._attributes ?= {}   
     unless record._attributes[key]
       if meta.options.collection
-        record._attributes[key] = Emu.ModelCollection.create(parent: record, type: meta.type(), store: record.get("store"))
-        record._attributes[key].addObserver "isDirty", -> record.set("isDirty", true)
+        record._attributes[key] = Emu.ModelCollection.create(parent: record, type: meta.type(), store: record.get("store"))        
         record._attributes[key].addObserver "hasValue", -> record.set("hasValue", true)
+        record._attributes[key].on "didStateChange", -> 
+          record.didStateChange()
         record._attributes[key].subscribeToUpdates() if meta.options.updatable
       else if meta.isModel()
         record._attributes[key] = meta.type().create()
-        record._attributes[key].addObserver "isDirty", -> record.set("isDirty", true)
+        record._attributes[key].on "didStateChange", -> 
+          record.set("isDirty", true)
+          record.didStateChange()
     record._attributes[key] 
   
   setAttr: (record, key, value) ->
