@@ -1,4 +1,4 @@
-describe "Changing state", ->
+describe "State tests", ->
 
   describe "New model", ->
     beforeEach ->
@@ -89,3 +89,23 @@ describe "Changing state", ->
 
     it "should have isDirty false", ->
       expect(@model.get("isDirty")).toBeFalsy()
+
+  describe "modifying state", ->
+
+    describe "nested collection in nested object", ->
+      beforeEach ->
+        TestSetup.setup() 
+        spyOn($, "ajax")
+        @model = App.Order.find(5)
+        $.ajax.mostRecentCall.args[0].success
+          orderCode: "12345"
+          customer:
+            name: "Floyd the Barber"
+            addresses: [
+              {town: "Seattle"}
+              {town: "Tokyo"}
+            ]
+        @model.get("customer.addresses").pushObject(App.Address.create())
+
+      it "should have isDirty true", ->
+        expect(@model.get("isDirty")).toBeTruthy()

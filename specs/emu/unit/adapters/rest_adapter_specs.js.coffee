@@ -82,7 +82,29 @@ describe "Emu.RestAdapter", ->
       
       it "should notify the store", ->
         expect(@store.didFindAll).toHaveBeenCalledWith(@models)
-    
+
+    describe "loading fails", ->
+      beforeEach ->
+        @jsonData = [
+          firstName: "Larry"
+          lastName: "Laffer"
+        ]
+        spyOn($, "ajax")
+        @models = Emu.ModelCollection.create()
+        @store = Ember.Object.create
+          didError: ->
+        spyOn(serializer, "serializeTypeName").andReturn("person")
+        spyOn(serializer, "deserializeCollection")
+        spyOn(@store, "didError")
+        @adapter = Emu.RestAdapter.create
+          namespace: "api"
+          serializer: Serializer
+        @adapter.findAll(Person, @store, @models)
+        $.ajax.mostRecentCall.args[0].error()
+
+      it "should notify the store", ->
+        expect(@store.didError).toHaveBeenCalledWith(@models)
+
     describe "collection that has a parent", ->
       beforeEach ->
         spyOn($, "ajax")      
@@ -169,7 +191,7 @@ describe "Emu.RestAdapter", ->
         expect($.ajax.mostRecentCall.args[0].url).toEqual("api/person?age=40&hairColour=brown")
         expect($.ajax.mostRecentCall.args[0].type).toEqual("GET")
     
-    describe "finishes loading", ->
+    describe "finishes loading successfully", ->
       beforeEach ->
         @jsonData = [
           firstName: "Larry"
@@ -194,6 +216,29 @@ describe "Emu.RestAdapter", ->
       
       it "should notify the store", ->
         expect(@store.didFindQuery).toHaveBeenCalledWith(@models)
+
+    describe "finishes with failure", ->
+      beforeEach ->
+        @jsonData = [
+          firstName: "Larry"
+          lastName: "Laffer"   
+        ]
+        @store = Ember.Object.create
+          didError: ->
+        @models = Emu.ModelCollection.create()
+        spyOn(serializer, "serializeQueryHash").andReturn("?age=40&hairColour=brown")
+        spyOn(serializer, "serializeTypeName").andReturn("person")
+        spyOn(serializer, "deserializeCollection")
+        spyOn($, "ajax")
+        spyOn(@store, "didError")
+        @adapter = Emu.RestAdapter.create
+            namespace: "api"
+            serializer: Serializer        
+        @adapter.findQuery(Person, @store, @models, {age: "40", hairColour: "brown"})
+        $.ajax.mostRecentCall.args[0].error()
+
+      it "should notify the store", ->
+        expect(@store.didError).toHaveBeenCalledWith(@models)
   
   describe "insert", ->
     
@@ -252,6 +297,29 @@ describe "Emu.RestAdapter", ->
       
       it "should notify the store", ->
         expect(@store.didSave).toHaveBeenCalledWith(@model)
+
+    describe "finish request with failure", ->
+      beforeEach ->   
+        @store = 
+          didError: ->
+        spyOn(@store, "didError")
+        spyOn($, "ajax")
+        @jsonData = {name: "Henry"}
+        @model = Person.create()
+        @adapter = Emu.RestAdapter.create
+          namespace: "api"
+          serializer: Serializer
+        spyOn(serializer, "serializeModel").andReturn(@jsonData)
+        spyOn(serializer, "serializeTypeName").andReturn("person")
+        spyOn(serializer, "deserializeModel")
+        @adapter.insert(@store, @model)
+        @response =
+          id: 5
+          name: "Henry"
+        $.ajax.mostRecentCall.args[0].error()        
+      
+      it "should notify the store", ->
+        expect(@store.didError).toHaveBeenCalledWith(@model)
 
     describe "has parent", ->
       beforeEach ->
@@ -346,5 +414,21 @@ describe "Emu.RestAdapter", ->
 
       it "should notify the store", ->
         expect(@store.didDeleteRecord).toHaveBeenCalledWith(@model)
+
+    describe "finishes with failure" , ->
+      beforeEach ->
+        spyOn($, "ajax")
+        @store = 
+          didError: jasmine.createSpy()
+        @model = Person.create(id: 6)
+        @adapter = Emu.RestAdapter.create
+          namespace: "api"
+          serializer: Serializer
+        spyOn(serializer, "serializeTypeName").andReturn("person")
+        @adapter.delete(@store, @model)
+        $.ajax.mostRecentCall.args[0].error()
+
+      it "should notify the store", ->
+        expect(@store.didError).toHaveBeenCalledWith(@model)
 
    

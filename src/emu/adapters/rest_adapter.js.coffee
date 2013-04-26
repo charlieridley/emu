@@ -8,6 +8,8 @@ Emu.RestAdapter = Ember.Object.extend
       type: "GET"
       success: (jsonData) =>
         @_didFindAll(store, collection, jsonData)
+      error: =>
+        @_didError(store, collection)
 
   findById: (type, store, model, id) ->
     $.ajax
@@ -25,6 +27,8 @@ Emu.RestAdapter = Ember.Object.extend
       success: (jsonData) =>
         @_serializer.deserializeCollection(collection, jsonData)
         store.didFindQuery(collection)
+      error: =>
+        @_didError(store, collection)
 
   insert: (store, model) ->
     @_save(store, model, "POST") 
@@ -38,6 +42,8 @@ Emu.RestAdapter = Ember.Object.extend
       type: "DELETE"
       success: ->
         store.didDeleteRecord(model)
+      error: =>
+        @_didError(store, model)
   
   _save: (store, model, requestType, id) ->
     jsonData = @_serializer.serializeModel(model)
@@ -47,6 +53,8 @@ Emu.RestAdapter = Ember.Object.extend
       type: requestType
       success: (jsonData) =>
         @_didSave(store, model, jsonData)
+      error: =>
+        @_didError(store, model)
   
   _didFindAll: (store, collection, jsonData) ->
     @_serializer.deserializeCollection(collection, jsonData)
