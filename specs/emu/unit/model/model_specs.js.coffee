@@ -276,15 +276,4 @@ describe "Emu.Model", ->
         addresses.pushObject(App.Address.create(town: "London"))
 
       it "should have fired the didStateChange event", ->
-        expect(@didStateChange).toBeTruthy()
-
-    describe "modifying an item in a collection field", ->
-      beforeEach ->
-        model = App.Customer.create()        
-        addresses = model.get("addresses")
-        addresses.pushObject(App.Address.create(town: "London"))
-        model.on "didStateChange", => @didStateChange = true
-        addresses.get("firstObject").set("town", "Winchester")
-
-      it "should have fired the didStateChange event", ->
-        expect(@didStateChange).toBeTruthy()
+        expect(@didStateChange).toBeTruthy()  

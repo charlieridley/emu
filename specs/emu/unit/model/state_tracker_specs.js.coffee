@@ -53,6 +53,9 @@ describe "Emu.StateTracker", ->
       it "has isSaving false", ->
         expect(@model.get("isSaving")).toBeFalsy()
 
+      it "has isLoaded true", ->
+        expect(@model.get("isLoaded")).toBeTruthy()
+
       it "has isDirty false", ->
         expect(@model.get("isDirty")).toBeFalsy()
 
@@ -65,3 +68,27 @@ describe "Emu.StateTracker", ->
 
       it "has isDirty false", ->
         expect(@model.get("isDirty")).toBeTruthy()
+
+    describe "didError", ->
+      beforeEach ->
+        stateTracker = Emu.StateTracker.create()
+        @model = App.Person.create(isDirty: false)
+        stateTracker.track(@model)
+        @model.didError()
+
+      it "has isLoaded false", ->
+        expect(@model.get("isLoaded")).toBeFalsy()
+
+      it "has isSaving false", ->
+        expect(@model.get("isSaving")).toBeFalsy()
+
+      it "has isLoading false", ->
+        expect(@model.get("isLoading")).toBeFalsy()
+
+      it "has isDirty true", ->
+        expect(@model.get("isDirty")).toBeTruthy()
+
+      it "has isError true", ->
+        expect(@model.get("isError")).toBeTruthy()
+
+

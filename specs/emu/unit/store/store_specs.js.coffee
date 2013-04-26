@@ -321,6 +321,17 @@ describe "Emu.Store", ->
     it "should fire didFinishSaving", ->
       expect(@didFinishSaving).toBeTruthy()
 
+  describe "didError", ->
+    beforeEach ->
+      @store = Emu.Store.create   
+        adapter: Adapter
+      @model = @store.createRecord(Person)
+      @model.on "didError", => @didError = true 
+      @store.didError(@model)
+
+    it "should raise didError on the model", ->
+      expect(@didError).toBeTruthy()
+
   describe "loadAll", ->
     beforeEach ->
       @collection = Emu.ModelCollection.create(type:Person)

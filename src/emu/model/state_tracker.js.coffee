@@ -10,11 +10,19 @@ Emu.StateTracker = Ember.Object.extend
       model.set("isDirty", false)
 
     model.on "didStartSaving", ->
-      model.set("isSaving", true)
+      model.set("isSaving", true)      
 
     model.on "didFinishSaving", ->
       model.set("isSaving", false)
       model.set("isDirty", false)
+      model.set("isLoaded", true)
 
     model.on "didStateChange", ->
       model.set("isDirty", true)
+
+    model.on "didError", ->
+      model.set("isDirty", true)
+      model.set("isLoaded", false)
+      model.set("isLoading", false)
+      model.set("isSaving", false)
+      model.set("isError", true)

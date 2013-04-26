@@ -14,6 +14,7 @@ App.CustomPerson.reopenClass(resourceName: -> 'custom_people')
 
 App.Order = Emu.Model.extend
   orderCode: Emu.field("string")
+  customer: Emu.field("App.Customer")
 
 App.Customer = Emu.Model.extend
   name: Emu.field("string")

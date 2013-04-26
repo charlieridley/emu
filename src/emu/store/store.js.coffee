@@ -47,8 +47,7 @@ Emu.Store = Ember.Object.extend
     model.didFinishLoading()  
 
   didError: (model) ->
-    model.set 'isError', true
-    model.set 'isLoading', false
+    model.didError()
 
   findQuery: (type, queryHash) -> 
     collection = @_getCollectionForQuery(type, queryHash)
