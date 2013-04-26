@@ -62,15 +62,15 @@ Emu.Model.reopenClass
     record._attributes ?= {}   
     unless record._attributes[key]
       if meta.options.collection
-        record._attributes[key] = Emu.ModelCollection.create(parent: record, type: meta.type(), store: record.get("store"))        
+        record._attributes[key] = Emu.ModelCollection.create(parent: record, type: meta.type(), store: record.get("store"), lazy: meta.options.lazy)        
         record._attributes[key].addObserver "hasValue", -> record.set("hasValue", true)
-        record._attributes[key].on "didStateChange", -> 
-          record.didStateChange()
+        unless meta.options.lazy
+          record._attributes[key].on "didStateChange", -> 
+            record.didStateChange()
         record._attributes[key].subscribeToUpdates() if meta.options.updatable
       else if meta.isModel()
         record._attributes[key] = meta.type().create()
         record._attributes[key].on "didStateChange", -> 
-          record.set("isDirty", true)
           record.didStateChange()
     record._attributes[key] 
   

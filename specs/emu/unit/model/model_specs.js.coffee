@@ -172,6 +172,16 @@ describe "Emu.Model", ->
           
           it "should create an empty collection", ->
             expect(@collection.subscribeToUpdates).toHaveBeenCalled()
+
+        describe "lazy collection", ->
+          beforeEach ->
+            Foo = Emu.Model.extend
+              people: Emu.field("App.Person", {collection: true, lazy: true}) 
+            @model = Foo.create()        
+            @result = Emu.Model.getAttr(@model, "people")
+
+          it "should create an empty collection", ->
+            expect(@result.get("lazy")).toBeTruthy()
     
     describe "model", ->
 
@@ -269,11 +279,22 @@ describe "Emu.Model", ->
         expect(@didStateChange).toBeTruthy()
 
     describe "adding item to collection field", ->
-      beforeEach ->
-        model = App.Customer.create()
-        model.on "didStateChange", => @didStateChange = true
-        addresses = model.get("addresses")
-        addresses.pushObject(App.Address.create(town: "London"))
+      
+      describe "not lazy", ->
+        beforeEach ->
+          model = App.Customer.create()
+          model.on "didStateChange", => @didStateChange = true
+          addresses = model.get("addresses")
+          addresses.pushObject(App.Address.create(town: "London"))
 
-      it "should have fired the didStateChange event", ->
-        expect(@didStateChange).toBeTruthy()  
+        it "should have fired the didStateChange event", ->
+          expect(@didStateChange).toBeTruthy()  
+
+      describe "lazy", ->
+        beforeEach ->
+          model = App.Customer.create()
+          model.on "didStateChange", => @didStateChange = true
+          addresses = model.get("orders").createRecord()
+
+        it "should not have fired the didStateChange event", ->
+          expect(@didStateChange).toBeFalsy()  

@@ -10,7 +10,7 @@ Emu.ModelCollection = Ember.ArrayProxy.extend Emu.ModelEvented, Ember.Evented,
       model = @get("type").create(paramHash)   
       model.set("parent", this)  
       model.setProperties(hash)    
-      model.subscribeToUpdates() if @_subscribeToUpdates
+      model.subscribeToUpdates() if @_subscribeToUpdates      
       @pushObject(model)    
     
     @pushObject = (model) =>
@@ -20,7 +20,6 @@ Emu.ModelCollection = Ember.ArrayProxy.extend Emu.ModelEvented, Ember.Evented,
     @addObserver "content.@each.isDirty", =>
       @didStateChange()
       @set("hasValue", true)
-      @set("isDirty", true)
     
     @find = (predicate) -> 
       @get("content").find(predicate)
