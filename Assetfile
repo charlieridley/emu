@@ -25,7 +25,8 @@ input "src/emu" do
     coffee_script
     concat [
       "core.js.js",
-      "application_ext.js.js"
+      "application_ext.js.js",
+      "model/model_evented.js.js"
     ], "ember-emu-#{EMU_VERSION}.js"
   end 
 
