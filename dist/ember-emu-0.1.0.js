@@ -1,5 +1,5 @@
-// Version: 0.1.0-50-gb1706b4
-// Last commit: b1706b4 (2013-04-24 20:09:02 -0700)
+// Version: 0.1.0-53-gf8fefaa
+// Last commit: f8fefaa (2013-04-25 17:44:51 -0400)
 
 
 (function() {
@@ -62,6 +62,26 @@
           return application.inject("route", "store", "store:main");
         }
       });
+    }
+  });
+
+}).call(this);
+(function() {
+  Emu.ModelEvented = Ember.Mixin.create({
+    didStartLoading: function() {
+      return this.trigger("didStartLoading");
+    },
+    didFinishLoading: function() {
+      return this.trigger("didFinishLoading");
+    },
+    didStartSaving: function() {
+      return this.trigger("didStartSaving");
+    },
+    didFinishSaving: function() {
+      return this.trigger("didFinishSaving");
+    },
+    didStateChange: function() {
+      return this.trigger("didStateChange");
     }
   });
 
@@ -241,7 +261,7 @@
       meta = this.constructor.metaForProperty(key);
       if (arguments.length > 1) {
         Emu.Model.setAttr(this, key, value);
-        this.set("isDirty", true);
+        this.didStateChange();
         this.set("hasValue", true);
       } else {
         if (meta.options.lazy) {
@@ -267,7 +287,11 @@
       if (!this.get("store")) {
         this.set("store", Ember.get(Emu, "defaultStore"));
       }
-      return this._primaryKey = Emu.Model.primaryKey(this.constructor);
+      this._primaryKey = Emu.Model.primaryKey(this.constructor);
+      if (this.get("isDirty") === void 0) {
+        this.set("isDirty", true);
+      }
+      return Emu.StateTracker.create().track(this);
     },
     save: function() {
       return this.get("store").save(this);
@@ -358,19 +382,20 @@
             type: meta.type(),
             store: record.get("store")
           });
-          record._attributes[key].addObserver("isDirty", function() {
-            return record.set("isDirty", true);
-          });
           record._attributes[key].addObserver("hasValue", function() {
             return record.set("hasValue", true);
+          });
+          record._attributes[key].on("didStateChange", function() {
+            return record.didStateChange();
           });
           if (meta.options.updatable) {
             record._attributes[key].subscribeToUpdates();
           }
         } else if (meta.isModel()) {
           record._attributes[key] = meta.type().create();
-          record._attributes[key].addObserver("isDirty", function() {
-            return record.set("isDirty", true);
+          record._attributes[key].on("didStateChange", function() {
+            record.set("isDirty", true);
+            return record.didStateChange();
           });
         }
       }
@@ -412,13 +437,21 @@
         }
         return this.pushObject(model);
       };
+      this.pushObject = function(model) {
+        model.on("didStateChange", function() {
+          return _this.didStateChange();
+        });
+        return _this.get("content").pushObject(model);
+      };
       this.addObserver("content.@each.isDirty", function() {
+        _this.didStateChange();
         _this.set("hasValue", true);
         return _this.set("isDirty", true);
       });
-      return this.find = function(predicate) {
+      this.find = function(predicate) {
         return this.get("content").find(predicate);
       };
+      return Emu.StateTracker.create().track(this);
     },
     subscribeToUpdates: function() {
       return this._subscribeToUpdates = true;
@@ -437,18 +470,27 @@
 
 }).call(this);
 (function() {
-  Emu.ModelEvented = Ember.Mixin.create({
-    didStartLoading: function() {
-      return this.trigger("didStartLoading");
-    },
-    didFinishLoading: function() {
-      return this.trigger("didFinishLoading");
-    },
-    didStartSaving: function() {
-      return this.trigger("didStartSaving");
-    },
-    didFinishSaving: function() {
-      return this.trigger("didFinishSaving");
+  Emu.StateTracker = Ember.Object.extend({
+    track: function(model) {
+      model.on("didStartLoading", function() {
+        model.set("isLoading", true);
+        return model.set("isLoaded", false);
+      });
+      model.on("didFinishLoading", function() {
+        model.set("isLoading", false);
+        model.set("isLoaded", true);
+        return model.set("isDirty", false);
+      });
+      model.on("didStartSaving", function() {
+        return model.set("isSaving", true);
+      });
+      model.on("didFinishSaving", function() {
+        model.set("isSaving", false);
+        return model.set("isDirty", false);
+      });
+      return model.on("didStateChange", function() {
+        return model.set("isDirty", true);
+      });
     }
   });
 
@@ -693,12 +735,10 @@
       return (_ref2 = this._pushAdapter) != null ? _ref2.start(this) : void 0;
     },
     createRecord: function(type, hash) {
-      var collection, model;
+      var collection;
 
       collection = this._getCollectionForType(type);
-      model = collection.createRecord(hash);
-      model.set("isDirty", true);
-      return model;
+      return collection.createRecord(hash);
     },
     find: function(type, param) {
       if (!param) {
@@ -732,8 +772,7 @@
 
           queryResult = collection.filter(deferredQuery.predicate);
           deferredQuery.results.pushObjects(queryResult);
-          deferredQuery.results.set("isLoaded", true);
-          return deferredQuery.results.set("isLoading", false);
+          return deferredQuery.results.didFinishLoading();
         });
       }
     },
@@ -753,10 +792,7 @@
       return this.loadModel(model);
     },
     didFindById: function(model) {
-      model.didFinishLoading();
-      model.set("isLoading", false);
-      model.set("isLoaded", true);
-      return model.set("isDirty", false);
+      return model.didFinishLoading();
     },
     didError: function(model) {
       model.set('isError', true);
@@ -768,7 +804,6 @@
       collection = this._getCollectionForQuery(type, queryHash);
       if (!collection.get("isLoading")) {
         collection.didStartLoading();
-        collection.set("isLoading", true);
         this._adapter.findQuery(type, this, collection, queryHash);
       }
       return collection;
@@ -782,18 +817,16 @@
       allModels = this.findAll(type);
       results = Emu.ModelCollection.create({
         type: type,
-        store: this,
-        isLoaded: true,
-        isLoading: false
+        store: this
       });
       if (allModels.get("isLoaded")) {
         filtered = allModels.filter(function(m) {
           return predicate(m);
         });
         results.pushObjects(filtered);
+        results.didFinishLoading();
       } else {
-        results.set("isLoading", true);
-        results.set("isLoaded", false);
+        results.didStartLoading();
         queries = this.get("deferredQueries")[type] || (this.get("deferredQueries")[type] = []);
         queries.pushObject({
           predicate: predicate,
@@ -811,24 +844,19 @@
       }
     },
     didSave: function(model) {
-      model.didFinishSaving();
-      model.set("isDirty", false);
-      model.set("isLoaded", true);
-      return model.set("isLoading", false);
+      return model.didFinishSaving();
     },
     loadAll: function(collection) {
       if (collection.get("isLoading") || collection.get("isLoaded")) {
         return collection;
       }
       collection.didStartLoading();
-      collection.set("isLoading", true);
       this._adapter.findAll(collection.get("type"), this, collection);
       return collection;
     },
     loadModel: function(model) {
       if (!model.get("isLoading") && !model.get("isLoaded")) {
         model.didStartLoading();
-        model.set("isLoading", true);
         this._adapter.findById(model.constructor, this, model, model.primaryKeyValue());
       }
       return model;
@@ -864,9 +892,7 @@
       return this._getCollectionForType(model.constructor).deleteRecord(model);
     },
     _didCollectionLoad: function(collection) {
-      collection.didFinishLoading();
-      collection.set("isLoaded", true);
-      return collection.set("isLoading", false);
+      return collection.didFinishLoading();
     },
     _getCollectionForType: function(type) {
       return this.get("modelCollections")[type] || (this.get("modelCollections")[type] = Emu.ModelCollection.create({
