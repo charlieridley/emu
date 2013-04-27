@@ -168,4 +168,33 @@ App.MySpecialPushAdapter = Emu.PushDataAdapter.extend({
     //Initialization code here	
   }
 });
+```
 
+Model Events
+------------
+You can subscribe to certain events on your models:
+
+```javascript
+car.on("didStateChange", function(){ alert("hey don't touch that"); });
+```
+Available events are:
+```
+didStartLoading
+didFinishLoading
+didStartSaving
+didFinishSaving
+didStateChange
+didError
+```
+
+Model State
+-----------
+Models contain a few properties to describe their state:
+
+```
+isLoaded
+isLoading
+isSaving
+isDirty
+isError
+```
