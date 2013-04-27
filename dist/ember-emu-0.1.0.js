@@ -1,5 +1,5 @@
-// Version: 0.1.0-53-gf8fefaa
-// Last commit: f8fefaa (2013-04-25 17:44:51 -0400)
+// Version: 0.1.0-66-g93480fc
+// Last commit: 93480fc (2013-04-27 11:40:38 -0400)
 
 
 (function() {
@@ -82,6 +82,9 @@
     },
     didStateChange: function() {
       return this.trigger("didStateChange");
+    },
+    didError: function() {
+      return this.trigger("didError");
     }
   });
 
@@ -131,6 +134,9 @@
         type: "GET",
         success: function(jsonData) {
           return _this._didFindAll(store, collection, jsonData);
+        },
+        error: function() {
+          return _this._didError(store, collection);
         }
       });
     },
@@ -157,6 +163,9 @@
         success: function(jsonData) {
           _this._serializer.deserializeCollection(collection, jsonData);
           return store.didFindQuery(collection);
+        },
+        error: function() {
+          return _this._didError(store, collection);
         }
       });
     },
@@ -167,11 +176,16 @@
       return this._save(store, model, "PUT", model.primaryKeyValue());
     },
     "delete": function(store, model) {
+      var _this = this;
+
       return $.ajax({
         url: this._getUrlForModel(model) + "/" + model.primaryKeyValue(),
         type: "DELETE",
         success: function() {
           return store.didDeleteRecord(model);
+        },
+        error: function() {
+          return _this._didError(store, model);
         }
       });
     },
@@ -186,6 +200,9 @@
         type: requestType,
         success: function(jsonData) {
           return _this._didSave(store, model, jsonData);
+        },
+        error: function() {
+          return _this._didError(store, model);
         }
       });
     },
@@ -264,7 +281,7 @@
         this.didStateChange();
         this.set("hasValue", true);
       } else {
-        if (meta.options.lazy) {
+        if (meta.options.lazy && this.primaryKeyValue()) {
           if ((_ref = this.get("store")) != null) {
             _ref.loadAll(Emu.Model.getAttr(this, key));
           }
@@ -380,21 +397,23 @@
           record._attributes[key] = Emu.ModelCollection.create({
             parent: record,
             type: meta.type(),
-            store: record.get("store")
+            store: record.get("store"),
+            lazy: meta.options.lazy
           });
           record._attributes[key].addObserver("hasValue", function() {
             return record.set("hasValue", true);
           });
-          record._attributes[key].on("didStateChange", function() {
-            return record.didStateChange();
-          });
+          if (!meta.options.lazy) {
+            record._attributes[key].on("didStateChange", function() {
+              return record.didStateChange();
+            });
+          }
           if (meta.options.updatable) {
             record._attributes[key].subscribeToUpdates();
           }
         } else if (meta.isModel()) {
           record._attributes[key] = meta.type().create();
           record._attributes[key].on("didStateChange", function() {
-            record.set("isDirty", true);
             return record.didStateChange();
           });
         }
@@ -445,8 +464,7 @@
       };
       this.addObserver("content.@each.isDirty", function() {
         _this.didStateChange();
-        _this.set("hasValue", true);
-        return _this.set("isDirty", true);
+        return _this.set("hasValue", true);
       });
       this.find = function(predicate) {
         return this.get("content").find(predicate);
@@ -486,10 +504,18 @@
       });
       model.on("didFinishSaving", function() {
         model.set("isSaving", false);
-        return model.set("isDirty", false);
+        model.set("isDirty", false);
+        return model.set("isLoaded", true);
       });
-      return model.on("didStateChange", function() {
+      model.on("didStateChange", function() {
         return model.set("isDirty", true);
+      });
+      return model.on("didError", function() {
+        model.set("isDirty", true);
+        model.set("isLoaded", false);
+        model.set("isLoading", false);
+        model.set("isSaving", false);
+        return model.set("isError", true);
       });
     }
   });
@@ -795,8 +821,7 @@
       return model.didFinishLoading();
     },
     didError: function(model) {
-      model.set('isError', true);
-      return model.set('isLoading', false);
+      return model.didError();
     },
     findQuery: function(type, queryHash) {
       var collection;
