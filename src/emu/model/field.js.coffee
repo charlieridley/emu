@@ -13,7 +13,7 @@ Emu.field = (type, options) ->
       @didStateChange()
       @set("hasValue", true)
     else
-      if meta.options.lazy        
+      if meta.options.lazy and @primaryKeyValue()
         @get("store")?.loadAll(Emu.Model.getAttr(this, key))
       else if meta.options.partial 
         @get("store")?.loadModel(this)

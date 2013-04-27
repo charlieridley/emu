@@ -54,3 +54,13 @@ describe "Lazy loading collection", ->
 
     it "should have sent a request to get the organization's projects", ->
       expect($.ajax.calls[1].args[0].url).toEqual("api/organization/1/project")
+
+  describe "parent is a new record", ->
+    beforeEach ->
+      TestSetup.setup()
+      spyOn($, "ajax")
+      @model = App.Customer.createRecord()
+      @model.get("orders")
+
+    it "should not have made an ajax call", ->
+      expect($.ajax.calls.length).toEqual(0)

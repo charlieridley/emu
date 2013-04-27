@@ -119,7 +119,7 @@ describe "Emu.field", ->
           Person = Emu.Model.extend
             store: @store
             orders: Emu.field("App.Order", {collection: true, lazy: true})
-          @model = Person.create()
+          @model = Person.create(id:6)
           @result = @model.get("orders")    
         
         it "should get all the models for the collection from the store", ->
@@ -138,13 +138,30 @@ describe "Emu.field", ->
           Person = Emu.Model.extend
             store: @store
             orders: Emu.field("App.Order", {collection: true, lazy: true})
-          @model = Person.create()
+          @model = Person.create(id:5)
           @model.get("orders")
           @model.get("orders")
         
         it "should get the models from the store only once", ->
           expect(@store.loadAll.calls.length).toEqual(1)
           @result = @model.get("orders")
+
+      describe "parent does not have primary key", ->
+        beforeEach ->
+          @store = Ember.Object.create
+            loadAll: ->
+          @orders = Emu.ModelCollection.create(type: App.Order)
+          spyOn(@store, "loadAll")
+          spyOn(Emu.ModelCollection, "create").andReturn(@orders)
+          Person = Emu.Model.extend
+            store: @store
+            orders: Emu.field("App.Order", {collection: true, lazy: true})
+          @model = Person.create()
+          @model.get("orders")
+
+        it "should not load the collection from the store", ->
+          expect(@store.loadAll.calls.length).toEqual(0)
+
   
     describe "partial property", ->
       
