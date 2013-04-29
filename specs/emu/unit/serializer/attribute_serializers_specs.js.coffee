@@ -33,6 +33,14 @@ describe "Emu.AttributeSerializers", ->
         
         it "should be null", ->
           expect(@result).toBeNull()
+
+      describe "non string value", ->
+        beforeEach ->
+          @result = Emu.AttributeSerializers["string"].deserialize(10)
+
+        it "should convert to a string", ->
+          expect(@result).toEqual("10")
+
   
   describe "array", ->
 

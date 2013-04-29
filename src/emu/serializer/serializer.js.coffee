@@ -54,7 +54,7 @@ Emu.Serializer = Ember.Object.extend
     else
       attributeSerializer = Emu.AttributeSerializers[meta.type()]
       value = attributeSerializer.deserialize(value)
-      model.set(property, value) if value
+      model.set(property, value) if value?
   
   _serializeProperty: (model, jsonData, property, meta) ->    
     value = Emu.Model.getAttr(model, property)

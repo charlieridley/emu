@@ -37,6 +37,18 @@ describe "Emu.Serializer", ->
         it "should not deserialize the field which isn't defined in the model", ->
           expect(@model.get("age")).toBeUndefined()
 
+      describe "field with value 0", ->
+        beforeEach ->   
+          @jsonData = 
+            id: "2"
+            orderCode: 0
+          @serializer = Emu.Serializer.create()
+          @model = App.Order.create()
+          @serializer.deserializeModel(@model, @jsonData)
+
+        it "should deserialize the number 0", ->
+          expect(@model.get("orderCode")).toBe("0")
+
       describe "custom primaryKey", ->
         beforeEach ->
           Customer = Emu.Model.extend

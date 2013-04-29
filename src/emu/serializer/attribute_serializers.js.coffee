@@ -5,7 +5,7 @@ Emu.AttributeSerializers =
       if Ember.isEmpty(value) then null else value
     
     deserialize: (value) -> 
-      if Ember.isEmpty(value) then null else value
+      if Ember.isEmpty(value) then null else value.toString()
   
   array:    
     serialize: (value) -> 
