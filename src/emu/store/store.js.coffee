@@ -43,9 +43,10 @@ Emu.Store = Ember.Object.extend
       model.primaryKeyValue(id) 
     @loadModel(model)
 
-  findPage: (type, pageNumber, pageSize) ->
-    pagedCollection = Emu.PagedModelCollection.create(type: type, pageSize: pageSize)
+  findPage: (type, pageNumber = 1, pageSize = 500) ->
+    pagedCollection = Emu.PagedModelCollection.create(type: type, pageSize: pageSize, store: this)
     @loadPage(pagedCollection, pageNumber)
+    pagedCollection
 
   didFindById: (model) ->
     model.didFinishLoading()  

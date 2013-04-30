@@ -683,10 +683,13 @@ describe "Emu.Store", ->
       @result = @store.findPage(App.Address, 2, 500)    
 
     it "should create a paged model collection", ->
-      expect(Emu.PagedModelCollection.create).toHaveBeenCalledWith(type: App.Address, pageSize: 500)
+      expect(Emu.PagedModelCollection.create).toHaveBeenCalledWith(type: App.Address, pageSize: 500, store: @store)
 
     it "should load page 2 of the collection", ->
       expect(@store.loadPage).toHaveBeenCalledWith(@pagedCollection, 2)
+
+    it "should return the result", ->
+      expect(@result).toBe(@pagedCollection)
 
   describe "loadPage", ->
 

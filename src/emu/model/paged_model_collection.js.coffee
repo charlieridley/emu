@@ -12,17 +12,9 @@ Emu.PagedModelCollection = Ember.Object.extend Ember.Enumerable,
     @_incrementCursor("cursorOnPage")
     if @get("cursorOnPage") >= @get("pageSize")
       @set("cursorOnPage", 0)
-      @_incrementCursor("pageCursor")    
-    item = @_collectionForPage(@get("pageCursor"))[@get("cursor")]
-    @get("store").loadPage(this, @get("pageCursor"))
-    item
-
-  _collectionForPage: (pageNumber) ->
-    unless @get("pages")[pageNumber]
-      @get("pages")[pageNumber] = []
-      for i in [0..@get("pageSize") - 1]
-        @get("pages")[pageNumber].pushObject(@get("type").create())
-    @get("pages")[pageNumber]
+      @_incrementCursor("pageCursor")
+    @get("store").loadPage(this, @get("pageCursor"))    
+    @get("pages")[@get("pageCursor")].get("content")[@get("cursorOnPage")]
 
   _incrementCursor: (cursor) ->
     @set(cursor, @get(cursor) + 1)

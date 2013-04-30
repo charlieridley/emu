@@ -27,17 +27,14 @@ describe "Emu.PagedModelCollection", ->
     describe "nothing loaded", ->
       beforeEach ->
         @store = 
-          loadPage: jasmine.createSpy()
+          loadPage: ->
         @collection = Emu.PagedModelCollection.create
           type: App.Person
           store: @store
+        spyOn(@store, "loadPage").andCallFake () =>
+          @collection.get("pages")[1] = Emu.ModelCollection.create()
+          @collection.get("pages")[1].pushObject(App.Person.create())
         @result = @collection.nextObject()
-
-      it "should have created a collection for the first page with 250 items", ->
-        expect(@collection.get("pages")[1].length).toEqual(250)
-
-      it "should have populated with empty objects of the array's type", ->
-        expect(@collection.get("pages")[1].get("firstObject").constructor).toBe(App.Person)
 
       it "should load the first page from the store", ->
         expect(@store.loadPage).toHaveBeenCalledWith(@collection, 1)
@@ -49,29 +46,36 @@ describe "Emu.PagedModelCollection", ->
 
       beforeEach ->
         @store = 
-          loadPage: jasmine.createSpy()
+          loadPage: ->
         @collection = Emu.PagedModelCollection.create
           type: App.Person
           store: @store
+        spyOn(@store, "loadPage").andCallFake () =>
+          @collection.get("pages")[1] = Emu.ModelCollection.create()
+          @collection.get("pages")[1].pushObject(App.Person.create())
+          @collection.get("pages")[1].pushObject(App.Person.create())
         @collection.nextObject()
         @result = @collection.nextObject()
 
-      it "should not have created a second page", ->
-        expect(@collection.get("pages")[2]).toBeUndefined()
-
       it "should return the second item in the collection of the first page", ->
-        expect(@result).toBe(@collection.get("pages")[1][1])
+        expect(@result).toBe(@collection.get("pages")[1].get("content")[1])
 
     describe "call for the first item on the second page", ->
 
       beforeEach ->
         @store = 
-          loadPage: jasmine.createSpy()
+          loadPage: ->
         @collection = Emu.PagedModelCollection.create
-          pageSize: 3
+          pageSize: 2
           type: App.Person
           store: @store
-        @collection.nextObject()
+        spyOn(@store, "loadPage").andCallFake () =>
+          @collection.get("pages")[1] = Emu.ModelCollection.create()
+          @collection.get("pages")[1].pushObject(App.Person.create())
+          @collection.get("pages")[1].pushObject(App.Person.create())
+          @collection.get("pages")[2] = Emu.ModelCollection.create()
+          @collection.get("pages")[2].pushObject(App.Person.create())
+          @collection.get("pages")[2].pushObject(App.Person.create())
         @collection.nextObject()
         @collection.nextObject()
         @collection.nextObject()
