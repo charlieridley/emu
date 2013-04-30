@@ -43,6 +43,10 @@ Emu.Store = Ember.Object.extend
       model.primaryKeyValue(id) 
     @loadModel(model)
 
+  findPage: (type, pageNumber, pageSize) ->
+    pagedCollection = Emu.PagedModelCollection.create(type: type, pageSize: pageSize)
+    @loadPage(pagedCollection, pageNumber)
+
   didFindById: (model) ->
     model.didFinishLoading()  
 
@@ -114,14 +118,29 @@ Emu.Store = Ember.Object.extend
 
   didDeleteRecord: (model) ->
     @_getCollectionForType(model.constructor).deleteRecord(model)
+
+  loadPage: (pagedCollection, pageNumber) -> 
+    @_createCollectionForPage(pagedCollection, pageNumber)
+    unless pagedCollection.get("pages")[pageNumber].get("isLoading") or pagedCollection.get("pages")[pageNumber].get("isLoaded")
+      pagedCollection.get("pages")[pageNumber].didStartLoading()
+      @_adapter.findPage(pagedCollection, this, pageNumber)
+
+  didFindPage: (pagedCollection, pageNumber) ->
+    pagedCollection.get("pages")[pageNumber].didFinishLoading()
+
+  _createCollectionForPage: (pagedCollection, pageNumber) ->
+    unless pagedCollection.get("pages")[pageNumber]
+      pagedCollection.get("pages")[pageNumber] = Emu.ModelCollection.create(type: pagedCollection.get("type"))
+      for i in [0..pagedCollection.get("pageSize") - 1]
+        pagedCollection.get("pages")[pageNumber].pushObject(pagedCollection.get("type").create())    
     
   _didCollectionLoad: (collection) ->
     collection.didFinishLoading()
   
   _getCollectionForType: (type) ->
-    @get("modelCollections")[type] || @get("modelCollections")[type] = Emu.ModelCollection.create(type: type, store: this)
+    @get("modelCollections")[type] or @get("modelCollections")[type] = Emu.ModelCollection.create(type: type, store: this)
   
   _getCollectionForQuery: (type, queryHash) ->
     key = JSON.stringify(queryHash)
-    queries = @get("queryCollections")[type] || @get("queryCollections")[type] = {}
-    @get("queryCollections")[type][key] || @get("queryCollections")[type][key] = Emu.ModelCollection.create(type: type, store: this)
+    queries = @get("queryCollections")[type] or @get("queryCollections")[type] = {}
+    @get("queryCollections")[type][key] or @get("queryCollections")[type][key] = Emu.ModelCollection.create(type: type, store: this)

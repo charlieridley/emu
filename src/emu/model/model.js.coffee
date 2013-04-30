@@ -40,6 +40,7 @@ Emu.Model.reopenClass
   isEmuModel: true
   createRecord: Emu.proxyToStore("createRecord")
   find: Emu.proxyToStore("find")  
+  findPage: Emu.proxyToStore("findPage")  
 
   primaryKey: (type = this) ->
     primaryKey = "id"  

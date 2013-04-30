@@ -30,6 +30,13 @@ Emu.RestAdapter = Ember.Object.extend
       error: =>
         @_didError(store, collection)
 
+  findPage: (pagedCollection, store, pageNumber) ->
+    $.ajax
+      url: @_getUrlForType(pagedCollection.get("type")) + @_serializer.serializeQueryHash(pageNumber: pageNumber, pageSize: pagedCollection.get("pageSize"))
+      type: "GET"
+      success: (jsonData) =>
+        @_didFindPage(store, pagedCollection, jsonData, pageNumber)
+
   insert: (store, model) ->
     @_save(store, model, "POST") 
     
@@ -63,6 +70,15 @@ Emu.RestAdapter = Ember.Object.extend
   _didFindById: (store, model, jsonData) ->
     @_serializer.deserializeModel(model, jsonData)
     store.didFindById(model)
+
+  _didFindPage: (store, pagedCollection, jsonData, pageNumber) ->
+    totalRecordCountKey = @_serializer.serializeKey("totalRecordCount")
+    resultsKey = @_serializer.serializeKey("results")
+    totalRecordCount = jsonData[totalRecordCountKey]
+    results = jsonData[resultsKey]
+    pagedCollection.set("length", totalRecordCount)
+    @_serializer.deserializeCollection(pagedCollection.get("pages")[pageNumber], results)
+    store.didFindPage(pagedCollection, pageNumber)
 
   _didError: (store, model) ->
     store.didError(model)

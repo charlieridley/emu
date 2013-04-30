@@ -6,6 +6,7 @@ describe "Emu.RestAdapter", ->
     deserializeModel: ->
     serializeModel: ->
     serializeQueryHash: ->
+    serializeKey: ->
   Serializer = 
     create: -> serializer
   
@@ -431,4 +432,64 @@ describe "Emu.RestAdapter", ->
       it "should notify the store", ->
         expect(@store.didError).toHaveBeenCalledWith(@model)
 
-   
+  describe "findPage", ->
+
+    describe "start request", ->
+      beforeEach ->   
+        @store = {}
+        spyOn($, "ajax")
+        @adapter = Emu.RestAdapter.create
+          namespace: "api"
+          serializer: Serializer
+        spyOn(serializer, "serializeTypeName").andReturn("person")
+        spyOn(serializer, "serializeQueryHash").andReturn("?pageNumber=1&pageSize=10")
+        @collection = Emu.PagedModelCollection.create(pageSize: 10, type: App.Person)
+        @adapter.findPage(@collection, @store, 1)
+
+      it "should make a GET request", ->        
+        expect($.ajax.mostRecentCall.args[0].type).toEqual("GET")
+      
+      it "should serialize the query hash for", ->
+        expect(serializer.serializeQueryHash).toHaveBeenCalledWith(pageNumber: 1, pageSize: 10)
+
+      it "should request to the correct URL", ->
+        expect($.ajax.mostRecentCall.args[0].url).toEqual("api/person?pageNumber=1&pageSize=10")
+
+    describe "finished successfully", ->
+      beforeEach ->   
+        @store = 
+          didFindPage: jasmine.createSpy()
+        spyOn($, "ajax")
+        @adapter = Emu.RestAdapter.create
+          namespace: "api"
+          serializer: Serializer
+        spyOn(serializer, "serializeTypeName").andReturn("address")
+        spyOn(serializer, "serializeQueryHash").andReturn("?pageNumber=1&pageSize=10")
+        spyOn(serializer, "serializeKey").andCallFake (key) ->
+          if key == "totalRecordCount" then "total_record_count" else "results"
+        spyOn(serializer, "deserializeCollection")
+        @collection = Emu.PagedModelCollection.create(pageSize: 2, type: App.Address)
+        @collection.get("pages")[1] = Emu.ModelCollection.create()
+        @adapter.findPage(@collection, @store, 1)
+        @jsonData = 
+          total_record_count: 2000
+          results: [
+            {id: 1, town: "London"}
+            {id: 2, town: "New York"}
+          ]
+        $.ajax.mostRecentCall.args[0].success(@jsonData)
+
+      it "should serialize the totalRecordCount key", ->
+        expect(serializer.serializeKey).toHaveBeenCalledWith("totalRecordCount")
+
+      it "should serialize the totalRecordCount key", ->
+        expect(serializer.serializeKey).toHaveBeenCalledWith("results")
+
+      it "should set the length property on the collection the resultsCount", ->
+        expect(@collection.get("length")).toEqual(2000)
+
+      it "should deserialize the collection", ->
+        expect(serializer.deserializeCollection).toHaveBeenCalledWith(@collection.get("pages")[1], @jsonData.results)
+
+      it "should notify the store the the page has loaded", ->
+        expect(@store.didFindPage).toHaveBeenCalledWith(@collection, 1)
