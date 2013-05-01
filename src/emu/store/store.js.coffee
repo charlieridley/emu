@@ -121,19 +121,9 @@ Emu.Store = Ember.Object.extend
     @_getCollectionForType(model.constructor).deleteRecord(model)
 
   loadPaged: (pagedCollection, pageNumber) -> 
-    @_createCollectionForPage(pagedCollection, pageNumber)
-    unless pagedCollection.get("pages")[pageNumber].get("isLoading") or pagedCollection.get("pages")[pageNumber].get("isLoaded")
-      pagedCollection.get("pages")[pageNumber].didStartLoading()
-      @_adapter.findPage(pagedCollection, this, pageNumber)
+    @_adapter.findPage(pagedCollection, this, pageNumber)
 
   didFindPage: (pagedCollection, pageNumber) ->
-    pagedCollection.get("pages")[pageNumber].didFinishLoading()
-
-  _createCollectionForPage: (pagedCollection, pageNumber) ->
-    unless pagedCollection.get("pages")[pageNumber]
-      pagedCollection.get("pages")[pageNumber] = Emu.ModelCollection.create(type: pagedCollection.get("type"))
-      for i in [0..pagedCollection.get("pageSize") - 1]
-        pagedCollection.get("pages")[pageNumber].pushObject(pagedCollection.get("type").create())    
     
   _didCollectionLoad: (collection) ->
     collection.didFinishLoading()

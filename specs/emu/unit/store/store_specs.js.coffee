@@ -696,69 +696,10 @@ describe "Emu.Store", ->
     describe "page not loaded", ->
       beforeEach ->
         @pagedCollection = Emu.PagedModelCollection.create(pageSize: 100, type: App.Address)
-        @collectionForPage = Emu.ModelCollection.create()
-        spyOn(Emu.ModelCollection, "create").andReturn(@collectionForPage)
         @store = Emu.Store.create   
           adapter: Adapter
         spyOn(adapter, "findPage")
-        @collectionForPage.on "didStartLoading", => @didStartLoading = true
-        @store.loadPaged(@pagedCollection, 1, 100)
-
-      it "should have created a collection for the fist page", ->
-        expect(Emu.ModelCollection.create).toHaveBeenCalledWith(type: App.Address)
-      
-      it "should have populated the first page with 10 items", ->
-        expect(@collectionForPage.get("length")).toEqual(100)
-
-      it "should have populated with empty objects of the array's type", ->
-        expect(@collectionForPage.every (x) => x.constructor == App.Address).toBeTruthy()
-
-      it "should call didStartLoading on the collection for the page", ->
-        expect(@didStartLoading).toBeTruthy()
+        @store.loadPaged(@pagedCollection, 1)
 
       it "should call findPage on the adapter", ->
         expect(adapter.findPage).toHaveBeenCalledWith(@pagedCollection, @store, 1)
-
-    describe "page loading", ->
-      beforeEach ->
-        @pagedCollection = Emu.PagedModelCollection.create(pageSize: 10)
-        @pagedCollection.get("pages")[1] = Emu.ModelCollection.create(isLoading: true)
-        @store = Emu.Store.create   
-          adapter: Adapter
-        spyOn(adapter, "findPage")        
-        @pagedCollection.get("pages")[1].on "didStartLoading", => @didStartLoading = true
-        @store.loadPaged(@pagedCollection, 1)
-
-      it "should not call didStartLoading on the collection for the page", ->
-        expect(@didStartLoading).toBeFalsy()
-
-      it "should not have called findPage on the adapter", ->
-        expect(adapter.findPage).not.toHaveBeenCalled()
-
-    describe "page loaded", ->
-      beforeEach ->
-        @pagedCollection = Emu.PagedModelCollection.create(pageSize: 10)
-        @pagedCollection.get("pages")[1] = Emu.ModelCollection.create(isLoaded: true)
-        @store = Emu.Store.create   
-          adapter: Adapter
-        spyOn(adapter, "findPage")        
-        @pagedCollection.get("pages")[1].on "didStartLoading", => @didStartLoading = true
-        @store.loadPaged(@pagedCollection, 1)
-
-      it "should not call didStartLoading on the collection for the page", ->
-        expect(@didStartLoading).toBeFalsy()
-
-      it "should not have called findPage on the adapter", ->
-        expect(adapter.findPage).not.toHaveBeenCalled()
-
-  describe "didFindPage", ->
-    beforeEach ->
-      @pagedCollection = Emu.PagedModelCollection.create(pageSize: 10)
-      @pagedCollection.get("pages")[1] = Emu.ModelCollection.create(isLoaded: true)
-      @store = Emu.Store.create   
-        adapter: Adapter
-      @pagedCollection.get("pages")[1].on "didFinishLoading", => @didFinishLoading = true
-      @store.didFindPage(@pagedCollection, 1)
-
-    it "should fire the finished event for the loaded page", ->
-      expect(@didFinishLoading).toBeTruthy()

@@ -469,7 +469,6 @@ describe "Emu.RestAdapter", ->
           if key == "totalRecordCount" then "total_record_count" else "results"
         spyOn(serializer, "deserializeCollection")
         @collection = Emu.PagedModelCollection.create(pageSize: 2, type: App.Address)
-        @collection.get("pages")[1] = Emu.ModelCollection.create()
         @adapter.findPage(@collection, @store, 1)
         @jsonData = 
           total_record_count: 2000
@@ -489,7 +488,7 @@ describe "Emu.RestAdapter", ->
         expect(@collection.get("totalRecordCount")).toEqual(2000)
 
       it "should deserialize the collection", ->
-        expect(serializer.deserializeCollection).toHaveBeenCalledWith(@collection.get("pages")[1], @jsonData.results)
+        expect(serializer.deserializeCollection).toHaveBeenCalledWith(@collection, @jsonData.results, true)
 
       it "should notify the store the the page has loaded", ->
         expect(@store.didFindPage).toHaveBeenCalledWith(@collection, 1)

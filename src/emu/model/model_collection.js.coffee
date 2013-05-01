@@ -1,5 +1,6 @@
-Emu.ModelCollection = Ember.ArrayProxy.extend Emu.ModelEvented, Ember.Evented,
+Emu.ModelCollection = Ember.ArrayProxy.extend Emu.ModelEvented, Emu.StateTracked, Ember.Evented,
   init: ->
+    @_super()
     @set("content", Ember.A([])) unless @get("content")
     
     @createRecord = (hash) ->  
@@ -23,8 +24,6 @@ Emu.ModelCollection = Ember.ArrayProxy.extend Emu.ModelEvented, Ember.Evented,
     
     @find = (predicate) -> 
       @get("content").find(predicate)
-
-    Emu.StateTracker.create().track(this)
 
   subscribeToUpdates: ->
     @_subscribeToUpdates = true

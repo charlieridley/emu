@@ -77,7 +77,7 @@ Emu.RestAdapter = Ember.Object.extend
     totalRecordCount = jsonData[totalRecordCountKey]
     results = jsonData[resultsKey]
     pagedCollection.set("totalRecordCount", totalRecordCount)
-    @_serializer.deserializeCollection(pagedCollection.get("pages")[pageNumber], results)
+    @_serializer.deserializeCollection(pagedCollection, results, true)
     store.didFindPage(pagedCollection, pageNumber)
 
   _didError: (store, model) ->
