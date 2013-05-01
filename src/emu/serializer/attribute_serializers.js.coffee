@@ -2,10 +2,10 @@ Emu.AttributeSerializers =
   
   string:    
     serialize: (value) -> 
-      if Ember.isEmpty(value) then null else value
+      if Ember.isNone(value) then null else String(value)
     
     deserialize: (value) -> 
-      if Ember.isEmpty(value) then null else value.toString()
+      if Ember.isEmpty(value) then null else String(value)
   
   array:    
     serialize: (value) -> 
@@ -23,3 +23,10 @@ Emu.AttributeSerializers =
     
     deserialize: (value) -> 
       if Ember.isEmpty(value) then null else value
+
+  number:
+    serialize: (value) -> 
+      if Ember.isNone(value) then null else Number(value)
+
+    deserialize: (value) ->
+      if Ember.isEmpty(value) then null else Number(value)

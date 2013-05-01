@@ -123,3 +123,37 @@ describe "Emu.AttributeSerializers", ->
         
         it "should be null", ->
           expect(@result).toBeNull()
+
+  describe "number", ->
+
+    describe "serialize", ->
+      
+      describe "has value", ->
+        it "should be number", ->
+          expect(Emu.AttributeSerializers["number"].serialize(60)).toEqual(60)
+
+      describe "no value", ->
+        it "should be null", ->
+          expect(Emu.AttributeSerializers["number"].serialize(undefined)).toBeNull()
+
+    describe "deserialize", ->
+
+      describe "has value", ->
+        it "should be number", ->
+          expect(Emu.AttributeSerializers["number"].deserialize(60)).toEqual(60)
+
+      describe "no value", ->
+        it "should be null", ->
+          expect(Emu.AttributeSerializers["number"].deserialize(undefined)).toBeNull()
+
+      describe "empty string", ->
+        it "should be null", ->
+          expect(Emu.AttributeSerializers["number"].deserialize("")).toBeNull()
+
+      describe "number as string", ->
+        it "should convert to number", ->
+          expect(Emu.AttributeSerializers["number"].deserialize("65")).toEqual(65)
+
+      describe "decimal as string", ->
+        it "should convert to number", ->
+          expect(Emu.AttributeSerializers["number"].deserialize("65.7865")).toEqual(65.7865)
