@@ -43,9 +43,9 @@ Emu.Store = Ember.Object.extend
       model.primaryKeyValue(id) 
     @loadModel(model)
 
-  findPage: (type, pageNumber = 1, pageSize = 500) ->
+  findPaged: (type, pageSize = 500) ->
     pagedCollection = Emu.PagedModelCollection.create(type: type, pageSize: pageSize, store: this)
-    @loadPage(pagedCollection, pageNumber)
+    pagedCollection.loadMore()
     pagedCollection
 
   didFindById: (model) ->
@@ -120,7 +120,7 @@ Emu.Store = Ember.Object.extend
   didDeleteRecord: (model) ->
     @_getCollectionForType(model.constructor).deleteRecord(model)
 
-  loadPage: (pagedCollection, pageNumber) -> 
+  loadPaged: (pagedCollection, pageNumber) -> 
     @_createCollectionForPage(pagedCollection, pageNumber)
     unless pagedCollection.get("pages")[pageNumber].get("isLoading") or pagedCollection.get("pages")[pageNumber].get("isLoaded")
       pagedCollection.get("pages")[pageNumber].didStartLoading()

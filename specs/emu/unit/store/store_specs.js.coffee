@@ -673,25 +673,25 @@ describe "Emu.Store", ->
       it "should delete the record from the modelCollection", ->
         expect(@modelCollections[Person].deleteRecord).toHaveBeenCalledWith(@model)  
 
-  describe "findPage", ->
+  describe "findPaged", ->
     beforeEach ->
       @pagedCollection = Emu.PagedModelCollection.create(type: Person)
       spyOn(Emu.PagedModelCollection, "create").andReturn(@pagedCollection)
       @store = Emu.Store.create   
         adapter: Adapter
-      spyOn(@store, "loadPage")
-      @result = @store.findPage(App.Address, 2, 500)    
+      spyOn(@pagedCollection, "loadMore")
+      @result = @store.findPaged(App.Address, 500)    
 
     it "should create a paged model collection", ->
       expect(Emu.PagedModelCollection.create).toHaveBeenCalledWith(type: App.Address, pageSize: 500, store: @store)
 
-    it "should load page 2 of the collection", ->
-      expect(@store.loadPage).toHaveBeenCalledWith(@pagedCollection, 2)
+    it "should load the first page of the collection", ->
+      expect(@pagedCollection.loadMore).toHaveBeenCalled()
 
     it "should return the result", ->
       expect(@result).toBe(@pagedCollection)
 
-  describe "loadPage", ->
+  describe "loadPaged", ->
 
     describe "page not loaded", ->
       beforeEach ->
@@ -702,7 +702,7 @@ describe "Emu.Store", ->
           adapter: Adapter
         spyOn(adapter, "findPage")
         @collectionForPage.on "didStartLoading", => @didStartLoading = true
-        @store.loadPage(@pagedCollection, 1, 100)
+        @store.loadPaged(@pagedCollection, 1, 100)
 
       it "should have created a collection for the fist page", ->
         expect(Emu.ModelCollection.create).toHaveBeenCalledWith(type: App.Address)
@@ -727,7 +727,7 @@ describe "Emu.Store", ->
           adapter: Adapter
         spyOn(adapter, "findPage")        
         @pagedCollection.get("pages")[1].on "didStartLoading", => @didStartLoading = true
-        @store.loadPage(@pagedCollection, 1)
+        @store.loadPaged(@pagedCollection, 1)
 
       it "should not call didStartLoading on the collection for the page", ->
         expect(@didStartLoading).toBeFalsy()
@@ -743,7 +743,7 @@ describe "Emu.Store", ->
           adapter: Adapter
         spyOn(adapter, "findPage")        
         @pagedCollection.get("pages")[1].on "didStartLoading", => @didStartLoading = true
-        @store.loadPage(@pagedCollection, 1)
+        @store.loadPaged(@pagedCollection, 1)
 
       it "should not call didStartLoading on the collection for the page", ->
         expect(@didStartLoading).toBeFalsy()

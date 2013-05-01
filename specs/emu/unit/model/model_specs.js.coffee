@@ -88,15 +88,15 @@ describe "Emu.Model", ->
     it "should proxy the call to the default store", ->
       expect(@store.find).toHaveBeenCalledWith(Person, 5)
 
-  describe "findPage", ->
+  describe "findPaged", ->
     beforeEach ->
       Ember.set(Emu, "defaultStore", undefined)
       @store = Emu.Store.create()
-      spyOn(@store, "findPage")
-      @model = Person.findPage(5, 100)
+      spyOn(@store, "findPaged")
+      @model = Person.findPaged(5, 100)
     
     it "should proxy the call to the default store", ->
-      expect(@store.findPage).toHaveBeenCalledWith(Person, 5, 100)
+      expect(@store.findPaged).toHaveBeenCalledWith(Person, 5, 100)
 
   describe "save", ->
     

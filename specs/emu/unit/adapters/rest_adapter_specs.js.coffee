@@ -485,8 +485,8 @@ describe "Emu.RestAdapter", ->
       it "should serialize the totalRecordCount key", ->
         expect(serializer.serializeKey).toHaveBeenCalledWith("results")
 
-      it "should set the length property on the collection the resultsCount", ->
-        expect(@collection.get("length")).toEqual(2000)
+      it "should set the totalRecordCount property on the collection the resultsCount", ->
+        expect(@collection.get("totalRecordCount")).toEqual(2000)
 
       it "should deserialize the collection", ->
         expect(serializer.deserializeCollection).toHaveBeenCalledWith(@collection.get("pages")[1], @jsonData.results)
