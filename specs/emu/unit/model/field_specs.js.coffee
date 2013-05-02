@@ -218,6 +218,27 @@ describe "Emu.field", ->
         it "should have hasValue false on the return object", ->
           expect(@model.get("hasValue")).toBeFalsy()
 
+    describe "paged collection", ->
+
+      describe "which is not set", ->
+        beforeEach ->
+          @store = Ember.Object.create
+            loadAll: ->
+          @orders = Emu.PagedModelCollection.create(type: App.Order)
+          spyOn(@orders, "loadMore")
+          spyOn(Emu.PagedModelCollection, "create").andReturn(@orders)
+          Person = Emu.Model.extend
+            store: @store
+            orders: Emu.field("App.Order", {collection: true, paged: true})
+          @model = Person.create(id:6)
+          @result = @model.get("orders")    
+
+        it "should load the first page", ->
+          expect(@orders.loadMore).toHaveBeenCalled()
+        
+        it "should return the collection", ->
+          expect(@result).toBe(@orders)
+
   describe "set", ->
     
     describe "simple field", ->

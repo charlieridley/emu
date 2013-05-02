@@ -3,6 +3,7 @@ describe "Emu.Model", ->
     name: Emu.field("string")
     address: Emu.field("App.Address")
     orders: Emu.field("App.Order", {collection:true})
+    oldOrders: Emu.field("App.Order", {collection: true, paged: true})
   
   it "should have a flag to indicate the type is an Emu model", ->
     expect(Person.isEmuModel).toBeTruthy()
@@ -157,7 +158,7 @@ describe "Emu.Model", ->
           it "should be of the type specified in the meta data for the field", ->
             expect(@result.get("type")).toBe(App.Order)
           
-          it "should pass the store refernece", ->
+          it "should pass the store reference", ->
             expect(@result.get("store")).toBe(@store)
 
         describe "get twice", ->
@@ -192,6 +193,25 @@ describe "Emu.Model", ->
 
           it "should create an empty collection", ->
             expect(@result.get("lazy")).toBeTruthy()
+
+      describe "paged", ->
+        beforeEach ->
+          spyOn(Emu.PagedModelCollection, "create").andCallThrough()
+          @store = {}
+          @model = Person.create(store: @store)           
+          @result = Emu.Model.getAttr(@model, "oldOrders")
+
+        it "should create an empty collection", ->
+            expect(Emu.PagedModelCollection.create).toHaveBeenCalled()
+        
+        it "should have the model as the parent", ->
+          expect(@result.get("parent")).toBe(@model)
+        
+        it "should be of the type specified in the meta data for the field", ->
+          expect(@result.get("type")).toBe(App.Order)
+        
+        it "should pass the store reference", ->
+          expect(@result.get("store")).toBe(@store)
     
     describe "model", ->
 
