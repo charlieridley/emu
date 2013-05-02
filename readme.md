@@ -198,3 +198,36 @@ isSaving
 isDirty
 isError
 ```
+Pagination
+----------
+You can load models as a paged collection:
+```javascript
+var tweets = App.Tweet.findPaged(10);
+	//GET request to: /tweet?pageNumber=1&pageSize=10
+	//Response: {totalRecordCount: 10000, results: [{id: 1, content: "what a twit"},......]
+tweets.loadMore();
+	//GET request to: /tweet?pageNumber=2&pageSize=10
+	//Response: {totalRecordCount: 10000, results: [{id: 11, content: "blah blah"},......]
+```
+You can also defined a paged collection as a field of another model:
+```javascript
+App.Report = Emu.Model({
+  title: Emu.field("string"),
+  records: Emu.field("App.Record", {collection: true, paged: true})
+});
+
+App.Record = Emu.Model({
+  year: Emu.field("number"),
+  money: Emu.field("number")
+});
+
+var report = App.Report.find(5);
+records = report.get("records");
+	//GET request to: /report/5/record?pageNumber=1&pageSize=250
+	//Response: {totalRecordCount: 5000, results: [{id: 1, year: 1996, money: 1250},......]
+records.get("length"); // -> 250
+records.loadMore();
+	//GET Request to: /report/5/records?pageNumber=2&pageSize=250
+	//Response: {totalRecordCount: 5000, results: [{id: 251, year: 2001, money: 12350},......]
+records.get("length"); // -> 500
+```
