@@ -492,3 +492,28 @@ describe "Emu.RestAdapter", ->
 
       it "should notify the store the the page has loaded", ->
         expect(@store.didFindPage).toHaveBeenCalledWith(@collection, 1)
+
+    describe "with parent", ->
+      beforeEach ->   
+        @store = {}
+        spyOn($, "ajax")
+        @adapter = Emu.RestAdapter.create
+          namespace: "api"
+          serializer: Serializer
+        parent = App.Report.create
+          id: 5
+          parent: Emu.ModelCollection.create
+            type: App.Report
+        spyOn(parent, "primaryKeyValue").andReturn(5)
+        @collection = Emu.PagedModelCollection.create(parent: parent, type: App.ReportRecord)
+        store = Ember.Object.create()
+        spyOn(serializer, "serializeTypeName").andCallFake (type) ->
+          if type == App.Report 
+            return "report"
+          if type == App.ReportRecord
+            return "reportRecord"
+        spyOn(serializer, "serializeQueryHash").andReturn("?pageNumber=1&pageSize=10")
+        @adapter.findPage(@collection, @store, 1)
+
+      it "should make a GET request to the URL for the entity", ->
+        expect($.ajax.mostRecentCall.args[0].url).toEqual("api/report/5/reportRecord?pageNumber=1&pageSize=10")

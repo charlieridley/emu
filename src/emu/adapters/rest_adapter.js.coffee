@@ -32,7 +32,7 @@ Emu.RestAdapter = Ember.Object.extend
 
   findPage: (pagedCollection, store, pageNumber) ->
     $.ajax
-      url: @_getUrlForType(pagedCollection.get("type")) + @_serializer.serializeQueryHash(pageNumber: pageNumber, pageSize: pagedCollection.get("pageSize"))
+      url: @_getUrlForModel(pagedCollection) + @_serializer.serializeQueryHash(pageNumber: pageNumber, pageSize: pagedCollection.get("pageSize"))
       type: "GET"
       success: (jsonData) =>
         @_didFindPage(store, pagedCollection, jsonData, pageNumber)
@@ -88,11 +88,11 @@ Emu.RestAdapter = Ember.Object.extend
     store.didSave(model)
     
   _getUrlForModel: (model) ->
-    url = if model.constructor == Emu.ModelCollection then @_serializer.serializeTypeName(model.get("type")) else ""
+    url = if Emu.isCollection(model) then @_serializer.serializeTypeName(model.get("type")) else ""
     currentModel = model
     buildUrl = =>
       currentModel = currentModel.get("parent")
-      if currentModel.constructor == Emu.ModelCollection
+      if Emu.isCollection(currentModel)
         url = @_serializer.serializeTypeName(currentModel.get("type")) + (if url then "/" + url else "")
       else
         url = currentModel.primaryKeyValue() + "/" + url 

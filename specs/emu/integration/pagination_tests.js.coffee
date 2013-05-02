@@ -35,7 +35,6 @@ describe "Pagination tests", ->
         expect(@result.get("length")).toEqual(4)
 
   describe "loading more in a collection", ->
-
     beforeEach ->
       TestSetup.setup() 
       spyOn($, "ajax")
@@ -51,3 +50,32 @@ describe "Pagination tests", ->
 
     it "should make a web request to get page 2", ->
       expect($.ajax.mostRecentCall.args[0].url).toEqual("api/address?pageNumber=2&pageSize=3")
+
+  describe "paged property", ->
+
+    describe "getting once", ->
+      beforeEach ->
+        TestSetup.setup() 
+        spyOn($, "ajax")
+        @report = App.Report.find(5)
+        $.ajax.mostRecentCall.args[0].success
+          id: 5
+          title: "test report"
+        @report.get("records")
+
+      it "should make a web request to get page 1 of the records", ->
+        expect($.ajax.mostRecentCall.args[0].url).toEqual("api/report/5/reportRecord?pageNumber=1&pageSize=250")
+
+    describe "getting and loading more", ->
+      beforeEach ->
+        TestSetup.setup() 
+        spyOn($, "ajax")
+        @report = App.Report.find(5)
+        $.ajax.mostRecentCall.args[0].success
+          id: 5
+          title: "test report"
+        @report.get("records").loadMore()
+
+      it "should make a web request to get page 2 of the records", ->
+        expect($.ajax.mostRecentCall.args[0].url).toEqual("api/report/5/reportRecord?pageNumber=2&pageSize=250")
+

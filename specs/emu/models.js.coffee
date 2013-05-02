@@ -32,3 +32,10 @@ App.Organization = Emu.Model.extend
 App.Project = Emu.Model.extend
   name: Emu.field('string')
   organization: Emu.field('App.Organization')
+
+App.Report = Emu.Model.extend
+  title: Emu.field("string")
+  records: Emu.field("App.ReportRecord", {collection: true, paged: true})
+
+App.ReportRecord = Emu.Model.extend
+  value: Emu.field("number")
