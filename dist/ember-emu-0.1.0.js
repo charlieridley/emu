@@ -1,5 +1,5 @@
-// Version: 0.1.0-71-g35a08f4
-// Last commit: 35a08f4 (2013-05-01 23:16:20 -0400)
+// Version: 0.1.0-74-g361870e
+// Last commit: 361870e (2013-05-02 22:46:00 -0400)
 
 
 (function() {
@@ -344,9 +344,8 @@
       }
       this._primaryKey = Emu.Model.primaryKey(this.constructor);
       if (this.get("isDirty") === void 0) {
-        this.set("isDirty", true);
+        return this.set("isDirty", true);
       }
-      return Emu.StateTracker.create().track(this);
     },
     save: function() {
       return this.get("store").save(this);
