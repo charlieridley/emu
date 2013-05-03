@@ -5,7 +5,6 @@ Emu.Model = Ember.Object.extend Emu.ModelEvented, Emu.StateTracked, Ember.Evente
       @set("store", Ember.get(Emu, "defaultStore"))  
     @_primaryKey = Emu.Model.primaryKey(@constructor)
     @set("isDirty", true) if @get("isDirty") == undefined
-    Emu.StateTracker.create().track(this)
   
   save: -> 
     @get("store").save(this)
