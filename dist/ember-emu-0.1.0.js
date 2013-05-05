@@ -1,10 +1,11 @@
-// Version: 0.1.0-77-g3b78e48
-// Last commit: 3b78e48 (2013-05-05 09:10:58 -0400)
+// Version: 0.1.0-79-gc1c3361
+// Last commit: c1c3361 (2013-05-05 11:25:04 -0400)
 
 
 (function() {
   window.Emu = Ember.Namespace.create({
-    VERSION: "0.1.0"
+    VERSION: "0.1.0",
+    CURRENT_API_REVISION: 1
   });
 
 }).call(this);
@@ -656,6 +657,7 @@
 }).call(this);
 (function() {
   Emu.Serializer = Ember.Object.extend({
+    pluralization: true,
     serializeKey: function(key) {
       return key[0].toLowerCase() + key.slice(1);
     },
@@ -663,10 +665,24 @@
       return key;
     },
     serializeTypeName: function(type) {
-      var parts;
+      var name, parts, serialized;
 
-      parts = type.toString().split(".");
-      return this.serializeKey(parts[parts.length - 1]);
+      if (type.resourceName) {
+        name = type.resourceName;
+        if (typeof name === 'function') {
+          return name();
+        } else {
+          return name;
+        }
+      } else {
+        parts = type.toString().split(".");
+        serialized = this.serializeKey(parts[parts.length - 1]);
+        if (this.get("pluralization")) {
+          return serialized + "s";
+        } else {
+          return serialized;
+        }
+      }
     },
     serializeModel: function(model) {
       var jsonData,
@@ -790,23 +806,6 @@
       return key.replace(/(\_[a-z])/g, function(x) {
         return x.toUpperCase().replace('_', '');
       });
-    },
-    serializeTypeName: function(type) {
-      var name, parts, typeString;
-
-      if (type.resourceName) {
-        name = type.resourceName;
-        if (typeof name === 'function') {
-          return name();
-        } else {
-          return name;
-        }
-      } else {
-        typeString = type.toString();
-        parts = typeString.split('.');
-        name = parts[parts.length - 1];
-        return name.replace(/([A-Z])/g, '_$1').toLowerCase().slice(1) + 's';
-      }
     }
   });
 
@@ -816,6 +815,9 @@
     init: function() {
       var _ref, _ref1, _ref2;
 
+      if (!(this.get("revision") === Emu.CURRENT_API_REVISION || Emu.TESTING)) {
+        throw new Error("Error: Emu has had breaking changes since your last update. Please review them at https://github.com/charlieridley/emu/breaking_changes.md and update the `revision` property on your store to " + Emu.CURRENT_API_REVISION);
+      }
       if (!Ember.get(Emu, "defaultStore")) {
         Ember.set(Emu, "defaultStore", this);
       }
