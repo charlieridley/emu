@@ -1,5 +1,5 @@
-// Version: 0.1.0-74-g361870e
-// Last commit: 361870e (2013-05-02 22:46:00 -0400)
+// Version: 0.1.0-77-g3b78e48
+// Last commit: 3b78e48 (2013-05-05 09:10:58 -0400)
 
 
 (function() {
@@ -554,7 +554,8 @@
       model.on("didFinishLoading", function() {
         model.set("isLoading", false);
         model.set("isLoaded", true);
-        return model.set("isDirty", false);
+        model.set("isDirty", false);
+        return model.set("isSaved", true);
       });
       model.on("didStartSaving", function() {
         return model.set("isSaving", true);
@@ -562,7 +563,8 @@
       model.on("didFinishSaving", function() {
         model.set("isSaving", false);
         model.set("isDirty", false);
-        return model.set("isLoaded", true);
+        model.set("isLoaded", true);
+        return model.set("isSaved", true);
       });
       model.on("didStateChange", function() {
         return model.set("isDirty", true);
