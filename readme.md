@@ -4,7 +4,7 @@ Emu is a simple data access library for [Ember.js](http://www.emberjs.com).
 
 Breaking Changes
 ----------------
-Breaking changes can be found [here](https://github.com/charlieridley/emu/breaking_changes.md)
+Breaking changes can be found [here](https://github.com/charlieridley/emu/blob/master/breaking_changes.md)
 
 To Start
 --------
