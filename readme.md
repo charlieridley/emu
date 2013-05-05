@@ -195,6 +195,7 @@ Models contain a few properties to describe their state:
 isLoaded
 isLoading
 isSaving
+isSaved
 isDirty
 isError
 ```
