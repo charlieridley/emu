@@ -14,4 +14,4 @@ App.Store = Emu.Store.extend({
 })
 ```
 
-See https://github.com/charlieridley/readme.md for more details.
+See (https://github.com/charlieridley/emu/blob/master/readme.md)[https://github.com/charlieridley/emu/blob/master/readme.md] for more details.
