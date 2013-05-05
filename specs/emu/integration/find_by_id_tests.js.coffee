@@ -10,7 +10,7 @@ describe "Find by ID tests", ->
       expect($.ajax.calls.length).toEqual(1)
     
     it "should make a request to the person URL with the correct ID", ->
-      expect($.ajax.mostRecentCall.args[0].url).toEqual("api/person/5")   
+      expect($.ajax.mostRecentCall.args[0].url).toEqual("api/people/5")   
   
   describe "request completes", ->
     beforeEach ->

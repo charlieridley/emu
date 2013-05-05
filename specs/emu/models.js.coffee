@@ -1,5 +1,6 @@
 App.Address = Emu.Model.extend
   town: Emu.field("string")
+App.Address.reopenClass(resourceName: 'addresses')
 
 App.Person = Emu.Model.extend
   name: Emu.field("string")

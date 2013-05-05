@@ -3,12 +3,39 @@ describe "Emu.Serializer", ->
     name: Emu.field("string")
 
   describe "serializeTypeName", ->
-    beforeEach ->     
-      @serializer = Emu.Serializer.create()
-      @result = @serializer.serializeTypeName(App.Person)
-    
-    it "should serialize the name to lower case", ->
-      expect(@result).toEqual("person")
+
+    describe "pluralization on", ->
+      beforeEach ->
+        @serializer = Emu.Serializer.create()
+
+      it "should serialize and pluralize the name", ->
+        result = @serializer.serializeTypeName(App.ClubTropicana)
+        expect(result).toEqual("clubTropicanas")
+
+      it "should serialize the name using a user-defined name", ->
+        result = @serializer.serializeTypeName(App.Person)
+        expect(result).toEqual("people")
+
+      it "should serialize the name using a user-defined serialization rule if needed", ->
+        result = @serializer.serializeTypeName(App.CustomPerson)
+        expect(result).toEqual("custom_people")
+
+    describe "pluralization off", ->
+      beforeEach ->
+        @serializer = Emu.Serializer.create
+          pluralization: false
+
+      it "should serialize and not pluralize the name", ->
+        result = @serializer.serializeTypeName(App.ClubTropicana)
+        expect(result).toEqual("clubTropicana")
+
+      it "should serialize the name using a user-defined name", ->
+        result = @serializer.serializeTypeName(App.Person)
+        expect(result).toEqual("people")
+
+      it "should serialize the name using a user-defined serialization rule if needed", ->
+        result = @serializer.serializeTypeName(App.CustomPerson)
+        expect(result).toEqual("custom_people")
 
   describe "deserializeModel", ->
 

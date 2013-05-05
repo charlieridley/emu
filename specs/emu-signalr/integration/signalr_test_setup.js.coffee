@@ -2,7 +2,7 @@ window.SignalrTestSetup =
   setup: -> 
     Emu.updatableModels = undefined
     $.connection = 
-      updatablePersonHub: 
+      updatablePersonsHub: 
         client: {}
       hub:
         start: jasmine.createSpy().andReturn

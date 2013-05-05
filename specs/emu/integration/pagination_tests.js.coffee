@@ -9,7 +9,7 @@ describe "Pagination tests", ->
         @customers = App.Customer.findPaged(500)
 
       it "should make a web request to get the first page", ->
-        expect($.ajax.mostRecentCall.args[0].url).toEqual("api/customer?pageNumber=1&pageSize=500")
+        expect($.ajax.mostRecentCall.args[0].url).toEqual("api/customers?pageNumber=1&pageSize=500")
 
     describe "finish loading", ->
       beforeEach ->
@@ -49,7 +49,7 @@ describe "Pagination tests", ->
       @customers.loadMore()
 
     it "should make a web request to get page 2", ->
-      expect($.ajax.mostRecentCall.args[0].url).toEqual("api/address?pageNumber=2&pageSize=3")
+      expect($.ajax.mostRecentCall.args[0].url).toEqual("api/addresses?pageNumber=2&pageSize=3")
 
   describe "paged property", ->
 
@@ -64,7 +64,7 @@ describe "Pagination tests", ->
         @report.get("records")
 
       it "should make a web request to get page 1 of the records", ->
-        expect($.ajax.mostRecentCall.args[0].url).toEqual("api/report/5/reportRecord?pageNumber=1&pageSize=250")
+        expect($.ajax.mostRecentCall.args[0].url).toEqual("api/reports/5/reportRecords?pageNumber=1&pageSize=250")
 
     describe "getting and loading more", ->
       beforeEach ->
@@ -77,5 +77,5 @@ describe "Pagination tests", ->
         @report.get("records").loadMore()
 
       it "should make a web request to get page 2 of the records", ->
-        expect($.ajax.mostRecentCall.args[0].url).toEqual("api/report/5/reportRecord?pageNumber=2&pageSize=250")
+        expect($.ajax.mostRecentCall.args[0].url).toEqual("api/reports/5/reportRecords?pageNumber=2&pageSize=250")
 

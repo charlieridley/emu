@@ -1,3 +1,4 @@
+Emu.TESTING = true
 window.TestSetup = 
   setup: -> 
     Ember.set(Emu, "defaultStore", undefined)

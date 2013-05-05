@@ -13,7 +13,7 @@ describe "Lazy loading collection", ->
       expect($.ajax.calls.length).toEqual(2)
     
     it "should make an request to the the orders for that customer", ->
-      expect($.ajax.mostRecentCall.args[0].url).toEqual("api/customer/15/order")
+      expect($.ajax.mostRecentCall.args[0].url).toEqual("api/customers/15/orders")
   
   describe "collection finishes loading", ->
     beforeEach ->   
@@ -50,10 +50,10 @@ describe "Lazy loading collection", ->
       expect($.ajax.calls.length).toEqual(2)
 
     it "should have sent a request to get the organization", ->
-      expect($.ajax.calls[0].args[0].url).toEqual("api/organization/1")
+      expect($.ajax.calls[0].args[0].url).toEqual("api/organizations/1")
 
     it "should have sent a request to get the organization's projects", ->
-      expect($.ajax.calls[1].args[0].url).toEqual("api/organization/1/project")
+      expect($.ajax.calls[1].args[0].url).toEqual("api/organizations/1/projects")
 
   describe "parent is a new record", ->
     beforeEach ->

@@ -13,7 +13,7 @@ describe "Partial loading property tests", ->
         @models.get("firstObject.town")
     
     it "should make an ajax request to load the parent model", ->
-      expect($.ajax.mostRecentCall.args[0].url).toEqual("api/customer/43")
+      expect($.ajax.mostRecentCall.args[0].url).toEqual("api/customers/43")
   
   describe "When getting a partial property when the parent object is fully loaded", ->
     beforeEach ->

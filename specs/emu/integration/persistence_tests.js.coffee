@@ -11,7 +11,7 @@ describe "Saving a new model", ->
         @person.save()
       
       it "should save to the correct URL", ->
-        expect($.ajax.mostRecentCall.args[0].url).toEqual("api/person")
+        expect($.ajax.mostRecentCall.args[0].url).toEqual("api/people")
       
       it "should send a POST request", ->
         expect($.ajax.mostRecentCall.args[0].type).toEqual("POST")  
@@ -60,7 +60,7 @@ describe "Saving a existing model", ->
     @person.save()
   
   it "should save to the correct URL", ->
-    expect($.ajax.mostRecentCall.args[0].url).toEqual("api/person/5")
+    expect($.ajax.mostRecentCall.args[0].url).toEqual("api/people/5")
   
   it "should send a PUT request", ->
     expect($.ajax.mostRecentCall.args[0].type).toEqual("PUT")
@@ -73,7 +73,7 @@ describe "Saving a model which is in a lazy collection field", ->
     @order.save()
 
   it "should save to the correct URL", ->
-    expect($.ajax.mostRecentCall.args[0].url).toEqual("api/customer/5/order")
+    expect($.ajax.mostRecentCall.args[0].url).toEqual("api/customers/5/orders")
 
   it "should send a POST request", ->
     expect($.ajax.mostRecentCall.args[0].type).toEqual("POST")

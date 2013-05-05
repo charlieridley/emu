@@ -10,7 +10,7 @@ describe "Custom primary key", ->
       expect($.ajax.calls.length).toEqual(1)
     
     it "should make a request to the person URL with the correct ID", ->
-      expect($.ajax.mostRecentCall.args[0].url).toEqual("api/customPerson/5") 
+      expect($.ajax.mostRecentCall.args[0].url).toEqual("api/custom_people/5") 
 
   describe "request completes", ->
     beforeEach ->

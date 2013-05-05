@@ -2,20 +2,28 @@
 
 Emu is a simple data access library for [Ember.js](http://www.emberjs.com).
 
+Breaking Changes
+----------------
+Breaking changes can be found [here](https://github.com/charlieridley/emu/breaking_changes.md)
+
 To Start
 --------
 ```javascript
 // you need a store
-App.Store = Emu.Store.extend();
+App.Store = Emu.Store.extend({
+  revision: 1
+});
 
 // lets define some models
 App.Company = Emu.Model.extend({
+	resourceName: "companies", //override default which would be 'companys'
 	name: Emu.field("string"),
 	address: Emu.field("App.Address", {partial: true}),	
 	employees: Emu.field("App.Employee", {collection: true, lazy: true})
 });
 
 App.Address = Emu.Model.extend({
+	resourceName: "addresses",
 	street: Emu.field("string"),
 	town: Emu.field("string")
 });
@@ -29,10 +37,10 @@ Querying
 --------
 ```javascript
 var companies = App.Company.find({searchName: "inc", pageNumber: 3, recordCount: 20});
-	//GET request to: 	http://www.mysite.com/company?searchName=inc&pageNumber=3&recordCount=20
+	//GET request to: 	http://www.mysite.com/companies?searchName=inc&pageNumber=3&recordCount=20
 
 var companies = App.Company.find(function(company){return company.get("name").indexOf("inc") > 0;});
-	//GET request to: 	http://www.mysite.com/company
+	//GET request to: 	http://www.mysite.com/companies
 	//Filters results by function when collection has loaded
 ```
 Partial loading
@@ -40,12 +48,12 @@ Partial loading
 ```javascript
 //Load a bunch of models - each model is "partially" loaded when getting as a collection
 var companies = App.Company.find();  
-	//GET request to: 	http://www.mysite.com/company
+	//GET request to: 	http://www.mysite.com/companies
 	//Response: [{id: 1, name: "Apple"}, {id: 2, name: "Facebook"}]
 
 //Getting a partial value triggers a full load of the model
 companies.get("firstObject.address");
-	//GET request to:	http://www.mysite.com/company/1
+	//GET request to:	http://www.mysite.com/companies/1
 	//Response: {id: 1, name: "Apple", address: {street:"1 Infinite Loop", town: "Cupertino"}}
 ```
 Lazy loading of collections
@@ -53,7 +61,7 @@ Lazy loading of collections
 ```javascript
 //Get a lazy collection property
 var members = company.get("employees");
-	//GET request to:	http://www.mysite.com/company/1/employee
+	//GET request to:	http://www.mysite.com/companies/1/employees
 	//Response: [{name: "Tom"}, {name: "Barny"}]
 ```
 Persistence
@@ -62,12 +70,12 @@ Persistence
 //Save an existing model
 var company = App.Company.find(5);
 company.save();
-	//PUT request to:	http://www.mysite.com/company/5
+	//PUT request to:	http://www.mysite.com/companies/5
 
 //Save a new model
 var company = App.Company.createRecord();
 company.save();
-	//POST request to:	http://www.mysite.com/company
+	//POST request to:	http://www.mysite.com/companies
 ```
 
 Default values
@@ -95,7 +103,29 @@ will serialize to
 {firstName:"Barry", lastName: "Chuckle"}
 ```
 
-However, if your backend prefers underscore seperated property names then you can easly switch the serializer when defining your store:
+The serializer pluralizes type names by default. To turn this of set the pluralization flag to false:
+
+```javascript
+App.Store = Emu.Store.extend({
+  adapter: Emu.RestAdapter.extend({
+    serializer: Emu.Serializer.extend({pluralization: false})
+  })
+})
+```
+To you can specify overrides in your models using a string or a function:
+
+```javascript
+App.Person = Emu.Model.extend({
+  resourceName: "people"
+})
+
+App.Person = Emu.Model.extend({
+  resourceName: function(){
+    return "people";
+  }
+})
+```
+If your backend prefers underscore seperated property names then you can easly switch the serializer when defining your store:
 
 ```javascript
 App.Store = Emu.Store.extend({
@@ -112,12 +142,10 @@ which will serialize to
 This will also serialize the URLs with underscores
 
 ```
-/funny_person?search_term=chuckle
+/funny_persons?search_term=chuckle
 ```
 Receiving updates from server
 ----------------------------
-
-This is a bit of an experiment, I think there's a lot of scope for improving this API so it's likely to change.
 
 You can receive updates from your server using the Emu.PushDataAdapter. There is currently a [SignalR](https://github.com/SignalR/SignalR) implementation of this. In order to use this you need to specify your adapter on the store. 
 
@@ -204,10 +232,10 @@ Pagination
 You can load models as a paged collection:
 ```javascript
 var tweets = App.Tweet.findPaged(10);
-	//GET request to: /tweet?pageNumber=1&pageSize=10
+	//GET request to: /tweets?pageNumber=1&pageSize=10
 	//Response: {totalRecordCount: 10000, results: [{id: 1, content: "what a twit"},......]
 tweets.loadMore();
-	//GET request to: /tweet?pageNumber=2&pageSize=10
+	//GET request to: /tweets?pageNumber=2&pageSize=10
 	//Response: {totalRecordCount: 10000, results: [{id: 11, content: "blah blah"},......]
 ```
 You can also defined a paged collection as a field of another model:
@@ -224,11 +252,11 @@ App.Record = Emu.Model({
 
 var report = App.Report.find(5);
 records = report.get("records");
-	//GET request to: /report/5/record?pageNumber=1&pageSize=250
+	//GET request to: /reports/5/records?pageNumber=1&pageSize=250
 	//Response: {totalRecordCount: 5000, results: [{id: 1, year: 1996, money: 1250},......]
 records.get("length"); // -> 250
 records.loadMore();
-	//GET Request to: /report/5/records?pageNumber=2&pageSize=250
+	//GET Request to: /reports/5/records?pageNumber=2&pageSize=250
 	//Response: {totalRecordCount: 5000, results: [{id: 251, year: 2001, money: 12350},......]
 records.get("length"); // -> 500
 ```
