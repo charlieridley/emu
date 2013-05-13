@@ -260,3 +260,24 @@ records.loadMore();
 	//Response: {totalRecordCount: 5000, results: [{id: 251, year: 2001, money: 12350},......]
 records.get("length"); // -> 500
 ```
+Get it
+------
+Builds can be found in the dist folder
+
+Build it
+--------
+```
+bundle install
+rakep
+```
+Test it
+-------
+Install [Karma](http://karma-runner.github.io/0.8/index.html)
+```
+npm install -g karma
+```
+Run tests
+```
+cd emu
+karma start
+```
