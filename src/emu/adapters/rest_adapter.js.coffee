@@ -2,7 +2,7 @@ Emu.RestAdapter = Ember.Object.extend
   init: ->
     @_serializer = @get("serializer")?.create() or Emu.Serializer.create()
 
-  findAll: (type, store, collection) -> 
+  findAll: (type, store, collection) ->
     $.ajax
       url: @_getUrlForModel(collection)
       type: "GET"
@@ -38,10 +38,10 @@ Emu.RestAdapter = Ember.Object.extend
         @_didFindPage(store, pagedCollection, jsonData, pageNumber)
 
   insert: (store, model) ->
-    @_save(store, model, "POST") 
-    
-  update: (store, model) ->   
-    @_save(store, model, "PUT", model.primaryKeyValue()) 
+    @_save(store, model, "POST")
+
+  update: (store, model) ->
+    @_save(store, model, "PUT", model.primaryKeyValue())
 
   delete: (store, model) ->
     $.ajax
@@ -51,7 +51,7 @@ Emu.RestAdapter = Ember.Object.extend
         store.didDeleteRecord(model)
       error: =>
         @_didError(store, model)
-  
+
   _save: (store, model, requestType, id) ->
     jsonData = @_serializer.serializeModel(model)
     $.ajax
@@ -62,11 +62,11 @@ Emu.RestAdapter = Ember.Object.extend
         @_didSave(store, model, jsonData)
       error: =>
         @_didError(store, model)
-  
+
   _didFindAll: (store, collection, jsonData) ->
     @_serializer.deserializeCollection(collection, jsonData)
     store.didFindAll(collection)
-  
+
   _didFindById: (store, model, jsonData) ->
     @_serializer.deserializeModel(model, jsonData)
     store.didFindById(model)
@@ -82,11 +82,11 @@ Emu.RestAdapter = Ember.Object.extend
 
   _didError: (store, model) ->
     store.didError(model)
-  
+
   _didSave: (store, model, jsonData) ->
     @_serializer.deserializeModel(model, jsonData)
     store.didSave(model)
-    
+
   _getUrlForModel: (model) ->
     url = if Emu.isCollection(model) then @_serializer.serializeTypeName(model.get("type")) else ""
     currentModel = model
@@ -95,12 +95,12 @@ Emu.RestAdapter = Ember.Object.extend
       if Emu.isCollection(currentModel)
         url = @_serializer.serializeTypeName(currentModel.get("type")) + (if url then "/" + url else "")
       else
-        url = currentModel.primaryKeyValue() + "/" + url 
+        url = currentModel.primaryKeyValue() + "/" + url
     buildUrl() while currentModel.get("parent")
     @_getBaseUrl() + url
 
   _getUrlForType: (type) ->
     @_getBaseUrl() + @_serializer.serializeTypeName(type)
-  
+
   _getBaseUrl: ->
     if @get("namespace") then @get("namespace") + "/" else ""

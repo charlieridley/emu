@@ -18,7 +18,7 @@ App.Store = Emu.Store.extend({
 App.Company = Emu.Model.extend({
 	resourceName: "companies", //override default which would be 'companys'
 	name: Emu.field("string"),
-	address: Emu.field("App.Address", {partial: true}),	
+	address: Emu.field("App.Address", {partial: true}),
 	employees: Emu.field("App.Employee", {collection: true, lazy: true})
 });
 
@@ -47,7 +47,7 @@ Partial loading
 ---------------
 ```javascript
 //Load a bunch of models - each model is "partially" loaded when getting as a collection
-var companies = App.Company.find();  
+var companies = App.Company.find();
 	//GET request to: 	http://www.mysite.com/companies
 	//Response: [{id: 1, name: "Apple"}, {id: 2, name: "Facebook"}]
 
@@ -147,7 +147,7 @@ This will also serialize the URLs with underscores
 Receiving updates from server
 ----------------------------
 
-You can receive updates from your server using the Emu.PushDataAdapter. There is currently a [SignalR](https://github.com/SignalR/SignalR) implementation of this. In order to use this you need to specify your adapter on the store. 
+You can receive updates from your server using the Emu.PushDataAdapter. There is currently a [SignalR](https://github.com/SignalR/SignalR) implementation of this. In order to use this you need to specify your adapter on the store.
 
 Use SignalR adapter like this:
 
@@ -187,13 +187,13 @@ App.MySpecialPushAdapter = Emu.PushDataAdapter.extend({
     var _this = this;
     someCallbackThatReceivesAnUpdateForType(type, function(json){
       _this.didUpdate(type, store, json);
-    });    
+    });
   },
-  
+
   //implement this function for any start code required
   start: function(store){
     this._super(store);
-    //Initialization code here	
+    //Initialization code here
   }
 });
 ```

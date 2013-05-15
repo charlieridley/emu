@@ -76,10 +76,9 @@ describe "Emu.UnderscoreSerializer", ->
           drinksAreFree: "No of course they're not free. What do you think this is? I'm trying to run a business here"
         @serializer = Emu.UnderscoreSerializer.create()
         @jsonResult = @serializer.serializeModel(model)
-      
+
       it "should deserialize the object to json", ->
         expect(@jsonResult).toEqual
           id: "55"
           drinks_are_free: "No of course they're not free. What do you think this is? I'm trying to run a business here"
-    
-    
+

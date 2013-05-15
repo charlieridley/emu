@@ -1,6 +1,6 @@
 describe "Emu.ModelEvented", ->
   Person = Ember.Object.extend Emu.ModelEvented, Ember.Evented
-  
+
   describe "didFinishLoading", ->
     beforeEach ->
       @model = Person.create()
@@ -14,7 +14,7 @@ describe "Emu.ModelEvented", ->
   describe "didStartLoading", ->
     beforeEach ->
       @model = Person.create()
-      @model.on "didStartLoading", => 
+      @model.on "didStartLoading", =>
         @didStartLoading = true
       @model.didStartLoading()
 
@@ -24,7 +24,7 @@ describe "Emu.ModelEvented", ->
   describe "didStartSaving", ->
     beforeEach ->
       @model = Person.create()
-      @model.on "didStartSaving", => 
+      @model.on "didStartSaving", =>
         @didStartSaving = true
       @model.didStartSaving()
 
@@ -34,7 +34,7 @@ describe "Emu.ModelEvented", ->
   describe "didFinishSaving", ->
     beforeEach ->
       @model = Person.create()
-      @model.on "didFinishSaving", => 
+      @model.on "didFinishSaving", =>
         @didFinishSaving = true
       @model.didFinishSaving()
 
@@ -44,7 +44,7 @@ describe "Emu.ModelEvented", ->
   describe "didStateChange", ->
     beforeEach ->
       @model = Person.create()
-      @model.on "didStateChange", => 
+      @model.on "didStateChange", =>
         @didStateChange = true
       @model.didStateChange()
 

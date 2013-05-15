@@ -1,7 +1,7 @@
 describe "Receving an update", ->
-  
+
   describe "simple field", ->
-    beforeEach ->      
+    beforeEach ->
       SignalrTestSetup.setup()
       spyOn($, "ajax")
       @person = App.UpdatablePerson.find(5)

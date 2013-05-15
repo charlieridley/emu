@@ -1,7 +1,7 @@
 describe "Emu.PagedModelCollection", ->
-  
+
   describe "create", ->
-    
+
     describe "not specifying page size", ->
       beforeEach ->
         @collection = Emu.PagedModelCollection.create()
@@ -17,10 +17,10 @@ describe "Emu.PagedModelCollection", ->
         expect(@collection.get("pageSize")).toEqual(10)
 
   describe "loadMore", ->
-    
+
     describe "first load", ->
       beforeEach ->
-        @store = 
+        @store =
           loadPaged: ->
         @collection = Emu.PagedModelCollection.create
           type: App.Person
@@ -34,7 +34,7 @@ describe "Emu.PagedModelCollection", ->
 
     describe "second load", ->
       beforeEach ->
-        @store = 
+        @store =
           loadPaged: ->
         @collection = Emu.PagedModelCollection.create
           type: App.Person

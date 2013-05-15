@@ -1,10 +1,10 @@
 Emu.Store = Ember.Object.extend
-  init: ->   
+  init: ->
     unless @get("revision") == Emu.CURRENT_API_REVISION or Emu.TESTING
-      throw new Error("Error: Emu has had breaking changes since your last update. Please review them at https://github.com/charlieridley/emu/breaking_changes.md and update the `revision` property on your store to " + Emu.CURRENT_API_REVISION); 
+      throw new Error("Error: Emu has had breaking changes since your last update. Please review them at https://github.com/charlieridley/emu/breaking_changes.md and update the `revision` property on your store to " + Emu.CURRENT_API_REVISION);
     unless Ember.get(Emu, "defaultStore")
       Ember.set(Emu, "defaultStore", this)
-    @set("modelCollections", {}) unless @get("modelCollections") 
+    @set("modelCollections", {}) unless @get("modelCollections")
     @set("queryCollections", {}) unless @get("queryCollections")
     @set("deferredQueries", {})  unless @get("deferredQueries")
     @set("updatableModels", {})  unless @get("updatableModels")
@@ -15,19 +15,19 @@ Emu.Store = Ember.Object.extend
   createRecord: (type, hash) ->
     collection = @_getCollectionForType(type)
     collection.createRecord(hash)
-  
-  find: (type, param) -> 
-    return @findAll(type) unless param 
+
+  find: (type, param) ->
+    return @findAll(type) unless param
     switch Em.typeOf(param)
       when 'string', 'number' then @findById(type, param)
       when 'object'           then @findQuery(type, param)
       when 'function'         then @findPredicate(type, param)
-  
+
   findAll: (type) ->
     collection = @_getCollectionForType(type)
     @loadAll(collection)
-    collection  
-  
+    collection
+
   didFindAll: (collection) ->
     @_didCollectionLoad(collection)
     deferredQueries = @get("deferredQueries")[collection.type]
@@ -36,13 +36,13 @@ Emu.Store = Ember.Object.extend
         queryResult = collection.filter(deferredQuery.predicate)
         deferredQuery.results.pushObjects(queryResult)
         deferredQuery.results.didFinishLoading()
-  
+
   findById: (type, id) ->
     collection = @_getCollectionForType(type)
     model = collection.find (item) -> item.primaryKeyValue() == id
     unless model
-      model = collection.createRecord(id: id)    
-      model.primaryKeyValue(id) 
+      model = collection.createRecord(id: id)
+      model.primaryKeyValue(id)
     @loadModel(model)
 
   findPaged: (type, pageSize = 500) ->
@@ -51,12 +51,12 @@ Emu.Store = Ember.Object.extend
     pagedCollection
 
   didFindById: (model) ->
-    model.didFinishLoading()  
+    model.didFinishLoading()
 
   didError: (model) ->
     model.didError()
 
-  findQuery: (type, queryHash) -> 
+  findQuery: (type, queryHash) ->
     collection = @_getCollectionForQuery(type, queryHash)
     unless collection.get("isLoading")
       collection.didStartLoading()
@@ -64,17 +64,17 @@ Emu.Store = Ember.Object.extend
     collection
 
   didFindQuery: (collection) ->
-    @_didCollectionLoad(collection)    
+    @_didCollectionLoad(collection)
 
   findPredicate: (type, predicate) ->
-    allModels = @findAll(type)    
-    results = Emu.ModelCollection.create(type: type, store: this)    
+    allModels = @findAll(type)
+    results = Emu.ModelCollection.create(type: type, store: this)
     if allModels.get("isLoaded")
       filtered = allModels.filter (m) -> predicate(m)
       results.pushObjects filtered
-      results.didFinishLoading()    
+      results.didFinishLoading()
     else
-      results.didStartLoading()    
+      results.didStartLoading()
       queries = @get("deferredQueries")[type] or @get("deferredQueries")[type] = []
       queries.pushObject(predicate: predicate, results: results)
     results
@@ -82,8 +82,8 @@ Emu.Store = Ember.Object.extend
   save: (model) ->
     model.didStartSaving()
     if model.primaryKeyValue()
-      @_adapter.update(this, model) 
-    else 
+      @_adapter.update(this, model)
+    else
       @_adapter.insert(this, model)
 
   didSave: (model) ->
@@ -94,8 +94,8 @@ Emu.Store = Ember.Object.extend
       return collection
     collection.didStartLoading()
     @_adapter.findAll(collection.get("type"), this, collection)
-    collection  
-  
+    collection
+
   loadModel: (model) ->
     if not model.get("isLoading") and not model.get("isLoaded")
       model.didStartLoading()
@@ -110,7 +110,7 @@ Emu.Store = Ember.Object.extend
       @get("updatableModels")[model.constructor].pushObject(model)
 
   findUpdatable: (type, id) ->
-    @get("updatableModels")[type]?.find (model) -> 
+    @get("updatableModels")[type]?.find (model) ->
       model.primaryKeyValue() == id
 
   deleteRecord: (model) ->
@@ -122,17 +122,17 @@ Emu.Store = Ember.Object.extend
   didDeleteRecord: (model) ->
     @_getCollectionForType(model.constructor).deleteRecord(model)
 
-  loadPaged: (pagedCollection, pageNumber) -> 
+  loadPaged: (pagedCollection, pageNumber) ->
     @_adapter.findPage(pagedCollection, this, pageNumber)
 
   didFindPage: (pagedCollection, pageNumber) ->
-    
+
   _didCollectionLoad: (collection) ->
     collection.didFinishLoading()
-  
+
   _getCollectionForType: (type) ->
     @get("modelCollections")[type] or @get("modelCollections")[type] = Emu.ModelCollection.create(type: type, store: this)
-  
+
   _getCollectionForQuery: (type, queryHash) ->
     key = JSON.stringify(queryHash)
     queries = @get("queryCollections")[type] or @get("queryCollections")[type] = {}

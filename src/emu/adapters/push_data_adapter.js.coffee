@@ -1,11 +1,11 @@
 Emu.PushDataAdapter = Ember.Object.extend
   init: ->
-    @_serializer = @get("serializer")?.create() or Emu.Serializer.create()    
+    @_serializer = @get("serializer")?.create() or Emu.Serializer.create()
 
   start: (store) ->
     @updatableTypes?.forEach (type) =>
       @listenForUpdates(store, Ember.get(type))
-  
+
   listenForUpdates: (store, type) ->
     @registerForUpdates?(store, type)
 

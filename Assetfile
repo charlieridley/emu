@@ -28,7 +28,7 @@ input "src/emu" do
       "application_ext.js.js",
       "model/model_evented.js.js"
     ], "ember-emu-#{EMU_VERSION}.js"
-  end 
+  end
 
   match "ember-emu-#{EMU_VERSION}.js" do
     filter VersionInfo
@@ -43,7 +43,7 @@ input "src/emu-signalr" do
     concat [
       "signalr_pus_data_adapter.js.js"
     ], "ember-emu-signalr-#{EMU_VERSION}.js"
-  end 
+  end
 
   match "ember-emu-signalr-#{EMU_VERSION}.js" do
     filter VersionInfo

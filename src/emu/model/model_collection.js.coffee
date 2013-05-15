@@ -2,18 +2,18 @@ Emu.ModelCollection = Ember.ArrayProxy.extend Emu.ModelEvented, Emu.StateTracked
   init: ->
     @_super()
     @set("content", Ember.A([])) unless @get("content")
-    
-    @createRecord = (hash) ->  
+
+    @createRecord = (hash) ->
       primaryKey = Emu.Model.primaryKey(@get("type"))
-      paramHash = 
+      paramHash =
         store: @get("store")
       paramHash[primaryKey] = hash?.id
-      model = @get("type").create(paramHash)   
-      model.set("parent", this)  
-      model.setProperties(hash)    
-      model.subscribeToUpdates() if @_subscribeToUpdates      
-      @pushObject(model)    
-    
+      model = @get("type").create(paramHash)
+      model.set("parent", this)
+      model.setProperties(hash)
+      model.subscribeToUpdates() if @_subscribeToUpdates
+      @pushObject(model)
+
     @pushObject = (model) =>
       model.on "didStateChange", => @didStateChange()
       @get("content").pushObject(model)
@@ -21,8 +21,8 @@ Emu.ModelCollection = Ember.ArrayProxy.extend Emu.ModelEvented, Emu.StateTracked
     @addObserver "content.@each.isDirty", =>
       @didStateChange()
       @set("hasValue", true)
-    
-    @find = (predicate) -> 
+
+    @find = (predicate) ->
       @get("content").find(predicate)
 
   subscribeToUpdates: ->

@@ -2,7 +2,7 @@ describe "State tests", ->
 
   describe "New model", ->
     beforeEach ->
-      TestSetup.setup() 
+      TestSetup.setup()
       @model = App.Person.create()
 
     it "should have isLoaded false", ->
@@ -16,7 +16,7 @@ describe "State tests", ->
 
   describe "loading model", ->
     beforeEach ->
-      TestSetup.setup() 
+      TestSetup.setup()
       spyOn($, "ajax")
       @model = App.Person.find(5)
 
@@ -31,12 +31,12 @@ describe "State tests", ->
 
   describe "loaded model", ->
     beforeEach ->
-      TestSetup.setup() 
+      TestSetup.setup()
       spyOn($, "ajax")
       @model = App.Person.find(5)
       $.ajax.mostRecentCall.args[0].success
         name: "Floyd the Barber"
-        address: 
+        address:
           town: "Seattle"
 
     it "should have isLoaded true", ->
@@ -50,10 +50,10 @@ describe "State tests", ->
 
   describe "saving model", ->
     beforeEach ->
-      TestSetup.setup() 
+      TestSetup.setup()
       spyOn($, "ajax")
       @model = App.Person.create()
-      @model.save()      
+      @model.save()
 
     it "should have isLoaded false", ->
       expect(@model.get("isLoaded")).toBeFalsy()
@@ -69,13 +69,13 @@ describe "State tests", ->
 
   describe "saved model", ->
     beforeEach ->
-      TestSetup.setup() 
+      TestSetup.setup()
       spyOn($, "ajax")
       @model = App.Person.create()
-      @model.save()    
+      @model.save()
       $.ajax.mostRecentCall.args[0].success
         name: "Floyd the Barber"
-        address: 
+        address:
           town: "Seattle"
 
     it "should have isLoaded true", ->
@@ -94,7 +94,7 @@ describe "State tests", ->
 
     describe "nested collection in nested object", ->
       beforeEach ->
-        TestSetup.setup() 
+        TestSetup.setup()
         spyOn($, "ajax")
         @model = App.Order.find(5)
         $.ajax.mostRecentCall.args[0].success

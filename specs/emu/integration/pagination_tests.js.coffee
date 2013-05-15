@@ -1,10 +1,10 @@
 describe "Pagination tests", ->
-  
+
   describe "loading one page", ->
-    
+
     describe "start loading", ->
       beforeEach ->
-        TestSetup.setup() 
+        TestSetup.setup()
         spyOn($, "ajax")
         @customers = App.Customer.findPaged(500)
 
@@ -13,7 +13,7 @@ describe "Pagination tests", ->
 
     describe "finish loading", ->
       beforeEach ->
-        TestSetup.setup() 
+        TestSetup.setup()
         spyOn($, "ajax")
         @result = App.Address.findPaged(4)
         $.ajax.mostRecentCall.args[0].success
@@ -36,7 +36,7 @@ describe "Pagination tests", ->
 
   describe "loading more in a collection", ->
     beforeEach ->
-      TestSetup.setup() 
+      TestSetup.setup()
       spyOn($, "ajax")
       @customers = App.Address.findPaged(3)
       $.ajax.mostRecentCall.args[0].success
@@ -44,7 +44,7 @@ describe "Pagination tests", ->
         results: [
           {id: 1, town: "London"}
           {id: 2, town: "New York"}
-          {id: 3, town: "Paris"}            
+          {id: 3, town: "Paris"}
         ]
       @customers.loadMore()
 
@@ -55,7 +55,7 @@ describe "Pagination tests", ->
 
     describe "getting once", ->
       beforeEach ->
-        TestSetup.setup() 
+        TestSetup.setup()
         spyOn($, "ajax")
         @report = App.Report.find(5)
         $.ajax.mostRecentCall.args[0].success
@@ -68,7 +68,7 @@ describe "Pagination tests", ->
 
     describe "getting and loading more", ->
       beforeEach ->
-        TestSetup.setup() 
+        TestSetup.setup()
         spyOn($, "ajax")
         @report = App.Report.find(5)
         $.ajax.mostRecentCall.args[0].success
