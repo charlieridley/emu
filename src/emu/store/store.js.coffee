@@ -1,7 +1,7 @@
 Emu.Store = Ember.Object.extend
   init: ->
     unless @get("revision") == Emu.CURRENT_API_REVISION or Emu.TESTING
-      throw new Error("Error: Emu has had breaking changes since your last update. Please review them at https://github.com/charlieridley/emu/breaking_changes.md and update the `revision` property on your store to " + Emu.CURRENT_API_REVISION);
+      throw new Error("Error: Emu has had breaking changes since your last update. Please review them at https://github.com/charlieridley/emu/blob/master/breaking_changes.md and update the `revision` property on your store to " + Emu.CURRENT_API_REVISION);
     unless Ember.get(Emu, "defaultStore")
       Ember.set(Emu, "defaultStore", this)
     @set("modelCollections", {}) unless @get("modelCollections")
