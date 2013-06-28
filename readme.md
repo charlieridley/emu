@@ -209,6 +209,7 @@ Available events are:
 ```
 didStartLoading
 didFinishLoading
+didFinishPartialLoading
 didStartSaving
 didFinishSaving
 didStateChange
