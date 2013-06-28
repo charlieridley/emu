@@ -11,6 +11,16 @@ describe "Emu.ModelEvented", ->
     it "should have called didFinishLoading event", ->
       expect(@didFinishLoading).toBeTruthy()
 
+  describe "didFinishPartialLoading", ->
+    beforeEach ->
+      @model = Person.create()
+      @model.on "didFinishPartialLoading", =>
+        @didFinishPartialLoading = true
+      @model.didFinishPartialLoading()
+
+    it "should have called didFinishPartialLoading event", ->
+      expect(@didFinishPartialLoading).toBeTruthy()
+
   describe "didStartLoading", ->
     beforeEach ->
       @model = Person.create()

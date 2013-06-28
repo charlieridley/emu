@@ -30,6 +30,8 @@ Emu.Store = Ember.Object.extend
 
   didFindAll: (collection) ->
     @_didCollectionLoad(collection)
+    collection.get("content").forEach (item) ->
+      item.didFinishPartialLoading()
     deferredQueries = @get("deferredQueries")[collection.type]
     if deferredQueries
       deferredQueries.forEach (deferredQuery) ->

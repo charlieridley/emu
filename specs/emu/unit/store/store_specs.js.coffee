@@ -113,10 +113,14 @@ describe "Emu.Store", ->
 
   describe "didFindAll", ->
     beforeEach ->
-      @models = Emu.ModelCollection.create(isLoading: true)
+      @models = Emu.ModelCollection.create(isLoading: true, type: Person)
+      @models.createRecord()
+      @models.createRecord()
       @store = Emu.Store.create
         adapter: Adapter
       @models.on "didFinishLoading", => @didFinishLoading = true
+      @models.get("firstObject").on "didFinishPartialLoading", => @didFinishPartialLoading1 = true
+      @models.get("lastObject").on "didFinishPartialLoading", => @didFinishPartialLoading2 = true
       @store.didFindAll(@models)
 
     it "should fire didFinishLoading", ->
@@ -127,6 +131,10 @@ describe "Emu.Store", ->
 
     it "should set isLoaded false on the model collection", ->
       expect(@models.get("isLoaded")).toBeTruthy()
+
+    it "should fre didFinishPartialLoading for each model", ->
+      expect(@didFinishPartialLoading1).toBeTruthy()
+      expect(@didFinishPartialLoading2).toBeTruthy()
 
   describe "findById", ->
 
