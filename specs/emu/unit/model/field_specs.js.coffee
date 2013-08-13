@@ -239,6 +239,22 @@ describe "Emu.field", ->
         it "should return the collection", ->
           expect(@result).toBe(@orders)
 
+      describe "specify pageSize", ->
+        beforeEach ->
+          @store = Ember.Object.create
+            loadAll: ->
+          @orders = Emu.PagedModelCollection.create(type: App.Order)
+          spyOn(@orders, "loadMore")
+          spyOn(Emu.PagedModelCollection, "create").andReturn(@orders)
+          Person = Emu.Model.extend
+            store: @store
+            orders: Emu.field("App.Order", {collection: true, paged: true, pageSize: 10})
+          @model = Person.create(id:6)
+          @result = @model.get("orders")
+
+        it "should create the paged model collection passing the pageSize", ->
+          expect(Emu.PagedModelCollection.create.mostRecentCall.args[0].pageSize).toEqual(10)
+
   describe "set", ->
 
     describe "simple field", ->

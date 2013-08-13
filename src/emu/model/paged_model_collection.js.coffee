@@ -1,9 +1,9 @@
 Emu.PagedModelCollection = Emu.ModelCollection.extend
-  pageSize: 250
   loadedPageCursor: 1
   init: ->
     @_super()
     @set("pages", Em.A([]))
+    @set("pageSize", 250) if not @get("pageSize")
 
   loadMore: ->
     @get("store").loadPaged(this, @get("loadedPageCursor"))

@@ -64,7 +64,7 @@ Emu.Model.reopenClass
     unless record._attributes[key]
       if meta.options.collection
         collectionType = if meta.options.paged then Emu.PagedModelCollection else Emu.ModelCollection
-        record._attributes[key] = collectionType.create(parent: record, type: meta.type(), store: record.get("store"), lazy: meta.options.lazy)
+        record._attributes[key] = collectionType.create(parent: record, type: meta.type(), store: record.get("store"), lazy: meta.options.lazy, pageSize: meta.options.pageSize)
         record._attributes[key].addObserver "hasValue", -> record.set("hasValue", true)
         unless meta.options.lazy
           record._attributes[key].on "didStateChange", ->
