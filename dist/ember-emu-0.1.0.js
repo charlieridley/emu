@@ -1,5 +1,5 @@
-// Version: 0.1.0-79-gc1c3361
-// Last commit: c1c3361 (2013-05-05 11:25:04 -0400)
+// Version: 0.1.0-89-gd8b5fbc
+// Last commit: d8b5fbc (2013-08-12 22:32:25 -0400)
 
 
 (function() {
@@ -264,6 +264,9 @@
     didFinishLoading: function() {
       return this.trigger("didFinishLoading");
     },
+    didFinishPartialLoading: function() {
+      return this.trigger("didFinishPartialLoading");
+    },
     didStartSaving: function() {
       return this.trigger("didStartSaving");
     },
@@ -438,7 +441,8 @@
             parent: record,
             type: meta.type(),
             store: record.get("store"),
-            lazy: meta.options.lazy
+            lazy: meta.options.lazy,
+            pageSize: meta.options.pageSize
           });
           record._attributes[key].addObserver("hasValue", function() {
             return record.set("hasValue", true);
@@ -529,11 +533,13 @@
 }).call(this);
 (function() {
   Emu.PagedModelCollection = Emu.ModelCollection.extend({
-    pageSize: 250,
     loadedPageCursor: 1,
     init: function() {
       this._super();
-      return this.set("pages", Em.A([]));
+      this.set("pages", Em.A([]));
+      if (!this.get("pageSize")) {
+        return this.set("pageSize", 250);
+      }
     },
     loadMore: function() {
       this.get("store").loadPaged(this, this.get("loadedPageCursor"));
@@ -816,7 +822,7 @@
       var _ref, _ref1, _ref2;
 
       if (!(this.get("revision") === Emu.CURRENT_API_REVISION || Emu.TESTING)) {
-        throw new Error("Error: Emu has had breaking changes since your last update. Please review them at https://github.com/charlieridley/emu/breaking_changes.md and update the `revision` property on your store to " + Emu.CURRENT_API_REVISION);
+        throw new Error("Error: Emu has had breaking changes since your last update. Please review them at https://github.com/charlieridley/emu/blob/master/breaking_changes.md and update the `revision` property on your store to " + Emu.CURRENT_API_REVISION);
       }
       if (!Ember.get(Emu, "defaultStore")) {
         Ember.set(Emu, "defaultStore", this);
@@ -868,6 +874,9 @@
       var deferredQueries;
 
       this._didCollectionLoad(collection);
+      collection.get("content").forEach(function(item) {
+        return item.didFinishPartialLoading();
+      });
       deferredQueries = this.get("deferredQueries")[collection.type];
       if (deferredQueries) {
         return deferredQueries.forEach(function(deferredQuery) {
