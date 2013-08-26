@@ -687,12 +687,8 @@ describe "Emu.Store", ->
       spyOn(Emu.PagedModelCollection, "create").andReturn(@pagedCollection)
       @store = Emu.Store.create
         adapter: Adapter
-      @pagedCollection.on "didStartLoading", => @didStartLoading = true
       spyOn(@pagedCollection, "loadMore")
       @result = @store.findPaged(App.Address, 500)
-
-    it "should fire didStartLoading", ->
-      expect(@didStartLoading).toBeTruthy()
 
     it "should create a paged model collection", ->
       expect(Emu.PagedModelCollection.create).toHaveBeenCalledWith(type: App.Address, pageSize: 500, store: @store)
@@ -710,8 +706,12 @@ describe "Emu.Store", ->
         @pagedCollection = Emu.PagedModelCollection.create(pageSize: 100, type: App.Address)
         @store = Emu.Store.create
           adapter: Adapter
+        @pagedCollection.on "didStartLoading", => @didStartLoading = true
         spyOn(adapter, "findPage")
         @store.loadPaged(@pagedCollection, 1)
+
+      it "should fire didStartLoading", ->
+        expect(@didStartLoading).toBeTruthy()
 
       it "should call findPage on the adapter", ->
         expect(adapter.findPage).toHaveBeenCalledWith(@pagedCollection, @store, 1)
