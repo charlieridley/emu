@@ -1,5 +1,5 @@
-// Version: 0.1.0-89-gd8b5fbc
-// Last commit: d8b5fbc (2013-08-12 22:32:25 -0400)
+// Version: 0.1.0-92-g7efbe85
+// Last commit: 7efbe85 (2013-08-12 22:40:51 -0400)
 
 
 (function() {
@@ -914,6 +914,7 @@
         pageSize: pageSize,
         store: this
       });
+      pagedCollection.didStartLoading();
       pagedCollection.loadMore();
       return pagedCollection;
     },
@@ -1019,7 +1020,9 @@
     loadPaged: function(pagedCollection, pageNumber) {
       return this._adapter.findPage(pagedCollection, this, pageNumber);
     },
-    didFindPage: function(pagedCollection, pageNumber) {},
+    didFindPage: function(pagedCollection, pageNumber) {
+      return pagedCollection.didFinishLoading();
+    },
     _didCollectionLoad: function(collection) {
       return collection.didFinishLoading();
     },
