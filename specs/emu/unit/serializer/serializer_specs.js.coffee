@@ -356,6 +356,21 @@ describe "Emu.Serializer", ->
             customerId: "55"
             name: "Terry the customer"
 
+      describe "false boolean value", ->
+        Job = Emu.Model.extend
+          isDone: Emu.field("boolean")
+        beforeEach ->
+          job = Job.create
+            id: "8"
+            isDone: false
+          @serializer = Emu.Serializer.create()
+          @jsonResult = @serializer.serializeModel(job)
+
+        it "should serialize the boolean value", ->
+          expect(@jsonResult).toEqual
+            id: "8"
+            isDone: false
+
     describe "nested collection", ->
 
       describe "not null value", ->

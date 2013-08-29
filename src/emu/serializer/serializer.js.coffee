@@ -72,6 +72,6 @@ Emu.Serializer = Ember.Object.extend
     else if meta.isModel()
       jsonData[serializedKey] = @serializeModel(value) if value.get("hasValue")
     else
-      if value
+      if value != undefined
         attributeSerializer = Emu.AttributeSerializers[meta.type()]
         jsonData[serializedKey] = attributeSerializer.serialize(value)
