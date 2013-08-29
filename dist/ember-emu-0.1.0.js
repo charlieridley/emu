@@ -1,5 +1,5 @@
-// Version: 0.1.0-97-gbaa9a8a
-// Last commit: baa9a8a (2013-08-28 20:37:18 -0400)
+// Version: 0.1.0-98-g0e29a5c
+// Last commit: 0e29a5c (2013-08-29 14:31:38 -0400)
 
 
 (function() {
@@ -123,6 +123,20 @@
 
       return $.ajax({
         url: this._getUrlForModel(model) + "/" + id,
+        type: "GET",
+        success: function(jsonData) {
+          return _this._didFindById(store, model, jsonData);
+        },
+        error: function() {
+          return _this._didError(store, model);
+        }
+      });
+    },
+    findByParentId: function(type, store, model, parentId) {
+      var _this = this;
+
+      return $.ajax({
+        url: this._getUrlForModel(model.get("parent")) + "/" + parentId + "/" + this._serializer.serializeTypeName(type, true),
         type: "GET",
         success: function(jsonData) {
           return _this._didFindById(store, model, jsonData);
@@ -310,7 +324,7 @@
       }
     };
     return Ember.computed(function(key, value, oldValue) {
-      var _ref, _ref1;
+      var _ref, _ref1, _ref2;
 
       meta = this.constructor.metaForProperty(key);
       if (arguments.length > 1) {
@@ -319,12 +333,18 @@
         this.set("hasValue", true);
       } else {
         if (meta.options.lazy && this.primaryKeyValue()) {
-          if ((_ref = this.get("store")) != null) {
-            _ref.loadAll(Emu.Model.getAttr(this, key));
+          if (meta.options.collection) {
+            if ((_ref = this.get("store")) != null) {
+              _ref.loadAll(Emu.Model.getAttr(this, key));
+            }
+          } else if (meta.isModel()) {
+            if ((_ref1 = this.get("store")) != null) {
+              _ref1.loadModel(Emu.Model.getAttr(this, key));
+            }
           }
         } else if (meta.options.partial) {
-          if ((_ref1 = this.get("store")) != null) {
-            _ref1.loadModel(this);
+          if ((_ref2 = this.get("store")) != null) {
+            _ref2.loadModel(this);
           }
         }
         if (meta.options.paged) {
@@ -456,7 +476,9 @@
             record._attributes[key].subscribeToUpdates();
           }
         } else if (meta.isModel()) {
-          record._attributes[key] = meta.type().create();
+          record._attributes[key] = meta.type().create({
+            parent: record
+          });
           record._attributes[key].on("didStateChange", function() {
             return record.didStateChange();
           });
@@ -670,20 +692,20 @@
     deserializeKey: function(key) {
       return key;
     },
-    serializeTypeName: function(type) {
+    serializeTypeName: function(type, isSingular) {
       var name, parts, serialized;
 
       if (type.resourceName) {
         name = type.resourceName;
         if (typeof name === 'function') {
-          return name();
+          return name(isSingular);
         } else {
           return name;
         }
       } else {
         parts = type.toString().split(".");
         serialized = this.serializeKey(parts[parts.length - 1]);
-        if (this.get("pluralization")) {
+        if (this.get("pluralization") && !isSingular) {
           return serialized + "s";
         } else {
           return serialized;
@@ -982,7 +1004,11 @@
     loadModel: function(model) {
       if (!model.get("isLoading") && !model.get("isLoaded")) {
         model.didStartLoading();
-        this._adapter.findById(model.constructor, this, model, model.primaryKeyValue());
+        if (model.primaryKeyValue()) {
+          this._adapter.findById(model.constructor, this, model, model.primaryKeyValue());
+        } else {
+          this._adapter.findByParentId(model.constructor, this, model, model.get("parent").primaryKeyValue());
+        }
       }
       return model;
     },
