@@ -172,7 +172,7 @@ describe "Emu.RestAdapter", ->
       it "should notify the store", ->
         expect(@store.didFindById).toHaveBeenCalledWith(@model)
 
-  describe "findByParentId", ->
+  describe "findChild", ->
 
     describe "starts loading", ->
       beforeEach ->
@@ -189,7 +189,7 @@ describe "Emu.RestAdapter", ->
         @adapter = Emu.RestAdapter.create
           namespace: "api"
           serializer: Serializer
-        @adapter.findByParentId(App.Teacher, store, model, 9)
+        @adapter.findChild(App.Teacher, store, model, 9)
 
       it "should make a GET request to the endpoint for the entity", ->
         expect($.ajax.mostRecentCall.args[0].url).toEqual("api/students/9/teacher")
@@ -213,7 +213,7 @@ describe "Emu.RestAdapter", ->
         @adapter = Emu.RestAdapter.create
           namespace: "api"
           serializer: Serializer
-        @adapter.findByParentId(App.Teacher, @store, @model, 9)
+        @adapter.findChild(App.Teacher, @store, @model, 9)
         $.ajax.mostRecentCall.args[0].success(@jsonData)
 
       it "should deserialize the model", ->

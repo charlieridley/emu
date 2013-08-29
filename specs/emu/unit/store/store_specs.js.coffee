@@ -2,7 +2,7 @@ describe "Emu.Store", ->
   adapter = Ember.Object.create
     findAll: ->
     findById: ->
-    findByParentId: ->
+    findChild: ->
     findQuery: ->
     findPage: ->
     insert: ->
@@ -365,7 +365,7 @@ describe "Emu.Store", ->
         beforeEach ->
           @model = Person.create(id: 4)
           spyOn(adapter, "findById")
-          spyOn(adapter, "findByParentId")
+          spyOn(adapter, "findChild")
           @store = Emu.Store.create
             adapter: Adapter
           @model.on "didStartLoading", => @didStartLoading = true
@@ -380,8 +380,8 @@ describe "Emu.Store", ->
         it "should call the findById method on the adapter", ->
           expect(adapter.findById).toHaveBeenCalledWith(Person, @store, @model, 4)
 
-        it "should not call the findByParentId method on the adapter", ->
-          expect(adapter.findByParentId).not.toHaveBeenCalled()
+        it "should not call the findChild method on the adapter", ->
+          expect(adapter.findChild).not.toHaveBeenCalled()
 
     describe "does not have primary key", ->
 
@@ -389,7 +389,7 @@ describe "Emu.Store", ->
         beforeEach ->
           @model = App.Teacher.create(parent: App.Student.create(id: 6))
           spyOn(adapter, "findById")
-          spyOn(adapter, "findByParentId")
+          spyOn(adapter, "findChild")
           @store = Emu.Store.create
             adapter: Adapter
           @model.on "didStartLoading", => @didStartLoading = true
@@ -404,8 +404,8 @@ describe "Emu.Store", ->
         it "should not call the findById method on the adapter", ->
           expect(adapter.findById).not.toHaveBeenCalled()
 
-        it "should call the findByParentId method on the adapter", ->
-          expect(adapter.findByParentId).toHaveBeenCalledWith(App.Teacher, @store, @model, 6)
+        it "should call the findChild method on the adapter", ->
+          expect(adapter.findChild).toHaveBeenCalledWith(App.Teacher, @store, @model, 6)
 
     describe "already loading", ->
       beforeEach ->

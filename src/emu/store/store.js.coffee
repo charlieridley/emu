@@ -104,7 +104,7 @@ Emu.Store = Ember.Object.extend
       if model.primaryKeyValue()
         @_adapter.findById(model.constructor, this, model, model.primaryKeyValue())
       else
-        @_adapter.findByParentId(model.constructor, this, model, model.get("parent").primaryKeyValue())
+        @_adapter.findChild(model.constructor, this, model, model.get("parent").primaryKeyValue())
     model
 
   subscribeToUpdates: (model) ->

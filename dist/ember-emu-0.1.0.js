@@ -132,7 +132,7 @@
         }
       });
     },
-    findByParentId: function(type, store, model, parentId) {
+    findChild: function(type, store, model, parentId) {
       var _this = this;
 
       return $.ajax({
@@ -1010,7 +1010,7 @@
         if (model.primaryKeyValue()) {
           this._adapter.findById(model.constructor, this, model, model.primaryKeyValue());
         } else {
-          this._adapter.findByParentId(model.constructor, this, model, model.get("parent").primaryKeyValue());
+          this._adapter.findChild(model.constructor, this, model, model.get("parent").primaryKeyValue());
         }
       }
       return model;
