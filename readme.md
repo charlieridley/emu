@@ -120,8 +120,8 @@ App.Person = Emu.Model.extend({
 })
 
 App.Person = Emu.Model.extend({
-  resourceName: function(){
-    return "people";
+  resourceName: function(isSingular){
+    return isSingular ? "person" : "people";
   }
 })
 ```
