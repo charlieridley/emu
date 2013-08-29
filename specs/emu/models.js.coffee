@@ -50,3 +50,7 @@ App.Teacher = Emu.Model.extend
 
 App.UpdatingPerson = Emu.Model.extend
   updatableAddress: Emu.field("App.Address", {updatable: true})
+
+App.LazyPerson = Emu.Model.extend
+  lazyAddress: Emu.field("App.Address", {lazy: true})
+  lazyReport: Emu.field("App.Report", {lazy: true})

@@ -51,6 +51,17 @@ describe "Saving a new model", ->
             {town: "New York"}
           ]
 
+    describe "with a lazy model property", ->
+      beforeEach ->
+        TestSetup.setup()
+        spyOn($, "ajax")
+        @customer = App.LazyPerson.createRecord(id: 1)
+        report = @customer.get("lazyReport")
+        report.save()
+
+      it "should save to the correct URL", ->
+        expect($.ajax.mostRecentCall.args[0].url).toEqual("api/lazyPersons/1/report")
+
 describe "Saving a existing model", ->
   beforeEach ->
     TestSetup.setup()

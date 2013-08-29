@@ -393,6 +393,25 @@ describe "Emu.RestAdapter", ->
       it "should send the request to the correct URL for the model", ->
         expect($.ajax.mostRecentCall.args[0].url).toEqual("api/customer/10/order")
 
+    describe "is lazy and has parent", ->
+      beforeEach ->
+        spyOn($, "ajax")
+        person = App.LazyPerson.create
+          id: 10
+          parent: Emu.ModelCollection.create
+            type: App.LazyPerson
+        address = App.Address.create(lazy: true, parent: person)
+        @adapter = Emu.RestAdapter.create
+          namespace: "api"
+          serializer: Serializer
+        spyOn(serializer, "serializeTypeName").andCallFake (type, isSingular) ->
+          if type == App.LazyPerson then return "lazyperson"
+          if type == App.Address and isSingular then return "address"
+        @adapter.insert(Ember.Object.create(), address)
+
+      it "should send the request to the correct URL for the model", ->
+        expect($.ajax.mostRecentCall.args[0].url).toEqual("api/lazyperson/10/address")
+
   describe "update", ->
 
     describe "start request", ->

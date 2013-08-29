@@ -101,7 +101,7 @@ Emu.Store = Ember.Object.extend
   loadModel: (model) ->
     if not model.get("isLoading") and not model.get("isLoaded")
       model.didStartLoading()
-      if model.primaryKeyValue()
+      if not model.get("lazy")
         @_adapter.findById(model.constructor, this, model, model.primaryKeyValue())
       else
         @_adapter.findChild(model.constructor, this, model, model.get("parent").primaryKeyValue())

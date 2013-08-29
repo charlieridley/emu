@@ -245,6 +245,16 @@ describe "Emu.Model", ->
           it "should subscribe to updates", ->
             expect(@address.subscribeToUpdates).toHaveBeenCalled()
 
+        describe "get lazy", ->
+          beforeEach ->
+            @address = App.Address.create()
+            spyOn(App.Address, "create").andReturn(@address)
+            @model = App.LazyPerson.create()
+            @result = Emu.Model.getAttr(@model, "lazyAddress")
+
+          it "should create an empty model", ->
+            expect(App.Address.create).toHaveBeenCalledWith(parent: @model, lazy: true)
+
     describe "subscribeToUpdates", ->
       beforeEach ->
         Ember.set(Emu, "defaultStore", undefined)

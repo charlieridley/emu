@@ -359,7 +359,7 @@ describe "Emu.Store", ->
 
   describe "loadModel", ->
 
-    describe "has primary key", ->
+    describe "is not lazy child", ->
 
       describe "start loading", ->
         beforeEach ->
@@ -383,11 +383,11 @@ describe "Emu.Store", ->
         it "should not call the findChild method on the adapter", ->
           expect(adapter.findChild).not.toHaveBeenCalled()
 
-    describe "does not have primary key", ->
+    describe "is lazy child", ->
 
       describe "start loading", ->
         beforeEach ->
-          @model = App.Teacher.create(parent: App.Student.create(id: 6))
+          @model = App.Teacher.create(parent: App.Student.create(id: 6), lazy: true)
           spyOn(adapter, "findById")
           spyOn(adapter, "findChild")
           @store = Emu.Store.create
