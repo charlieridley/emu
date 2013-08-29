@@ -1,5 +1,5 @@
-// Version: 0.1.0-98-g0e29a5c
-// Last commit: 0e29a5c (2013-08-29 14:31:38 -0400)
+// Version: 0.1.0-103-g9dffd1c
+// Last commit: 9dffd1c (2013-08-29 15:23:35 -0400)
 
 
 (function() {
@@ -479,6 +479,9 @@
           record._attributes[key] = meta.type().create({
             parent: record
           });
+          if (meta.options.updatable) {
+            record._attributes[key].subscribeToUpdates();
+          }
           record._attributes[key].on("didStateChange", function() {
             return record.didStateChange();
           });
