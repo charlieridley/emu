@@ -72,6 +72,7 @@ Emu.Model.reopenClass
         record._attributes[key].subscribeToUpdates() if meta.options.updatable
       else if meta.isModel()
         record._attributes[key] = meta.type().create(parent: record)
+        record._attributes[key].subscribeToUpdates() if meta.options.updatable
         record._attributes[key].on "didStateChange", ->
           record.didStateChange()
     record._attributes[key]

@@ -219,12 +219,31 @@ describe "Emu.Model", ->
 
         describe "get once", ->
           beforeEach ->
-            spyOn(App.Address, "create").andCallThrough()
+            @address = App.Address.create()
+            spyOn(@address, "subscribeToUpdates")
+            spyOn(App.Address, "create").andReturn(@address)
             @model = Person.create()
             @result = Emu.Model.getAttr(@model, "address")
 
           it "should create an empty model", ->
             expect(App.Address.create).toHaveBeenCalledWith(parent: @model)
+
+          it "should not subscribe to updates", ->
+            expect(@address.subscribeToUpdates).not.toHaveBeenCalled()
+
+        describe "get updatable", ->
+          beforeEach ->
+            @address = App.Address.create()
+            spyOn(@address, "subscribeToUpdates")
+            spyOn(App.Address, "create").andReturn(@address)
+            @model = App.UpdatingPerson.create()
+            @result = Emu.Model.getAttr(@model, "updatableAddress")
+
+          it "should create an empty model", ->
+            expect(App.Address.create).toHaveBeenCalledWith(parent: @model)
+
+          it "should subscribe to updates", ->
+            expect(@address.subscribeToUpdates).toHaveBeenCalled()
 
     describe "subscribeToUpdates", ->
       beforeEach ->

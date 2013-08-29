@@ -47,3 +47,6 @@ App.Student = Emu.Model.extend
 
 App.Teacher = Emu.Model.extend
   name: Emu.field("string")
+
+App.UpdatingPerson = Emu.Model.extend
+  updatableAddress: Emu.field("App.Address", {updatable: true})
