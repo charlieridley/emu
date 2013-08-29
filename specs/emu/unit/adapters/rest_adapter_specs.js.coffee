@@ -172,6 +172,56 @@ describe "Emu.RestAdapter", ->
       it "should notify the store", ->
         expect(@store.didFindById).toHaveBeenCalledWith(@model)
 
+  describe "findByParentId", ->
+
+    describe "starts loading", ->
+      beforeEach ->
+        spyOn($, "ajax")
+        students = Emu.ModelCollection.create(type: App.Student)
+        student = students.createRecord(id: 9)
+        model = App.Teacher.create(parent: student)
+        store = Ember.Object.create()
+        spyOn(serializer, "serializeTypeName").andCallFake (type, isSingular) -> 
+          if isSingular
+            if type == App.Teacher then return "teacher"
+          if not isSingular
+            if type == App.Student then return "students"
+        @adapter = Emu.RestAdapter.create
+          namespace: "api"
+          serializer: Serializer
+        @adapter.findByParentId(App.Teacher, store, model, 9)
+
+      it "should make a GET request to the endpoint for the entity", ->
+        expect($.ajax.mostRecentCall.args[0].url).toEqual("api/students/9/teacher")
+        expect($.ajax.mostRecentCall.args[0].type).toEqual("GET")
+
+    describe "finishes loading", ->
+      beforeEach ->
+        @jsonData =
+          id: 10
+          name: "Bob"
+        spyOn($, "ajax")
+        students = Emu.ModelCollection.create(type: App.Student)
+        student = students.createRecord(id: 9)
+        @model = App.Teacher.create(parent: student)
+        @store = Ember.Object.create(didFindById: ->)
+        spyOn(@store, "didFindById")
+        spyOn(serializer, "serializeTypeName").andCallFake (type) -> 
+          if type == App.Teacher then return "teacher"
+          if type == App.Student then return "student"
+        spyOn(serializer, "deserializeModel")
+        @adapter = Emu.RestAdapter.create
+          namespace: "api"
+          serializer: Serializer
+        @adapter.findByParentId(App.Teacher, @store, @model, 9)
+        $.ajax.mostRecentCall.args[0].success(@jsonData)
+
+      it "should deserialize the model", ->
+        expect(serializer.deserializeModel).toHaveBeenCalledWith(@model, @jsonData)
+
+      it "should notify the store", ->
+        expect(@store.didFindById).toHaveBeenCalledWith(@model)
+
   describe "findQuery", ->
 
     describe "starts loading", ->

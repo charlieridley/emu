@@ -11,7 +11,7 @@ App.Person.reopenClass(resourceName: 'people')
 App.CustomPerson = App.Person.extend
   personId: Emu.field("string", {primaryKey: true})
 
-App.CustomPerson.reopenClass(resourceName: -> 'custom_people')
+App.CustomPerson.reopenClass(resourceName:(isSingular) -> if isSingular then 'custom_person' else 'custom_people')
 
 App.Order = Emu.Model.extend
   orderCode: Emu.field("string")
@@ -40,3 +40,10 @@ App.Report = Emu.Model.extend
 
 App.ReportRecord = Emu.Model.extend
   value: Emu.field("number")
+
+App.Student = Emu.Model.extend
+  name: Emu.field("string")
+  teacher: Emu.field("App.Teacher", {lazy: true})
+
+App.Teacher = Emu.Model.extend
+  name: Emu.field("string")

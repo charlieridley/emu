@@ -20,6 +20,15 @@ Emu.RestAdapter = Ember.Object.extend
       error: =>
         @_didError(store, model)
 
+  findByParentId: (type, store, model, parentId) ->
+    $.ajax
+      url: @_getUrlForModel(model.get("parent")) + "/"+ parentId + "/" + @_serializer.serializeTypeName(type, true)
+      type: "GET"
+      success: (jsonData) =>
+        @_didFindById(store, model, jsonData)
+      error: =>
+        @_didError(store, model)
+
   findQuery: (type, store, collection, queryHash) ->
     $.ajax
       url: @_getUrlForType(type) + @_serializer.serializeQueryHash(queryHash)

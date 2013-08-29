@@ -2,6 +2,7 @@ describe "Emu.Store", ->
   adapter = Ember.Object.create
     findAll: ->
     findById: ->
+    findByParentId: ->
     findQuery: ->
     findPage: ->
     insert: ->
@@ -357,23 +358,54 @@ describe "Emu.Store", ->
       expect(Emu.ModelCollection.create).not.toHaveBeenCalled()
 
   describe "loadModel", ->
-    describe "start loading", ->
-      beforeEach ->
-        @model = Person.create(id: 4)
-        spyOn(adapter, "findById")
-        @store = Emu.Store.create
-          adapter: Adapter
-        @model.on "didStartLoading", => @didStartLoading = true
-        @store.loadModel(@model)
 
-      it "should fire didStartLoading", ->
-        expect(@didStartLoading).toBeTruthy()
+    describe "has primary key", ->
 
-      it "should set isLoading on the model to true", ->
-        expect(@model.get("isLoading")).toBeTruthy()
+      describe "start loading", ->
+        beforeEach ->
+          @model = Person.create(id: 4)
+          spyOn(adapter, "findById")
+          spyOn(adapter, "findByParentId")
+          @store = Emu.Store.create
+            adapter: Adapter
+          @model.on "didStartLoading", => @didStartLoading = true
+          @store.loadModel(@model)
 
-      it "should call the findById method on the adapter", ->
-        expect(adapter.findById).toHaveBeenCalledWith(Person, @store, @model, 4)
+        it "should fire didStartLoading", ->
+          expect(@didStartLoading).toBeTruthy()
+
+        it "should set isLoading on the model to true", ->
+          expect(@model.get("isLoading")).toBeTruthy()
+
+        it "should call the findById method on the adapter", ->
+          expect(adapter.findById).toHaveBeenCalledWith(Person, @store, @model, 4)
+
+        it "should not call the findByParentId method on the adapter", ->
+          expect(adapter.findByParentId).not.toHaveBeenCalled()
+
+    describe "does not have primary key", ->
+
+      describe "start loading", ->
+        beforeEach ->
+          @model = App.Teacher.create(parent: App.Student.create(id: 6))
+          spyOn(adapter, "findById")
+          spyOn(adapter, "findByParentId")
+          @store = Emu.Store.create
+            adapter: Adapter
+          @model.on "didStartLoading", => @didStartLoading = true
+          @store.loadModel(@model)
+
+        it "should fire didStartLoading", ->
+          expect(@didStartLoading).toBeTruthy()
+
+        it "should set isLoading on the model to true", ->
+          expect(@model.get("isLoading")).toBeTruthy()
+
+        it "should not call the findById method on the adapter", ->
+          expect(adapter.findById).not.toHaveBeenCalled()
+
+        it "should call the findByParentId method on the adapter", ->
+          expect(adapter.findByParentId).toHaveBeenCalledWith(App.Teacher, @store, @model, 6)
 
     describe "already loading", ->
       beforeEach ->

@@ -5,14 +5,14 @@ Emu.Serializer = Ember.Object.extend
 
   deserializeKey: (key) -> key
 
-  serializeTypeName: (type) ->
+  serializeTypeName: (type, isSingular) ->
     if type.resourceName
       name = type.resourceName
-      if typeof name is 'function' then name() else name
+      if typeof name is 'function' then name(isSingular) else name
     else
       parts = type.toString().split(".")
       serialized = @serializeKey(parts[parts.length - 1])
-      if @get("pluralization") then serialized + "s" else serialized
+      if @get("pluralization") and not isSingular then serialized + "s" else serialized
 
   serializeModel: (model) ->
     jsonData = {}

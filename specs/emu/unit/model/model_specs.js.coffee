@@ -224,7 +224,7 @@ describe "Emu.Model", ->
             @result = Emu.Model.getAttr(@model, "address")
 
           it "should create an empty model", ->
-            expect(App.Address.create).toHaveBeenCalled()
+            expect(App.Address.create).toHaveBeenCalledWith(parent: @model)
 
     describe "subscribeToUpdates", ->
       beforeEach ->

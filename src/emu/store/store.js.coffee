@@ -101,7 +101,10 @@ Emu.Store = Ember.Object.extend
   loadModel: (model) ->
     if not model.get("isLoading") and not model.get("isLoaded")
       model.didStartLoading()
-      @_adapter.findById(model.constructor, this, model, model.primaryKeyValue())
+      if model.primaryKeyValue()
+        @_adapter.findById(model.constructor, this, model, model.primaryKeyValue())
+      else
+        @_adapter.findByParentId(model.constructor, this, model, model.get("parent").primaryKeyValue())
     model
 
   subscribeToUpdates: (model) ->

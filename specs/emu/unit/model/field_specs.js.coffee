@@ -144,7 +144,6 @@ describe "Emu.field", ->
 
         it "should get the models from the store only once", ->
           expect(@store.loadAll.calls.length).toEqual(1)
-          @result = @model.get("orders")
 
       describe "parent does not have primary key", ->
         beforeEach ->
@@ -162,6 +161,43 @@ describe "Emu.field", ->
         it "should not load the collection from the store", ->
           expect(@store.loadAll.calls.length).toEqual(0)
 
+    describe "lazy model", ->
+
+      describe "which is not set", ->
+        beforeEach ->
+          @store = Ember.Object.create
+            loadModel: ->
+          @order = App.Order.create()
+          spyOn(@store, "loadModel")
+          spyOn(App.Order, "create").andReturn(@order)
+          Person = Emu.Model.extend
+            store: @store
+            order: Emu.field("App.Order", {lazy: true})
+          @model = Person.create(id:6)
+          @result = @model.get("order")
+
+        it "should create an order", ->
+          expect(App.Order.create).toHaveBeenCalled()
+
+        it "should load the order", ->
+          expect(@store.loadModel).toHaveBeenCalledWith(@order)
+
+      describe "is loaded", ->
+        beforeEach ->
+          @store = Ember.Object.create
+            loadModel: ->
+          @order = App.Order.create()
+          spyOn(@store, "loadModel")
+          spyOn(App.Order, "create").andReturn(@order)
+          Person = Emu.Model.extend
+            store: @store
+            order: Emu.field("App.Order", {lazy: true})
+          @model = Person.create(id:6)
+          @model.get("order")
+          @model.get("order")
+
+        it "should get the model from the store only once", ->
+          expect(@store.loadModel.calls.length).toEqual(1)
 
     describe "partial property", ->
 
