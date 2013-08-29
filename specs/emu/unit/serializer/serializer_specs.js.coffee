@@ -6,7 +6,7 @@ describe "Emu.Serializer", ->
 
     describe "pluralization on", ->
 
-      describe "isSingular false"
+      describe "isSingular false", ->
         beforeEach ->
           @serializer = Emu.Serializer.create()
 
@@ -22,7 +22,7 @@ describe "Emu.Serializer", ->
           result = @serializer.serializeTypeName(App.CustomPerson)
           expect(result).toEqual("custom_people")
 
-      describe "isSingular true"
+      describe "isSingular true", ->
         beforeEach ->
           @serializer = Emu.Serializer.create()
 
