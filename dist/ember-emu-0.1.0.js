@@ -1,5 +1,5 @@
-// Version: 0.1.0-103-g9dffd1c
-// Last commit: 9dffd1c (2013-08-29 15:23:35 -0400)
+// Version: 0.1.0-106-g5e26722
+// Last commit: 5e26722 (2013-08-29 16:59:36 -0400)
 
 
 (function() {
@@ -242,7 +242,7 @@
       var buildUrl, currentModel, url,
         _this = this;
 
-      url = Emu.isCollection(model) ? this._serializer.serializeTypeName(model.get("type")) : "";
+      url = Emu.isCollection(model) ? this._serializer.serializeTypeName(model.get("type")) : model.get("lazy") ? this._serializer.serializeTypeName(model.constructor, true) : "";
       currentModel = model;
       buildUrl = function() {
         currentModel = currentModel.get("parent");
@@ -477,7 +477,8 @@
           }
         } else if (meta.isModel()) {
           record._attributes[key] = meta.type().create({
-            parent: record
+            parent: record,
+            lazy: meta.options.lazy
           });
           if (meta.options.updatable) {
             record._attributes[key].subscribeToUpdates();
@@ -1007,7 +1008,7 @@
     loadModel: function(model) {
       if (!model.get("isLoading") && !model.get("isLoaded")) {
         model.didStartLoading();
-        if (model.primaryKeyValue()) {
+        if (!model.get("lazy")) {
           this._adapter.findById(model.constructor, this, model, model.primaryKeyValue());
         } else {
           this._adapter.findChild(model.constructor, this, model, model.get("parent").primaryKeyValue());
