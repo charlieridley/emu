@@ -57,6 +57,15 @@ describe "Emu.Serializer", ->
 
   describe "deserializeModel", ->
 
+    describe "null value", ->
+      beforeEach ->
+        @serializer = Emu.Serializer.create()
+        @model = Person.create()
+        spyOn(@model, "clear")
+        @serializer.deserializeModel(@model, null)
+
+      it "should set the model to no value", ->
+        expect(@model.clear).toHaveBeenCalled()
     describe "simple fields only", ->
 
       describe "default primaryKey", ->

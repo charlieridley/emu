@@ -22,6 +22,9 @@ Emu.Serializer = Ember.Object.extend
     jsonData
 
   deserializeModel: (model, jsonData, addative) ->
+    if not jsonData
+      model.clear()
+      return
     primaryKeyValue = jsonData[model.primaryKey()]
     model.primaryKeyValue(primaryKeyValue) if primaryKeyValue
     model.constructor.eachEmuField (property, meta) =>
