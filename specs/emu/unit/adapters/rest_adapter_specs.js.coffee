@@ -130,6 +130,33 @@ describe "Emu.RestAdapter", ->
         expect($.ajax.mostRecentCall.args[0].url).toEqual("api/parentperson/5/person")
         expect($.ajax.mostRecentCall.args[0].type).toEqual("GET")
 
+    describe "lazy collection inside lazy object", ->
+      beforeEach ->
+        spyOn($, "ajax")
+        models = Emu.ModelCollection.create type: App.ReportRecord, parent: App.Report.createRecord
+          id: 5
+          lazy: true
+          parent: App.Manager.create
+            id: 6
+            parent: Emu.ModelCollection.create(type: App.Manager)
+
+        store = Ember.Object.create()
+        spyOn(serializer, "serializeTypeName").andCallFake (type) ->
+          if type == App.ReportRecord
+            return "reportRecords"
+          if type == App.Report
+            return "report"
+          if type == App.Manager
+            return "managers"
+        @adapter = Emu.RestAdapter.create
+          namespace: "api"
+          serializer: Serializer
+        @adapter.findAll(App.ReportRecord, store, models)
+
+      it "should make a GET request to the URL for the entities", ->
+        expect($.ajax.mostRecentCall.args[0].url).toEqual("api/managers/6/report/reportRecords")
+        expect($.ajax.mostRecentCall.args[0].type).toEqual("GET")
+
   describe "findById", ->
 
     describe "starts loading", ->
@@ -181,7 +208,7 @@ describe "Emu.RestAdapter", ->
         student = students.createRecord(id: 9)
         model = App.Teacher.create(parent: student)
         store = Ember.Object.create()
-        spyOn(serializer, "serializeTypeName").andCallFake (type, isSingular) -> 
+        spyOn(serializer, "serializeTypeName").andCallFake (type, isSingular) ->
           if isSingular
             if type == App.Teacher then return "teacher"
           if not isSingular
@@ -206,7 +233,7 @@ describe "Emu.RestAdapter", ->
         @model = App.Teacher.create(parent: student)
         @store = Ember.Object.create(didFindById: ->)
         spyOn(@store, "didFindById")
-        spyOn(serializer, "serializeTypeName").andCallFake (type) -> 
+        spyOn(serializer, "serializeTypeName").andCallFake (type) ->
           if type == App.Teacher then return "teacher"
           if type == App.Student then return "student"
         spyOn(serializer, "deserializeModel")

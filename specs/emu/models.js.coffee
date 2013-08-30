@@ -54,3 +54,6 @@ App.UpdatingPerson = Emu.Model.extend
 App.LazyPerson = Emu.Model.extend
   lazyAddress: Emu.field("App.Address", {lazy: true})
   lazyReport: Emu.field("App.Report", {lazy: true})
+
+App.Manager = Emu.Model.extend
+  report: Emu.field("App.Report", {lazy: true})

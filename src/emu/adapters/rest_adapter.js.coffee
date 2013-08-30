@@ -110,7 +110,7 @@ Emu.RestAdapter = Ember.Object.extend
       if Emu.isCollection(currentModel)
         url = @_serializer.serializeTypeName(currentModel.get("type")) + (if url then "/" + url else "")
       else
-        url = currentModel.primaryKeyValue() + "/" + url
+        url = (if currentModel.get("lazy") then @_serializer.serializeTypeName(currentModel.constructor, true) else currentModel.primaryKeyValue()) + "/" + url
     buildUrl() while currentModel.get("parent")
     @_getBaseUrl() + url
 
