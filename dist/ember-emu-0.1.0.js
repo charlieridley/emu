@@ -1,5 +1,5 @@
-// Version: 0.1.0-110-ga9f4de9
-// Last commit: a9f4de9 (2013-08-30 09:19:25 -0400)
+// Version: 0.1.0-112-gf32a1f3
+// Last commit: f32a1f3 (2013-08-30 13:26:29 -0400)
 
 
 (function() {
@@ -249,7 +249,7 @@
         if (Emu.isCollection(currentModel)) {
           return url = _this._serializer.serializeTypeName(currentModel.get("type")) + (url ? "/" + url : "");
         } else {
-          return url = currentModel.primaryKeyValue() + "/" + url;
+          return url = (currentModel.get("lazy") ? _this._serializer.serializeTypeName(currentModel.constructor, true) : currentModel.primaryKeyValue()) + "/" + url;
         }
       };
       while (currentModel.get("parent")) {
