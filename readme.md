@@ -30,7 +30,8 @@ App.Address = Emu.Model.extend({
 
 App.Employee = Emu.Model.extend({
 	employeeId: Emu.field("string", {primaryKey: true}), //custom primary key, overrides default 'id' field
-	name: Emu.field("string")
+	name: Emu.field("string"),
+	address: Emu.field("App.Address", {lazy: true})
 });
 ```
 Querying
@@ -56,13 +57,18 @@ companies.get("firstObject.address");
 	//GET request to:	http://www.mysite.com/companies/1
 	//Response: {id: 1, name: "Apple", address: {street:"1 Infinite Loop", town: "Cupertino"}}
 ```
-Lazy loading of collections
+Lazy loading 
 ------------
 ```javascript
 //Get a lazy collection property
 var members = company.get("employees");
 	//GET request to:	http://www.mysite.com/companies/1/employees
 	//Response: [{name: "Tom"}, {name: "Barny"}]
+```
+```javascript
+//Get a lazy model property
+var address = employee.get("address");
+	//GET request to:	http://www.mysite.com/employees/1/address
 ```
 Persistence
 -----------
