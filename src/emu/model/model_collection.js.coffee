@@ -1,8 +1,8 @@
 Emu.ModelCollection = Ember.ArrayProxy.extend Emu.ModelEvented, Emu.StateTracked, Ember.Evented,
   init: ->
-    @_super()
-    @set("content", Ember.A([])) unless @get("content")
 
+    @set("content", Ember.A([])) unless @get("content")
+    @_super()
     @createRecord = (hash) ->
       primaryKey = Emu.Model.primaryKey(@get("type"))
       paramHash =
