@@ -1,17 +1,35 @@
 {
-  "name": "Emu",
+  "name": "ember-emu",
   "version": "0.1.0",
+  "title": "Emu",
   "description": "Simple data access framework for Ember.js",
-  "author": "Charlie Ridley charlieridley@gmail.com",
+  "author": {
+    "name": "Charlie Ridley",
+    "url": "https://github.com/charlieridley/",
+    "email": "charlieridley@gmail.com"
+  },
   "homepage": "https://github.com/charlieridley/emu",
   "repository":{
     "type": "git",
     "url": "git://github.com/charlieridley/emu.git"
   },
   "devDependencies": {
-    "karma": "~0.8"
+    "karma": "~0.8",
+    "grunt": "~0.4.1",
+    "bower": "~1.1.2",
+    "grunt-notify": "~0.2.7",
+    "grunt-contrib-uglify": "~0.2.1",
+    "grunt-contrib-coffee": "~0.7.0",
+    "grunt-neuter": "~0.5.0",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-git-describe": "~2.3.2",
+    "matchdep": "~0.1.2"
   },
   "scripts":{
     "test": "./node_modules/.bin/karma start --single-run --browsers PhantomJS"
+  },
+  "engines": {
+    "node": ">=0.10.17",
+    "npm": ">=1.3.8"
   }
 }

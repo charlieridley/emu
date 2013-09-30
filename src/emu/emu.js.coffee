@@ -1,0 +1,8 @@
+require("core")
+require("adapters/*")
+require("mixins/*")
+require("model/*")
+require("serializer/*")
+require("store/*")
+require("utils")
+require("application_ext")
