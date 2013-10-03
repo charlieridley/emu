@@ -1,5 +1,5 @@
-// Version: 0.1.0-114-gd8cea77
-// Last commit: d8cea77 (2013-09-06 10:12:39 -0400)
+// Version: 0.1.0-116-ge829dd6
+// Last commit: e829dd6 (2013-10-03 13:55:35 -0400)
 
 
 (function() {
@@ -671,7 +671,7 @@
     },
     number: {
       serialize: function(value) {
-        if (Ember.isNone(value)) {
+        if (Ember.isNone(value) || value === "") {
           return null;
         } else {
           return Number(value);
