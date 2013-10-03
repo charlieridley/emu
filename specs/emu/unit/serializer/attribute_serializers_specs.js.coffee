@@ -136,6 +136,10 @@ describe "Emu.AttributeSerializers", ->
         it "should be null", ->
           expect(Emu.AttributeSerializers["number"].serialize(undefined)).toBeNull()
 
+      describe "empty string value", ->
+        it "should be null", ->
+          expect(Emu.AttributeSerializers["number"].serialize("")).toBeNull()
+
     describe "deserialize", ->
 
       describe "has value", ->

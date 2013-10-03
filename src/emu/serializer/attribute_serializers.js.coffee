@@ -26,7 +26,7 @@ Emu.AttributeSerializers =
 
   number:
     serialize: (value) ->
-      if Ember.isNone(value) then null else Number(value)
+      if Ember.isNone(value) or value == "" then null else Number(value)
 
     deserialize: (value) ->
       if Ember.isEmpty(value) then null else Number(value)
