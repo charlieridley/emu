@@ -1,4 +1,4 @@
-#Emu [![Build Status](https://secure.travis-ci.org/charlieridley/emu.png?branch=master)](https://travis-ci.org/charlieridley/emu)
+# Emu [![Build Status](https://secure.travis-ci.org/charlieridley/emu.png?branch=master)](https://travis-ci.org/charlieridley/emu)
 
 Emu is a simple data access library for [Ember.js](http://www.emberjs.com).
 
